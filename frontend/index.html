@@ -93,11 +93,22 @@
             <span class="panel-badge">Live Radar & River Gauges</span>
           </div>
           <div class="map-controls">
-            <button class="map-filter-btn active" data-filter="ALL">All Stations</button>
-            <button class="map-filter-btn" data-filter="Critical">Critical</button>
-            <button class="map-filter-btn" data-filter="High">High</button>
-            <button class="map-filter-btn" data-filter="Moderate">Moderate</button>
-            <button class="map-filter-btn" data-filter="Low">Low</button>
+            <!-- 1-Click Free Basemap Switcher -->
+            <div class="basemap-group" title="Select Map Style">
+              <button class="basemap-btn active" data-basemap="dark">🌙 Dark Ops</button>
+              <button class="basemap-btn" data-basemap="topo">🏔️ Topo Contours</button>
+              <button class="basemap-btn" data-basemap="satellite">🛰️ Satellite</button>
+              <button class="basemap-btn" data-basemap="streets">🗺️ Streets</button>
+            </div>
+
+            <!-- Hazard Status Filter -->
+            <div class="filter-group" title="Filter by Hazard Severity">
+              <button class="map-filter-btn active" data-filter="ALL">All</button>
+              <button class="map-filter-btn" data-filter="Critical">Critical</button>
+              <button class="map-filter-btn" data-filter="High">High</button>
+              <button class="map-filter-btn" data-filter="Moderate">Moderate</button>
+              <button class="map-filter-btn" data-filter="Low">Low</button>
+            </div>
           </div>
         </div>
 

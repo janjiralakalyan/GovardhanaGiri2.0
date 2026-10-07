@@ -32,7 +32,18 @@ class GovardhanaGiriApp {
   }
 
   bindEvents() {
-    // Map Filter Buttons
+    // Basemap Layer Switcher (Dark Ops, Topo Contours, Satellite, Streets)
+    document.querySelectorAll('.basemap-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        const basemapKey = e.target.getAttribute('data-basemap');
+        this.mapEngine.switchBaseLayer(basemapKey);
+        this.showToast(`Switched basemap to ${e.target.textContent}`, "info");
+      });
+    });
+
+    // Map Hazard Filter Buttons
     document.querySelectorAll('.map-filter-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.map-filter-btn').forEach(b => b.classList.remove('active'));
