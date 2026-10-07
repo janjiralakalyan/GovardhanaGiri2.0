@@ -57,6 +57,26 @@ class GovardhanaGiriApp {
       });
     });
 
+    // Toggle Rivers & Drainage Layer
+    const riverBtn = document.getElementById('btn-toggle-rivers');
+    if (riverBtn) {
+      riverBtn.addEventListener('click', () => {
+        const active = this.mapEngine.toggleRivers();
+        riverBtn.classList.toggle('active', active);
+        this.showToast(active ? "🌊 River & Stream corridors enabled" : "River corridors hidden", "info");
+      });
+    }
+
+    // Toggle Ghats & Mountain Ranges Layer
+    const ghatBtn = document.getElementById('btn-toggle-ghats');
+    if (ghatBtn) {
+      ghatBtn.addEventListener('click', () => {
+        const active = this.mapEngine.toggleGhats();
+        ghatBtn.classList.toggle('active', active);
+        this.showToast(active ? "🏔️ Ghat & Mountain ranges enabled" : "Ghat ranges hidden", "info");
+      });
+    });
+
     // Inspector Tabs (Telemetry vs Simulator vs Shelters)
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {

@@ -66,6 +66,16 @@ def health_check():
         "ai_engine": "XGBoost Hazard Models Active"
     }
 
+@app.get("/api/geography")
+def get_geography_layers():
+    """Returns geospatial features for Telangana rivers, streams, and ghat ranges."""
+    geo_path = os.path.join(BASE_DIR, "data", "telangana_geography_layers.json")
+    if os.path.exists(geo_path):
+        import json
+        with open(geo_path, "r") as f:
+            return json.load(f)
+    return {"type": "FeatureCollection", "features": []}
+
 @app.get("/api/stations")
 def list_stations():
     """Returns all 10 Telangana stations enriched with live AI hazard predictions."""
