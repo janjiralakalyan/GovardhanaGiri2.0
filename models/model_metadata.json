@@ -1,0 +1,140 @@
+{
+  "model_version": "GovardhanaGiri-2.0-v1.0",
+  "training_date": "2026-10-07",
+  "framework": "XGBoost + Scikit-Learn",
+  "feature_columns": [
+    "Rainfall_1h",
+    "Rainfall_3h",
+    "Rainfall_6h",
+    "Rainfall_24h",
+    "Rainfall_Intensity",
+    "Forecast_Rainfall_6h",
+    "Soil_Moisture",
+    "Soil_Saturation",
+    "Infiltration_Rate",
+    "Elevation",
+    "Slope",
+    "Terrain_Ruggedness",
+    "Flow_Accumulation",
+    "Distance_to_River",
+    "Drainage_Density",
+    "NDVI",
+    "Water_Level",
+    "Historical_Flood_Frequency",
+    "Rainfall_Acceleration",
+    "Soil_Runoff_Potential",
+    "River_Stage_Proximity",
+    "Catchment_Surge_Index",
+    "Land_Cover_Concrete & Impermeable",
+    "Land_Cover_Cropland & Scrub",
+    "Land_Cover_Deciduous Forest",
+    "Land_Cover_Deciduous Ravine Forest",
+    "Land_Cover_Dry Deciduous Forest",
+    "Land_Cover_Moist Deciduous",
+    "Land_Cover_Scrub & Dry Forest",
+    "Land_Cover_Settlement & Mixed Vegetation",
+    "Land_Cover_Thick Canopy Forest",
+    "Soil_Type_Alluvial Loam",
+    "Soil_Type_Clayey Black & Red Soil",
+    "Soil_Type_Forest Clay Loam",
+    "Soil_Type_Gravelly Black Cotton & Lithic",
+    "Soil_Type_Red Rocky Clay Loam",
+    "Soil_Type_Red Sandy Loam",
+    "Soil_Type_Silty Clay Loam",
+    "Soil_Type_Skeletal Loamy Soil",
+    "Soil_Type_Urban Made Ground & Clay"
+  ],
+  "numeric_features": [
+    "Rainfall_1h",
+    "Rainfall_3h",
+    "Rainfall_6h",
+    "Rainfall_24h",
+    "Rainfall_Intensity",
+    "Forecast_Rainfall_6h",
+    "Soil_Moisture",
+    "Soil_Saturation",
+    "Infiltration_Rate",
+    "Elevation",
+    "Slope",
+    "Terrain_Ruggedness",
+    "Flow_Accumulation",
+    "Distance_to_River",
+    "Drainage_Density",
+    "NDVI",
+    "Water_Level",
+    "Historical_Flood_Frequency",
+    "Rainfall_Acceleration",
+    "Soil_Runoff_Potential",
+    "River_Stage_Proximity",
+    "Catchment_Surge_Index"
+  ],
+  "categorical_features": [
+    "Land_Cover",
+    "Soil_Type"
+  ],
+  "risk_classes": [
+    "Low",
+    "Moderate",
+    "High",
+    "Critical"
+  ],
+  "metrics": {
+    "risk_classifier": {
+      "accuracy": 0.8588,
+      "f1_score": 0.8593,
+      "roc_auc_ovr": 0.9741
+    },
+    "occurrence_classifier": {
+      "accuracy": 0.9209,
+      "f1_score": 0.8843,
+      "roc_auc": 0.9432
+    },
+    "lead_time_regressor": {
+      "mae_hours": 2.399,
+      "mae_minutes": 144.0,
+      "r2_score": 0.6946
+    }
+  },
+  "top_features": [
+    {
+      "Feature": "Soil_Moisture",
+      "Importance": 0.1502578854560852
+    },
+    {
+      "Feature": "Historical_Flood_Frequency",
+      "Importance": 0.11456096917390823
+    },
+    {
+      "Feature": "Rainfall_Intensity",
+      "Importance": 0.09134317934513092
+    },
+    {
+      "Feature": "Catchment_Surge_Index",
+      "Importance": 0.08214576542377472
+    },
+    {
+      "Feature": "Rainfall_6h",
+      "Importance": 0.05012889578938484
+    },
+    {
+      "Feature": "Land_Cover_Thick Canopy Forest",
+      "Importance": 0.046968135982751846
+    },
+    {
+      "Feature": "Land_Cover_Concrete & Impermeable",
+      "Importance": 0.03743331506848335
+    },
+    {
+      "Feature": "Distance_to_River",
+      "Importance": 0.034603413194417953
+    },
+    {
+      "Feature": "Land_Cover_Cropland & Scrub",
+      "Importance": 0.029670849442481995
+    },
+    {
+      "Feature": "Soil_Type_Alluvial Loam",
+      "Importance": 0.027736952528357506
+    }
+  ]
+}

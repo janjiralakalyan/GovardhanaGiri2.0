@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GovardhanaGiri 2.0 | Flash Flood Early Warning System (Telangana)</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+
+  <!-- Top Emergency Operations Header -->
+  <header class="top-header">
+    <div class="brand-section">
+      <div class="brand-logo-badge">🛡️</div>
+      <div>
+        <h1 class="brand-title">GOVARDHANA GIRI 2.0</h1>
+        <div class="brand-subtitle">Hyper-Local Flash Flood & Landslide Early Warning System • Telangana</div>
+      </div>
+    </div>
+
+    <div class="header-status-strip">
+      <div class="system-badge">
+        <span class="pulse-dot"></span>
+        <span>XGBoost AI Engine: Active</span>
+      </div>
+      <div class="header-time" id="header-clock">--:--:-- IST</div>
+      <button class="audio-toggle-btn" id="btn-toggle-siren">
+        🔈 Test Warning Siren
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <!-- Top Key Metrics HUD Grid -->
+    <section class="hud-grid">
+      <div class="hud-card">
+        <div class="hud-info">
+          <span class="hud-label">Monitored Hotspots</span>
+          <span class="hud-value" id="hud-stations-count">10</span>
+          <span class="hud-subtext">Telangana Hilly & River Catchments</span>
+        </div>
+        <div class="hud-icon">🛰️</div>
+      </div>
+
+      <div class="hud-card critical-card">
+        <div class="hud-info">
+          <span class="hud-label">Critical Evacuation Orders</span>
+          <span class="hud-value" style="color: var(--risk-critical);" id="hud-critical-count">0</span>
+          <span class="hud-subtext">Red Alert (< 1.5h Lead Time)</span>
+        </div>
+        <div class="hud-icon">🚨</div>
+      </div>
+
+      <div class="hud-card warning-card">
+        <div class="hud-info">
+          <span class="hud-label">High Flood Watches</span>
+          <span class="hud-value" style="color: var(--risk-high);" id="hud-warning-count">0</span>
+          <span class="hud-subtext">Orange Alert (Pre-evacuation)</span>
+        </div>
+        <div class="hud-icon">⚠️</div>
+      </div>
+
+      <div class="hud-card pop-card">
+        <div class="hud-info">
+          <span class="hud-label">Riparian Population At Risk</span>
+          <span class="hud-value" style="color: #c084fc;" id="hud-at-risk-pop">0</span>
+          <span class="hud-subtext">Active Catchment Corridors</span>
+        </div>
+        <div class="hud-icon">👥</div>
+      </div>
+    </section>
+
+    <!-- Main Workspace Grid: Map (Left) + Inspector (Right) -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: Interactive GIS Map & Stations -->
+      <section class="map-panel">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <span class="panel-title">Geospatial Flash Flood Risk Map</span>
+            <span class="panel-badge">Live Radar & River Gauges</span>
+          </div>
+          <div class="map-controls">
+            <button class="map-filter-btn active" data-filter="ALL">All Stations</button>
+            <button class="map-filter-btn" data-filter="Critical">Critical</button>
+            <button class="map-filter-btn" data-filter="High">High</button>
+            <button class="map-filter-btn" data-filter="Moderate">Moderate</button>
+            <button class="map-filter-btn" data-filter="Low">Low</button>
+          </div>
+        </div>
+
+        <!-- Leaflet Map Canvas -->
+        <div id="flood-map"></div>
+
+        <!-- Bottom Station Selector Strip -->
+        <div class="stations-strip" id="stations-carousel">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </section>
+
+      <!-- Right Column: Inspector & Telemetry & Decision Support -->
+      <section class="details-panel">
+
+        <!-- AI Hazard Banner -->
+        <div class="hazard-banner tier-Moderate" id="hazard-banner">
+          <div class="hazard-header-flex">
+            <div>
+              <div class="station-title-main" id="ins-station-title">Medaram (Jampanna Vagu)</div>
+              <div class="station-sub-coords" id="ins-station-coords">18.3186°N, 80.2472°E | Elev: 142m | Slope: 19.5°</div>
+            </div>
+            <div class="risk-badge badge-Moderate" id="ins-risk-badge">● MODERATE RISK</div>
+          </div>
+
+          <!-- Hero Evacuation Countdown -->
+          <div class="lead-time-box">
+            <div class="lead-time-stat">
+              <span class="lead-time-label">Estimated Evacuation Lead Time</span>
+              <span class="lead-time-val" id="ins-lead-time">4.5 hrs</span>
+              <span style="font-size: 10px; color: var(--text-muted);" id="ins-lead-time-sub">Safe Evacuation Window Remaining</span>
+            </div>
+            <div class="lead-time-stat">
+              <span class="lead-time-label">Standard Operating Procedure</span>
+              <div class="sop-action-text" id="ins-sop-action">Issue Yellow Watch. Alert low-lying riparian communities.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- River Stage Gauge Card -->
+        <div class="gauge-card">
+          <div class="gauge-header">
+            <span style="font-weight: 600;">Stream Water Stage vs Danger Mark</span>
+            <span>Current: <strong id="gauge-stage-val" style="color:#38bdf8;">3.8 m</strong> / Danger: <strong id="gauge-danger-val" style="color:#f87171;">5.2 m</strong></span>
+          </div>
+          <div class="gauge-track">
+            <div class="gauge-fill" id="gauge-fill-bar" style="width: 55%;"></div>
+          </div>
+        </div>
+
+        <!-- Inspector Tabs -->
+        <div class="panel-tabs">
+          <button class="tab-btn active" data-tab="tab-telemetry">Live Telemetry</button>
+          <button class="tab-btn" data-tab="tab-simulator">What-If Cloudburst Lab</button>
+          <button class="tab-btn" data-tab="tab-shelters">Safe Shelters & Evacuation</button>
+        </div>
+
+        <!-- Tab 1: Live Telemetry -->
+        <div class="tab-content active" id="tab-telemetry">
+          <div class="telemetry-grid">
+            <div class="telemetry-item">
+              <span class="telemetry-item-label">Rainfall (1h)</span>
+              <span class="telemetry-item-val" id="tel-val-rain-1h">24.5 mm</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-item-label">Rainfall (6h)</span>
+              <span class="telemetry-item-val" id="tel-val-rain-6h">82.0 mm</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-item-label">Intensity</span>
+              <span class="telemetry-item-val" id="tel-val-intensity">32.0 mm/h</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-item-label">Soil Moisture</span>
+              <span class="telemetry-item-val" id="tel-val-soil-moist">72.0%</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-item-label">Soil Saturation</span>
+              <span class="telemetry-item-val" id="tel-val-soil-sat">76.0%</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-item-label">Infiltration Rate</span>
+              <span class="telemetry-item-val" id="tel-val-infil">3.8 mm/h</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-item-label">Distance to River</span>
+              <span class="telemetry-item-val" id="tel-val-river-dist">45 m</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-item-label">Flow Accumulation</span>
+              <span class="telemetry-item-val" id="tel-val-flow-accum">24,000</span>
+            </div>
+            <div class="telemetry-item">
+              <span class="telemetry-item-label">Land Cover</span>
+              <span class="telemetry-item-val" id="tel-val-land-cover">Canopy Forest</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: What-If Cloudburst Simulator -->
+        <div class="tab-content" id="tab-simulator">
+          <div class="sim-card">
+            <div style="font-weight: 600; font-size: 13px; color: var(--accent-cyan);">
+              ⚡ Interactive Hydro-Meteorological Stress Simulator
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+              Adjust rainfall, saturation, and water stage sliders to test how the trained XGBoost model responds in real time.
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-row">
+                <div class="slider-label-row">
+                  <span>Rainfall Intensity</span>
+                  <span class="slider-value" id="slider-rain-int-val">32 mm/h</span>
+                </div>
+                <input type="range" id="slider-rain-int" min="0" max="150" step="1" value="32">
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-label-row">
+                  <span>1-Hour Rainfall</span>
+                  <span class="slider-value" id="slider-rain-1h-val">24.5 mm</span>
+                </div>
+                <input type="range" id="slider-rain-1h" min="0" max="140" step="1" value="24.5">
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-label-row">
+                  <span>Soil Saturation</span>
+                  <span class="slider-value" id="slider-soil-sat-val">76 %</span>
+                </div>
+                <input type="range" id="slider-soil-sat" min="10" max="100" step="1" value="76">
+              </div>
+
+              <div class="slider-row">
+                <div class="slider-label-row">
+                  <span>River Stage (Water Level)</span>
+                  <span class="slider-value" id="slider-water-lvl-val">3.8 m</span>
+                </div>
+                <input type="range" id="slider-water-lvl" min="0.5" max="22" step="0.1" value="3.8">
+              </div>
+            </div>
+
+            <div class="sim-buttons-grid">
+              <button class="btn-danger-action" id="btn-cloudburst">
+                ⚡ Simulate Extreme Cloudburst
+              </button>
+              <button class="btn-secondary-action" id="btn-apply-telemetry">
+                🔄 Re-run AI on Sliders
+              </button>
+            </div>
+
+            <div style="margin-top: 10px;">
+              <button class="btn-secondary-action" style="width: 100%;" id="btn-reset-normal">
+                ☀️ Reset to Calm Monsoon Conditions
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Safe Shelters & Evacuation -->
+        <div class="tab-content" id="tab-shelters">
+          <div class="shelter-list" id="shelter-list-container">
+            <!-- Populated via JS -->
+          </div>
+
+          <div style="margin-top: 10px;">
+            <button class="btn-danger-action" style="width: 100%; padding: 12px;" id="btn-dispatch-alert">
+              🚨 Dispatch Emergency Evacuation Alert (SMS Blast + Sirens)
+            </button>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/static/js/audio_alerts.js"></script>
+  <script src="/static/js/map.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
