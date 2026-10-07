@@ -27,8 +27,11 @@ class GovardhanaGiriApp {
     // 4. Fetch Initial Station Data
     await this.fetchStations();
 
-    // 5. Select Default Station
-    this.selectStation(this.selectedStationId);
+    // 5. Fit All 10 Telangana Hotspots across the State
+    this.mapEngine.fitAllStations();
+
+    // 6. Select Default Station for inspector without auto-zooming
+    this.selectStation(this.selectedStationId, false);
   }
 
   bindEvents() {
@@ -62,8 +65,30 @@ class GovardhanaGiriApp {
         e.target.classList.add('active');
         const tabId = e.target.getAttribute('data-tab');
         document.getElementById(tabId).classList.add('active');
+
+        // Show shelters only when the user is on the Shelters tab
+        if (tabId === 'tab-shelters') {
+          this.mapEngine.showShelters = true;
+          const curr = this.stations.find(s => s.id === this.selectedStationId);
+          if (curr) {
+            this.mapEngine.renderShelters(curr.shelters, curr.lat, curr.lon);
+            this.mapEngine.flyToStation(curr.lat, curr.lon, 12);
+          }
+        } else {
+          this.mapEngine.showShelters = false;
+          this.mapEngine.shelterLayerGroup.clearLayers();
+        }
       });
     });
+
+    // Reset Map to State Overview (Fit All 10 Stations)
+    const fitBtn = document.getElementById('btn-fit-all');
+    if (fitBtn) {
+      fitBtn.addEventListener('click', () => {
+        this.mapEngine.fitAllStations();
+        this.showToast("Reset map to full Telangana state overview (10 stations)", "info");
+      });
+    }
 
     // Cloudburst Shockwave Trigger Button
     document.getElementById('btn-cloudburst').addEventListener('click', () => {
@@ -159,15 +184,19 @@ class GovardhanaGiriApp {
     });
   }
 
-  selectStation(stationId) {
+  selectStation(stationId, flyTo = true) {
     this.selectedStationId = stationId;
     const stn = this.stations.find(s => s.id === stationId);
     if (!stn) return;
 
     // Update Map
-    this.mapEngine.flyToStation(stn.lat, stn.lon, 12);
+    if (flyTo) {
+      this.mapEngine.flyToStation(stn.lat, stn.lon, 11);
+    }
     this.mapEngine.renderStations(this.stations, stationId);
-    this.mapEngine.renderShelters(stn.shelters, stn.lat, stn.lon);
+    if (this.mapEngine.showShelters) {
+      this.mapEngine.renderShelters(stn.shelters, stn.lat, stn.lon);
+    }
 
     // Update Station Strip Active State
     this.renderStationStrip();

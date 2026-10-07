@@ -373,6 +373,34 @@ body {
   color: var(--text-primary);
 }
 
+.map-action-btn {
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.map-action-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px var(--accent-cyan-glow);
+}
+
+.map-station-badge {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.custom-geo-marker:hover .map-station-badge {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8) !important;
+}
+
 #flood-map {
   flex: 1;
   min-height: 480px;
