@@ -18,12 +18,12 @@ class FloodMapEngine {
   }
 
   init() {
-    // 1. Define Free Base Tile Layers (100% Free, Zero API Keys)
+    // 1. Define Free Base Tile Layers (100% Free, NO API Keys, NO Watermarks)
     this.baseLayers = {
-      'dark': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 18,
-        subdomains: 'abcd',
-        attribution: '&copy; OpenStreetMap, &copy; CARTO'
+      'dark': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        className: 'dark-tiles',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }),
       'topo': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 17,
@@ -33,10 +33,9 @@ class FloodMapEngine {
         maxZoom: 19,
         attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics'
       }),
-      'streets': L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        maxZoom: 18,
-        subdomains: 'abcd',
-        attribution: '&copy; OpenStreetMap, &copy; CARTO'
+      'streets': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       })
     };
 

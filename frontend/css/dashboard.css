@@ -380,6 +380,11 @@ body {
   background: #090e1a;
 }
 
+/* Watermark-Free Pure Dark Mode Filter on OpenStreetMap */
+.dark-tiles {
+  filter: invert(100%) hue-rotate(180deg) brightness(78%) contrast(95%);
+}
+
 /* Map Bottom Station Selector Carousel */
 .stations-strip {
   padding: 12px 16px;

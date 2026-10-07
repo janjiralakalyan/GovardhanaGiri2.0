@@ -17,7 +17,7 @@ GovardhanaGiri 2.0 is an end-to-end AI-powered Early Warning and Decision Suppor
    - **Evacuation Lead Time Regressor:** Forecasts actionable evacuation window remaining with a Mean Absolute Error of **2.40 hours** (~144 minutes).
 
 3. **High-Tech Emergency Operations Dashboard:**
-   - **Interactive Geospatial Map (Leaflet.js + CartoDB Dark Matter):** Color-coded radar pulse markers, danger buffer rings, and high-ground shelters.
+   - **Interactive Geospatial Map (Leaflet.js Multi-Basemap):** Switchable between Dark Ops, Topo Contours (OpenTopoMap), and Satellite (ESRI), with color-coded radar pulse markers, danger buffer rings, and high-ground shelters.
    - **River Stage Hydrograph Meter:** Visual indicator comparing live water level to bankfull danger mark.
    - **"What-If" Cloudburst Simulator:** Sliders to stress-test real-time hydro-meteorological shocks (e.g., sudden 120 mm/hr cloudburst or 98% saturated soil) and observe instant AI re-evaluations in <20ms.
    - **Multi-Channel Emergency Alert Dispatcher:** Simulates automated SMS broadcasts to ward populations, public warning sirens (via native Web Audio API), and SDRF/NDRF team mobilization.
