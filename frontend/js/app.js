@@ -16,7 +16,7 @@ class GovardhanaGiriApp {
   async init() {
     // 1. Initialize Leaflet Map
     this.mapEngine = new FloodMapEngine('flood-map', (id) => this.selectStation(id));
-    this.mapEngine.init();
+    await this.mapEngine.init();
 
     // 2. Setup Event Listeners
     this.bindEvents();
@@ -75,7 +75,7 @@ class GovardhanaGiriApp {
         ghatBtn.classList.toggle('active', active);
         this.showToast(active ? "🏔️ Ghat & Mountain ranges enabled" : "Ghat ranges hidden", "info");
       });
-    });
+    }
 
     // Inspector Tabs (Telemetry vs Simulator vs Shelters)
     document.querySelectorAll('.tab-btn').forEach(btn => {
