@@ -26,12 +26,12 @@ class FloodMapEngine {
   }
 
   async init() {
-    // 1. Watermark-Free Base Tile Layers
+    // 1. Watermark-Free High-Contrast Base Tile Layers
     this.baseLayers = {
-      'dark': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      'dark': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
-        className: 'dark-tiles',
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        subdomains: 'abcd',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
       }),
       'topo': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 17,
@@ -41,9 +41,10 @@ class FloodMapEngine {
         maxZoom: 19,
         attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics'
       }),
-      'streets': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      'streets': L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        subdomains: 'abcd',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
       })
     };
 
@@ -55,6 +56,10 @@ class FloodMapEngine {
 
     // Default: Dark Mode
     this.baseLayers['dark'].addTo(this.map);
+
+    setTimeout(() => {
+      if (this.map) this.map.invalidateSize();
+    }, 250);
 
     // Feature Layer Groups
     this.ghatsLayerGroup = L.layerGroup().addTo(this.map);
@@ -303,6 +308,7 @@ class FloodMapEngine {
   }
 
   fitAllStations() {
+    if (this.map) this.map.invalidateSize();
     if (!this.stations || this.stations.length === 0) return;
     const latLngs = this.stations.map(s => [s.lat, s.lon]);
     this.map.fitBounds(latLngs, {
