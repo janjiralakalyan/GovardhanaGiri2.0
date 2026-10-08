@@ -1,0 +1,670 @@
+{
+  "system_name": "NE-LENS",
+  "full_title": "AI-Based Early Warning and Landslide Risk Monitoring System for Northeast India",
+  "disclaimer": "Operational Decision Support for District Disaster Management Authorities (DDMA). Risk bands represent regional multi-source kinematic & hydro-meteorological indices.",
+  "locations": [
+    {
+      "id": "AIZAWL-01",
+      "district": "Aizawl District",
+      "state": "Mizoram",
+      "corridor_name": "Tuirial & Durtlang Slope Corridor",
+      "lat": 23.7271,
+      "lon": 92.7176,
+      "risk_score": 82,
+      "risk_level": "CRITICAL",
+      "risk_trend": "Increasing",
+      "risk_trend_delta": "+13 in last 3h",
+      "prediction_window": "High risk in next 6 hours",
+      "affected_radius_km": 2.5,
+      "priority": "P1 — URGENT",
+      "exposure": {
+        "villages_count": 3,
+        "villages_list": ["Tuirial Veng", "Durtlang North", "Sihphir Outskirts"],
+        "population_affected": 4820,
+        "population_is_estimate": true,
+        "roads_count": 4,
+        "roads_list": ["NH-54 Bypass (Km 18-22)", "Tuirial Link Road", "Durtlang Ridge Road", "Zemabawk Arterial"],
+        "schools_count": 2,
+        "schools_list": ["Govt Middle School Tuirial", "Durtlang High School"],
+        "hospitals_count": 1,
+        "hospitals_list": ["Durtlang Primary Health Centre (PHC)"],
+        "bridges_count": 2,
+        "bridges_list": ["Tuirial River RCC Bridge", "Chite Lui Box Culvert #12"]
+      },
+      "risk_drivers": {
+        "rainfall_24h": {
+          "value": 146,
+          "unit": "mm / 24h",
+          "rating": "HIGH",
+          "contribution_pct": 38,
+          "threshold": 100
+        },
+        "soil_moisture": {
+          "value": 82,
+          "unit": "%",
+          "rating": "VERY WET",
+          "contribution_pct": 28,
+          "threshold": 70
+        },
+        "slope": {
+          "value": 38,
+          "unit": "°",
+          "rating": "STEEP",
+          "contribution_pct": 18,
+          "threshold": 30
+        },
+        "historical_landslides": {
+          "value": "4 nearby events",
+          "unit": "",
+          "rating": "HIGH",
+          "contribution_pct": 10,
+          "threshold": 2
+        },
+        "susceptibility": {
+          "value": "HIGH",
+          "unit": "Shale & Siltstone",
+          "rating": "HIGH",
+          "contribution_pct": 6,
+          "threshold": 0
+        },
+        "main_driver": "Heavy accumulated rainfall + saturated soil"
+      },
+      "rainfall_metrics": {
+        "current_rate": 18,
+        "last_6h": 74,
+        "last_24h": 146,
+        "forecast_next_6h": 58,
+        "trend": "Increasing",
+        "hourly_series_24h": [
+          {"hour": "00:00", "rain": 2.5},
+          {"hour": "02:00", "rain": 3.2},
+          {"hour": "04:00", "rain": 4.8},
+          {"hour": "06:00", "rain": 6.5},
+          {"hour": "08:00", "rain": 9.2},
+          {"hour": "10:00", "rain": 12.0},
+          {"hour": "12:00", "rain": 15.4},
+          {"hour": "14:00", "rain": 18.2},
+          {"hour": "16:00", "rain": 21.0},
+          {"hour": "18:00", "rain": 24.5},
+          {"hour": "20:00", "rain": 22.0},
+          {"hour": "22:00", "rain": 18.0}
+        ]
+      },
+      "risk_trend_series": [
+        {"time": "06:00", "score": 32, "tier": "Low"},
+        {"time": "09:00", "score": 41, "tier": "Moderate"},
+        {"time": "12:00", "score": 57, "tier": "Moderate"},
+        {"time": "15:00", "score": 69, "tier": "High"},
+        {"time": "18:00", "score": 82, "tier": "Critical"}
+      ],
+      "historical_reports": {
+        "total_in_area": 7,
+        "total_in_radius": 4,
+        "most_recent": "18 days ago",
+        "events": [
+          {
+            "id": "HIST-AZL-01",
+            "time_ago": "18 days ago",
+            "date": "2026-09-19",
+            "type": "Road blockage & Debris Flow",
+            "severity": "High",
+            "affected": "NH-54 Km 19.8 (Tuirial stretch)",
+            "source": "State PWD & District Police",
+            "description": "50-meter cut-slope failure blocked vehicular passage for 14 hours. Cleared by earthmovers.",
+            "lat": 23.7312,
+            "lon": 92.7215
+          },
+          {
+            "id": "HIST-AZL-02",
+            "time_ago": "3 months ago",
+            "date": "2026-07-04",
+            "type": "Slope failure",
+            "severity": "Critical",
+            "affected": "Durtlang Ridge residential spur",
+            "source": "Geological Survey of India (GSI) / DDMA",
+            "description": "Crown tension cracks accelerated into 120m planar shear; 6 houses evacuated preventively.",
+            "lat": 23.7420,
+            "lon": 92.7150
+          },
+          {
+            "id": "HIST-AZL-03",
+            "time_ago": "7 months ago",
+            "date": "2026-03-12",
+            "type": "Mudslide",
+            "severity": "Moderate",
+            "affected": "Sihphir Link road",
+            "source": "Village Council",
+            "description": "Loose overburden slipped onto feeder road after unseasonal thunderstorm.",
+            "lat": 23.7180,
+            "lon": 92.7090
+          },
+          {
+            "id": "HIST-AZL-04",
+            "time_ago": "11 months ago",
+            "date": "2025-11-05",
+            "type": "Rockfall",
+            "severity": "Moderate",
+            "affected": "Tuirial gorge cut",
+            "source": "Border Roads Organisation (BRO)",
+            "description": "Jointed sandstone blocks detached following continuous antecedent moisture.",
+            "lat": 23.7250,
+            "lon": 92.7280
+          }
+        ]
+      },
+      "recommended_actions": [
+        "Inspect high-risk slope crown (Durtlang Ridge section)",
+        "Monitor nearby road (Restrict heavy vehicles on NH-54 Bypass Km 18-22)",
+        "Notify district disaster-management team & SDRF 3rd Bn",
+        "Prepare alternate route via Zemabawk link road",
+        "Continue real-time rainfall & soil pore-pressure monitoring"
+      ],
+      "field_reports": [
+        {
+          "id": "REP-AZL-901",
+          "title": "New slope crack reported",
+          "type": "Crack",
+          "location": "Road X (NH-54 Bypass Km 19.4)",
+          "time_ago": "12 min ago",
+          "status": "Awaiting verification",
+          "reporter": "PWD Field Overseer",
+          "lat": 23.7295,
+          "lon": 92.7190,
+          "notes": "15cm wide tension crack opened along road shoulder after 2h intense downpour."
+        },
+        {
+          "id": "REP-AZL-902",
+          "title": "Loose boulders dislodging",
+          "type": "Rockfall",
+          "location": "Tuirial Quarry Cut",
+          "time_ago": "45 min ago",
+          "status": "Verified",
+          "reporter": "Village Disaster Committee",
+          "lat": 23.7230,
+          "lon": 92.7240,
+          "notes": "Intermittent rockfall on lower terrace. Warning cones placed."
+        }
+      ]
+    },
+    {
+      "id": "CHAMPHAI-02",
+      "district": "Champhai District",
+      "state": "Mizoram",
+      "corridor_name": "Tiau River Border Escarpment",
+      "lat": 23.4735,
+      "lon": 93.3283,
+      "risk_score": 74,
+      "risk_level": "HIGH",
+      "risk_trend": "Increasing",
+      "risk_trend_delta": "+9 in last 3h",
+      "prediction_window": "High risk in next 8 hours",
+      "affected_radius_km": 2.0,
+      "priority": "P2 — HIGH WATCH",
+      "exposure": {
+        "villages_count": 2,
+        "villages_list": ["Zokhawthar Border Hamlet", "Champhai Vengsang"],
+        "population_affected": 3210,
+        "population_is_estimate": true,
+        "roads_count": 2,
+        "roads_list": ["Champhai-Zokhawthar International Border Road", "Tiau Feeder"],
+        "schools_count": 1,
+        "schools_list": ["Zokhawthar Primary School"],
+        "hospitals_count": 1,
+        "hospitals_list": ["Champhai Sub-Divisional Hospital"],
+        "bridges_count": 1,
+        "bridges_list": ["Tiau Friendship Bridge"]
+      },
+      "risk_drivers": {
+        "rainfall_24h": {
+          "value": 118,
+          "unit": "mm / 24h",
+          "rating": "HIGH",
+          "contribution_pct": 34,
+          "threshold": 100
+        },
+        "soil_moisture": {
+          "value": 76,
+          "unit": "%",
+          "rating": "WET",
+          "contribution_pct": 25,
+          "threshold": 70
+        },
+        "slope": {
+          "value": 34,
+          "unit": "°",
+          "rating": "STEEP",
+          "contribution_pct": 22,
+          "threshold": 30
+        },
+        "historical_landslides": {
+          "value": "3 nearby events",
+          "unit": "",
+          "rating": "MODERATE",
+          "contribution_pct": 11,
+          "threshold": 2
+        },
+        "susceptibility": {
+          "value": "MODERATE-HIGH",
+          "unit": "Siltstone & Sandstone",
+          "rating": "HIGH",
+          "contribution_pct": 8,
+          "threshold": 0
+        },
+        "main_driver": "Sustained border ridge monsoon inflow on weathered cut slopes"
+      },
+      "rainfall_metrics": {
+        "current_rate": 14,
+        "last_6h": 58,
+        "last_24h": 118,
+        "forecast_next_6h": 42,
+        "trend": "Increasing",
+        "hourly_series_24h": [
+          {"hour": "00:00", "rain": 1.8},
+          {"hour": "04:00", "rain": 3.4},
+          {"hour": "08:00", "rain": 7.0},
+          {"hour": "12:00", "rain": 11.2},
+          {"hour": "16:00", "rain": 14.8},
+          {"hour": "20:00", "rain": 16.5},
+          {"hour": "22:00", "rain": 14.0}
+        ]
+      },
+      "risk_trend_series": [
+        {"time": "06:00", "score": 26, "tier": "Low"},
+        {"time": "09:00", "score": 38, "tier": "Low"},
+        {"time": "12:00", "score": 51, "tier": "Moderate"},
+        {"time": "15:00", "score": 65, "tier": "High"},
+        {"time": "18:00", "score": 74, "tier": "High"}
+      ],
+      "historical_reports": {
+        "total_in_area": 5,
+        "total_in_radius": 3,
+        "most_recent": "24 days ago",
+        "events": [
+          {
+            "id": "HIST-CPH-01",
+            "time_ago": "24 days ago",
+            "date": "2026-09-13",
+            "type": "Road blockage",
+            "severity": "Moderate",
+            "affected": "Border Road km 8",
+            "source": "Assam Rifles / PWD",
+            "description": "Mud and gravel accumulation cleared in 6 hours.",
+            "lat": 23.4710,
+            "lon": 93.3250
+          }
+        ]
+      },
+      "recommended_actions": [
+        "Station earthmoving equipment at Zokhawthar choke point",
+        "Alert trade corridor vehicle operators of potential debris spill",
+        "Monitor Tiau river bank scouring",
+        "Coordinate with local Village Council presidents"
+      ],
+      "field_reports": [
+        {
+          "id": "REP-CPH-901",
+          "title": "Drainage ditch silt accumulation",
+          "type": "Drainage blockage",
+          "location": "Zokhawthar Road Km 7.2",
+          "time_ago": "1h ago",
+          "status": "Verified",
+          "reporter": "PWD Guard",
+          "lat": 23.4720,
+          "lon": 93.3260,
+          "notes": "Culvert mouth half blocked by wash-down mud."
+        }
+      ]
+    },
+    {
+      "id": "EKHASI-03",
+      "district": "East Khasi Hills",
+      "state": "Meghalaya",
+      "corridor_name": "Mawkdok Dympep Gorge & Sohra Plateau",
+      "lat": 25.3420,
+      "lon": 91.7380,
+      "risk_score": 58,
+      "risk_level": "MODERATE",
+      "risk_trend": "Stable",
+      "risk_trend_delta": "+2 in last 3h",
+      "prediction_window": "Advisory alert for next 12 hours",
+      "affected_radius_km": 1.8,
+      "priority": "P3 — MONITORING",
+      "exposure": {
+        "villages_count": 2,
+        "villages_list": ["Mawkdok Valley", "Dympep Settlement"],
+        "population_affected": 2150,
+        "population_is_estimate": true,
+        "roads_count": 2,
+        "roads_list": ["Shillong-Sohra Highway (SH-5)", "Mawkdok Bridge Link"],
+        "schools_count": 1,
+        "schools_list": ["Mawkdok Presbyterian School"],
+        "hospitals_count": 1,
+        "hospitals_list": ["Sohra Community Health Centre"],
+        "bridges_count": 1,
+        "bridges_list": ["Mawkdok Suspension Bridge"]
+      },
+      "risk_drivers": {
+        "rainfall_24h": {
+          "value": 192,
+          "unit": "mm / 24h",
+          "rating": "VERY HIGH",
+          "contribution_pct": 45,
+          "threshold": 120
+        },
+        "soil_moisture": {
+          "value": 68,
+          "unit": "%",
+          "rating": "MODERATE",
+          "contribution_pct": 20,
+          "threshold": 70
+        },
+        "slope": {
+          "value": 42,
+          "unit": "°",
+          "rating": "VERY STEEP",
+          "contribution_pct": 22,
+          "threshold": 35
+        },
+        "historical_landslides": {
+          "value": "6 nearby events",
+          "unit": "",
+          "rating": "HIGH",
+          "contribution_pct": 8,
+          "threshold": 3
+        },
+        "susceptibility": {
+          "value": "MODERATE",
+          "unit": "Hard Limestone & Quartzite",
+          "rating": "MODERATE",
+          "contribution_pct": 5,
+          "threshold": 0
+        },
+        "main_driver": "Extreme Sohra rainfall partially offset by durable rock mass"
+      },
+      "rainfall_metrics": {
+        "current_rate": 22,
+        "last_6h": 88,
+        "last_24h": 192,
+        "forecast_next_6h": 65,
+        "trend": "Sustained High",
+        "hourly_series_24h": [
+          {"hour": "00:00", "rain": 8.0},
+          {"hour": "06:00", "rain": 14.5},
+          {"hour": "12:00", "rain": 24.0},
+          {"hour": "18:00", "rain": 26.5},
+          {"hour": "22:00", "rain": 22.0}
+        ]
+      },
+      "risk_trend_series": [
+        {"time": "06:00", "score": 45, "tier": "Moderate"},
+        {"time": "09:00", "score": 50, "tier": "Moderate"},
+        {"time": "12:00", "score": 55, "tier": "Moderate"},
+        {"time": "15:00", "score": 56, "tier": "Moderate"},
+        {"time": "18:00", "score": 58, "tier": "Moderate"}
+      ],
+      "historical_reports": {
+        "total_in_area": 8,
+        "total_in_radius": 5,
+        "most_recent": "2 months ago",
+        "events": [
+          {
+            "id": "HIST-EKH-01",
+            "time_ago": "2 months ago",
+            "date": "2026-08-01",
+            "type": "Rockfall",
+            "severity": "Moderate",
+            "affected": "Shillong-Sohra Highway km 24",
+            "source": "BRO",
+            "description": "Limestone overhang fall during cloudburst; cleared in 4 hours.",
+            "lat": 25.3400,
+            "lon": 91.7350
+          }
+        ]
+      },
+      "recommended_actions": [
+        "Maintain routine gorge patrol on SH-5",
+        "Check netting on rockfall-prone cliff faces",
+        "Advise tourists to avoid stopping under overhanging cliffs"
+      ],
+      "field_reports": []
+    },
+    {
+      "id": "DIMAHASAO-04",
+      "district": "Dima Hasao",
+      "state": "Assam",
+      "corridor_name": "Jatinga - Haflong Ghat Range",
+      "lat": 25.1764,
+      "lon": 93.0238,
+      "risk_score": 71,
+      "risk_level": "HIGH",
+      "risk_trend": "Increasing",
+      "risk_trend_delta": "+8 in last 3h",
+      "prediction_window": "High risk in next 6 hours",
+      "affected_radius_km": 2.2,
+      "priority": "P2 — HIGH WATCH",
+      "exposure": {
+        "villages_count": 3,
+        "villages_list": ["Haflong East", "Jatinga Valley", "Fiangpui"],
+        "population_affected": 3950,
+        "population_is_estimate": true,
+        "roads_count": 3,
+        "roads_list": ["NH-27 East-West Corridor", "Haflong Hill Road", "Railway Link"],
+        "schools_count": 2,
+        "schools_list": ["Govt Boys HS Haflong", "Jatinga St Jude School"],
+        "hospitals_count": 1,
+        "hospitals_list": ["Haflong Civil Hospital"],
+        "bridges_count": 2,
+        "bridges_list": ["Jatinga Railway Bridge", "NH-27 Viaduct"]
+      },
+      "risk_drivers": {
+        "rainfall_24h": {
+          "value": 132,
+          "unit": "mm / 24h",
+          "rating": "HIGH",
+          "contribution_pct": 36,
+          "threshold": 100
+        },
+        "soil_moisture": {
+          "value": 79,
+          "unit": "%",
+          "rating": "WET",
+          "contribution_pct": 27,
+          "threshold": 70
+        },
+        "slope": {
+          "value": 32,
+          "unit": "°",
+          "rating": "STEEP",
+          "contribution_pct": 19,
+          "threshold": 28
+        },
+        "historical_landslides": {
+          "value": "5 nearby events",
+          "unit": "",
+          "rating": "HIGH",
+          "contribution_pct": 11,
+          "threshold": 2
+        },
+        "susceptibility": {
+          "value": "HIGH",
+          "unit": "Tertiary Sandstone & Clay",
+          "rating": "HIGH",
+          "contribution_pct": 7,
+          "threshold": 0
+        },
+        "main_driver": "Rapid clay swelling & slope creep along NH-27 cut slopes"
+      },
+      "rainfall_metrics": {
+        "current_rate": 16,
+        "last_6h": 66,
+        "last_24h": 132,
+        "forecast_next_6h": 48,
+        "trend": "Increasing",
+        "hourly_series_24h": [
+          {"hour": "00:00", "rain": 2.0},
+          {"hour": "06:00", "rain": 8.5},
+          {"hour": "12:00", "rain": 16.0},
+          {"hour": "18:00", "rain": 21.0},
+          {"hour": "22:00", "rain": 16.0}
+        ]
+      },
+      "risk_trend_series": [
+        {"time": "06:00", "score": 28, "tier": "Low"},
+        {"time": "09:00", "score": 40, "tier": "Low"},
+        {"time": "12:00", "score": 54, "tier": "Moderate"},
+        {"time": "15:00", "score": 63, "tier": "High"},
+        {"time": "18:00", "score": 71, "tier": "High"}
+      ],
+      "historical_reports": {
+        "total_in_area": 9,
+        "total_in_radius": 5,
+        "most_recent": "1 month ago",
+        "events": [
+          {
+            "id": "HIST-DMH-01",
+            "time_ago": "1 month ago",
+            "date": "2026-09-02",
+            "type": "Road blockage",
+            "severity": "High",
+            "affected": "NH-27 near Jatinga",
+            "source": "NHAI / ASDMA",
+            "description": "Hill debris covered highway lanes; required 18h excavation.",
+            "lat": 25.1720,
+            "lon": 93.0210
+          }
+        ]
+      },
+      "recommended_actions": [
+        "Alert Northeast Frontier Railway (NFR) regarding Jatinga slope stability",
+        "Position heavy recovery vehicles at Haflong junction",
+        "Inspect retaining walls along NH-27"
+      ],
+      "field_reports": [
+        {
+          "id": "REP-DMH-901",
+          "title": "Road shoulder subsistence noticed",
+          "type": "Slope movement",
+          "location": "NH-27 Km 34.1",
+          "time_ago": "25 min ago",
+          "status": "Awaiting verification",
+          "reporter": "Highway Patrol",
+          "lat": 25.1740,
+          "lon": 93.0220,
+          "notes": "3m length of bitumen settled by 8cm."
+        }
+      ]
+    },
+    {
+      "id": "KOHIMA-05",
+      "district": "Kohima District",
+      "state": "Nagaland",
+      "corridor_name": "Dzükou Foothills & Kohima South Bypass",
+      "lat": 25.6751,
+      "lon": 94.1086,
+      "risk_score": 28,
+      "risk_level": "LOW",
+      "risk_trend": "Stable",
+      "risk_trend_delta": "0 in last 3h",
+      "prediction_window": "Normal conditions; regular monitoring",
+      "affected_radius_km": 1.2,
+      "priority": "P4 — ROUTINE",
+      "exposure": {
+        "villages_count": 1,
+        "villages_list": ["Kigwema Outskirts"],
+        "population_affected": 950,
+        "population_is_estimate": true,
+        "roads_count": 1,
+        "roads_list": ["NH-29 South Corridor"],
+        "schools_count": 1,
+        "schools_list": ["Kigwema Community School"],
+        "hospitals_count": 0,
+        "hospitals_list": [],
+        "bridges_count": 1,
+        "bridges_list": ["Khonoma Feeder Culvert"]
+      },
+      "risk_drivers": {
+        "rainfall_24h": {
+          "value": 34,
+          "unit": "mm / 24h",
+          "rating": "LOW",
+          "contribution_pct": 20,
+          "threshold": 80
+        },
+        "soil_moisture": {
+          "value": 42,
+          "unit": "%",
+          "rating": "NORMAL",
+          "contribution_pct": 22,
+          "threshold": 65
+        },
+        "slope": {
+          "value": 26,
+          "unit": "°",
+          "rating": "MODERATE",
+          "contribution_pct": 28,
+          "threshold": 25
+        },
+        "historical_landslides": {
+          "value": "1 nearby event",
+          "unit": "",
+          "rating": "LOW",
+          "contribution_pct": 15,
+          "threshold": 2
+        },
+        "susceptibility": {
+          "value": "LOW-MOD",
+          "unit": "Compact Sandstone",
+          "rating": "LOW",
+          "contribution_pct": 15,
+          "threshold": 0
+        },
+        "main_driver": "Minimal antecedent precipitation; stable geotechnical condition"
+      },
+      "rainfall_metrics": {
+        "current_rate": 3,
+        "last_6h": 12,
+        "last_24h": 34,
+        "forecast_next_6h": 8,
+        "trend": "Stable",
+        "hourly_series_24h": [
+          {"hour": "00:00", "rain": 0.5},
+          {"hour": "06:00", "rain": 1.2},
+          {"hour": "12:00", "rain": 3.0},
+          {"hour": "18:00", "rain": 3.2},
+          {"hour": "22:00", "rain": 2.0}
+        ]
+      },
+      "risk_trend_series": [
+        {"time": "06:00", "score": 25, "tier": "Low"},
+        {"time": "09:00", "score": 26, "tier": "Low"},
+        {"time": "12:00", "score": 27, "tier": "Low"},
+        {"time": "15:00", "score": 28, "tier": "Low"},
+        {"time": "18:00", "score": 28, "tier": "Low"}
+      ],
+      "historical_reports": {
+        "total_in_area": 2,
+        "total_in_radius": 1,
+        "most_recent": "8 months ago",
+        "events": [
+          {
+            "id": "HIST-KHM-01",
+            "time_ago": "8 months ago",
+            "date": "2026-02-10",
+            "type": "Minor slump",
+            "severity": "Low",
+            "affected": "Feeder terrace",
+            "source": "Village Head",
+            "description": "Small agricultural terrace displacement.",
+            "lat": 25.6720,
+            "lon": 94.1050
+          }
+        ]
+      },
+      "recommended_actions": [
+        "Routine culvert monitoring",
+        "Standard drainage clearance"
+      ],
+      "field_reports": []
+    }
+  ]
+}

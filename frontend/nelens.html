@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NE-LENS | Landslide Early Warning & Risk Monitoring System (Northeast India)</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/static/css/nelens.css">
+</head>
+<body>
+
+  <!-- ==========================================================================
+       TOP OPERATIONAL HEADER
+       ========================================================================== -->
+  <header class="nelens-header">
+    <div class="brand-block">
+      <div class="brand-emblem">⛰️</div>
+      <div class="brand-text">
+        <h1>NE-LENS <span class="gov-tag">SIH • DDMA</span></h1>
+        <p>Landslide Early Warning System • Northeast India</p>
+      </div>
+    </div>
+
+    <nav class="header-nav">
+      <a class="nav-link active" href="#overview">Overview</a>
+      <a class="nav-link" href="#map">Risk Map</a>
+      <a class="nav-link" href="#history">Historical Events</a>
+      <a class="nav-link" href="#alerts">Alerts</a>
+      <a class="nav-link" href="#reports">Reports</a>
+    </nav>
+
+    <div class="header-controls">
+      <!-- Location Selector -->
+      <div class="location-dropdown-wrap">
+        <label for="location-selector">District:</label>
+        <select id="location-selector" aria-label="Select Northeast District">
+          <!-- Populated dynamically via JS -->
+        </select>
+      </div>
+
+      <!-- Live Sync Status -->
+      <div class="header-status-badge">
+        <span class="status-dot-pulse"></span>
+        <span>52/52 Sensors Live | IMD Synced</span>
+      </div>
+
+      <!-- Time Clock -->
+      <div class="header-status-badge" id="live-clock" style="font-family:'JetBrains Mono',monospace;">
+        --:--:-- IST
+      </div>
+
+      <!-- Notification Bell -->
+      <button class="header-status-badge" style="cursor:pointer;" title="2 Unread Weather Bulletins">
+        🔔 <span style="background:#dc2626; color:#fff; font-size:10px; font-weight:800; padding:1px 5px; border-radius:10px;">2</span>
+      </button>
+
+      <!-- Officer Profile -->
+      <div class="officer-profile-tag">
+        <div class="officer-avatar">DO</div>
+        <div>
+          <div style="font-weight:700; color:#f8fafc;">DDMA Aizawl</div>
+          <div style="font-size:10px; color:#94a3b8;">Field Control Room</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       MAIN DASHBOARD WORKSPACE
+       ========================================================================== -->
+  <main class="dashboard-viewport">
+
+    <!-- 1. CURRENT RISK SUMMARY (TOP HERO CARD) -->
+    <section class="risk-hero-card" id="overview">
+      <div class="risk-hero-left">
+        <div>
+          <div class="risk-score-title">LANDSLIDE RISK</div>
+          <div class="risk-score-display">
+            <span class="score-number" id="hero-risk-score">82</span>
+            <span class="score-max">/ 100</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="risk-tier-pill tier-CRITICAL" id="hero-risk-tier">CRITICAL</div>
+        </div>
+
+        <div class="risk-meta-block">
+          <div class="risk-location-label">Location:</div>
+          <div class="risk-location-title" id="hero-location-title">Aizawl District, Mizoram</div>
+          <div style="font-size:12px; color:var(--text-muted);" id="hero-corridor-title">Tuirial & Durtlang Slope Corridor</div>
+          <div class="risk-prediction-line" id="hero-prediction-line">Prediction: High risk in next 6 hours</div>
+        </div>
+      </div>
+
+      <!-- Segmented Risk Scale -->
+      <div class="risk-scale-container">
+        <div class="scale-bars-flex">
+          <div class="scale-segment" id="seg-vlow" style="background:#16a34a;" title="0 - 20 Very Low"></div>
+          <div class="scale-segment" id="seg-low" style="background:#22c55e;" title="21 - 40 Low"></div>
+          <div class="scale-segment" id="seg-mod" style="background:#ca8a04;" title="41 - 60 Moderate"></div>
+          <div class="scale-segment" id="seg-high" style="background:#ea580c;" title="61 - 80 High"></div>
+          <div class="scale-segment active-segment" id="seg-crit" style="background:#dc2626;" title="81 - 100 Critical"></div>
+        </div>
+        <div class="scale-labels-flex">
+          <span>0 — 20 Very Low</span>
+          <span>21 — 40 Low</span>
+          <span>41 — 60 Moderate</span>
+          <span>61 — 80 High</span>
+          <span style="color:#dc2626; font-weight:800;">81 — 100 Critical</span>
+        </div>
+        <div style="font-size:9px; color:#94a3b8; font-style:italic;">
+          *Multi-source kinematic & hydro-meteorological decision support index.
+        </div>
+      </div>
+
+      <!-- Trend Tag -->
+      <div>
+        <div class="risk-trend-tag" id="hero-trend-tag">
+          Risk trend ↑ Increasing
+        </div>
+      </div>
+    </section>
+
+    <!-- TWO-COLUMN WORKSPACE: LEFT 62% + RIGHT 38% -->
+    <div class="main-grid-layout">
+
+      <!-- ======================================================================
+           LEFT COLUMN: PRIMARY GIS MAP (VISUALLY DOMINANT) + DRIVERS & RAIN
+           ====================================================================== -->
+      <div class="left-column-stack">
+
+        <!-- 2. PRIMARY GIS MAP (60-65% DOMINANCE) -->
+        <section class="gis-map-card" id="map">
+          <div class="map-card-header">
+            <div class="map-title-wrap">
+              <h2>LIVE LANDSLIDE RISK MAP</h2>
+              <span class="map-live-tag">● Live Geomorphic InSAR & Rain Gauges</span>
+            </div>
+
+            <!-- Layer Controls -->
+            <div class="layer-controls-strip">
+              <label class="layer-toggle-item">
+                <input type="checkbox" id="layer-toggle-risk" checked>
+                <span>Risk Zones</span>
+              </label>
+              <label class="layer-toggle-item">
+                <input type="checkbox" id="layer-toggle-history" checked>
+                <span>Previous Landslides</span>
+              </label>
+              <label class="layer-toggle-item">
+                <input type="checkbox" id="layer-toggle-villages" checked>
+                <span>Villages</span>
+              </label>
+              <label class="layer-toggle-item">
+                <input type="checkbox" id="layer-toggle-roads" checked>
+                <span>Roads</span>
+              </label>
+              <label class="layer-toggle-item">
+                <input type="checkbox" id="layer-toggle-rivers" checked>
+                <span>Rivers</span>
+              </label>
+              <label class="layer-toggle-item">
+                <input type="checkbox" id="layer-toggle-sensors" checked>
+                <span>Sensors</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Leaflet Map Canvas -->
+          <div id="nelens-map"></div>
+        </section>
+
+        <!-- BOTTOM ROW UNDER MAP: RISK DRIVERS + RAINFALL / RISK TREND -->
+        <div class="map-bottom-grid">
+
+          <!-- 4. WHY IS THE RISK HIGH? (RISK DRIVERS CARD) -->
+          <div class="white-card">
+            <div class="card-header-simple">
+              <h3><span>⚡</span> RISK DRIVERS</h3>
+              <span style="font-size:10px; color:#64748b; font-weight:700;">CONTRIBUTION</span>
+            </div>
+
+            <div class="drivers-list">
+              <!-- Rainfall -->
+              <div class="driver-row">
+                <div class="driver-label-group">
+                  <span>🌧</span> <span>Rainfall</span>
+                </div>
+                <div class="driver-bar-slot">
+                  <div class="driver-bar-fill" id="driver-rain-bar" style="width: 85%; background:#0284c7;"></div>
+                </div>
+                <div class="driver-val-group">
+                  <span class="driver-val-main" id="driver-rain-val">146 mm / 24h</span>
+                  <span class="driver-badge" id="driver-rain-rating" style="background:#fee2e2; color:#b91c1c;">HIGH</span>
+                </div>
+              </div>
+
+              <!-- Soil Moisture -->
+              <div class="driver-row">
+                <div class="driver-label-group">
+                  <span>💧</span> <span>Soil Moisture</span>
+                </div>
+                <div class="driver-bar-slot">
+                  <div class="driver-bar-fill" id="driver-soil-bar" style="width: 82%; background:#2563eb;"></div>
+                </div>
+                <div class="driver-val-group">
+                  <span class="driver-val-main" id="driver-soil-val">82%</span>
+                  <span class="driver-badge" id="driver-soil-rating" style="background:#fee2e2; color:#b91c1c;">VERY WET</span>
+                </div>
+              </div>
+
+              <!-- Slope -->
+              <div class="driver-row">
+                <div class="driver-label-group">
+                  <span>⛰</span> <span>Slope</span>
+                </div>
+                <div class="driver-bar-slot">
+                  <div class="driver-bar-fill" id="driver-slope-bar" style="width: 76%; background:#ea580c;"></div>
+                </div>
+                <div class="driver-val-group">
+                  <span class="driver-val-main" id="driver-slope-val">38°</span>
+                  <span class="driver-badge" id="driver-slope-rating" style="background:#ffedd5; color:#c2410c;">STEEP</span>
+                </div>
+              </div>
+
+              <!-- Historical Landslides -->
+              <div class="driver-row">
+                <div class="driver-label-group">
+                  <span>📚</span> <span>Hist. Landslides</span>
+                </div>
+                <div class="driver-bar-slot">
+                  <div class="driver-bar-fill" id="driver-hist-bar" style="width: 60%; background:#d97706;"></div>
+                </div>
+                <div class="driver-val-group">
+                  <span class="driver-val-main" id="driver-hist-val">4 nearby</span>
+                  <span class="driver-badge" id="driver-hist-rating" style="background:#fef3c7; color:#92400e;">HIGH</span>
+                </div>
+              </div>
+
+              <!-- Susceptibility -->
+              <div class="driver-row">
+                <div class="driver-label-group">
+                  <span>🪨</span> <span>Susceptibility</span>
+                </div>
+                <div class="driver-bar-slot">
+                  <div class="driver-bar-fill" id="driver-susc-bar" style="width: 70%; background:#475569;"></div>
+                </div>
+                <div class="driver-val-group">
+                  <span class="driver-val-main" id="driver-susc-val">HIGH</span>
+                  <span class="driver-badge" id="driver-susc-rating" style="background:#f1f5f9; color:#334155;">HIGH</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main Driver Callout -->
+            <div class="main-driver-callout">
+              <strong>MAIN DRIVER</strong>
+              <span id="main-driver-text">Heavy accumulated rainfall + saturated soil</span>
+            </div>
+          </div>
+
+          <!-- 6 & 7. RAINFALL TRIGGER & RISK TREND -->
+          <div class="white-card rainfall-trend-card">
+            <div class="card-header-simple">
+              <h3><span>🌧</span> RAINFALL & RISK TREND</h3>
+              <span style="font-size:10px; color:#b91c1c; font-weight:700;">↑ INCREASING</span>
+            </div>
+
+            <!-- Rainfall Numbers Grid -->
+            <div class="rainfall-stats-grid">
+              <div class="rain-stat-box">
+                <span class="rain-stat-lbl">Current</span>
+                <span class="rain-stat-val" id="rf-current-rate">18 mm/h</span>
+              </div>
+              <div class="rain-stat-box">
+                <span class="rain-stat-lbl">Last 6h</span>
+                <span class="rain-stat-val" id="rf-last-6h">74 mm</span>
+              </div>
+              <div class="rain-stat-box">
+                <span class="rain-stat-lbl">Last 24h</span>
+                <span class="rain-stat-val" id="rf-last-24h">146 mm</span>
+              </div>
+              <div class="rain-stat-box" style="border-color:#bae6fd; background:#f0f9ff;">
+                <span class="rain-stat-lbl" style="color:#0284c7;">Next 6h</span>
+                <span class="rain-stat-val" id="rf-forecast-6h" style="color:#0284c7;">+58 mm</span>
+              </div>
+            </div>
+
+            <!-- 24h Sparkline Container -->
+            <div class="chart-sparkline-wrap">
+              <div style="font-size:9px; color:#64748b; font-weight:700; margin-bottom:2px;">24-HOUR RAINFALL ACCUMULATION CURVE</div>
+              <div id="rainfall-sparkline-canvas"></div>
+            </div>
+
+            <!-- Risk Trend Headline & Sparkline -->
+            <div class="chart-sparkline-wrap" style="height:75px;">
+              <div style="font-size:9px; color:#64748b; font-weight:700; margin-bottom:2px;">RISK EVOLUTION (06:00 → 18:00)</div>
+              <div id="risk-trend-canvas"></div>
+            </div>
+
+            <div class="trend-headline-bar">
+              <span><b>Headline:</b> Risk increasing rapidly</span>
+              <span><b>Next 6h:</b> High trigger probability</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ======================================================================
+           RIGHT COLUMN: IMPACTED AREA + HISTORY + ACTION + FIELD REPORTS
+           ====================================================================== -->
+      <div class="right-column-stack">
+
+        <!-- 3. IMPACT / AFFECTED AREA CARD -->
+        <section class="white-card impacted-card">
+          <div class="impact-header-flex">
+            <div>
+              <h3 style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:700; text-transform:uppercase; color:#0f172a;">
+                📍 IMPACTED AREA
+              </h3>
+              <div class="impact-radius-badge" id="impact-radius-val" style="margin-top:4px;">
+                Risk Radius: 2.5 km
+              </div>
+            </div>
+            <div class="priority-urgent-pill" id="impact-priority-val">
+              Priority: P1 — URGENT
+            </div>
+          </div>
+
+          <!-- Exposure Numbers with Icons -->
+          <div class="exposure-metrics-grid">
+            <div class="exposure-cell">
+              <span class="exposure-icon">🏘</span>
+              <div>
+                <div class="exposure-count" id="exp-villages-count">3</div>
+                <div class="exposure-name">Villages</div>
+              </div>
+            </div>
+
+            <div class="exposure-cell" style="background:#fef2f2; border-color:#fecaca;">
+              <span class="exposure-icon">👥</span>
+              <div>
+                <div class="exposure-count" id="exp-population-count" style="color:#b91c1c;">4,820</div>
+                <div class="exposure-name" style="color:#991b1b;">People</div>
+              </div>
+            </div>
+
+            <div class="exposure-cell">
+              <span class="exposure-icon">🛣</span>
+              <div>
+                <div class="exposure-count" id="exp-roads-count">4</div>
+                <div class="exposure-name">Roads</div>
+              </div>
+            </div>
+
+            <div class="exposure-cell">
+              <span class="exposure-icon">🏫</span>
+              <div>
+                <div class="exposure-count" id="exp-schools-count">2</div>
+                <div class="exposure-name">Schools</div>
+              </div>
+            </div>
+
+            <div class="exposure-cell">
+              <span class="exposure-icon">🏥</span>
+              <div>
+                <div class="exposure-count" id="exp-hospitals-count">1</div>
+                <div class="exposure-name">Hospital</div>
+              </div>
+            </div>
+
+            <div class="exposure-cell">
+              <span class="exposure-icon">🌉</span>
+              <div>
+                <div class="exposure-count" id="exp-bridges-count">2</div>
+                <div class="exposure-name">Bridges</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="exposure-disclaimer">
+            *Population exposure figures represent localized census estimates within the active 2.5 km hazard buffer.
+          </div>
+        </section>
+
+        <!-- 8. ALERT / ACTION CARD -->
+        <section class="white-card action-card" id="alerts">
+          <div class="card-header-simple" style="margin-bottom:6px;">
+            <h3 style="color:#dc2626;"><span>🚨</span> RECOMMENDED ACTION</h3>
+            <span style="background:#fee2e2; color:#991b1b; font-size:10px; font-weight:800; padding:2px 8px; border-radius:4px;">
+              🔴 URGENT
+            </span>
+          </div>
+
+          <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">
+            Standard Operating Checklist:
+          </div>
+
+          <div class="action-sop-list" id="action-sop-list">
+            <!-- Populated via JS -->
+          </div>
+
+          <div class="action-buttons-group">
+            <button class="btn-create-alert" id="btn-create-alert">
+              <span>🚨</span> CREATE ALERT (DISPATCH WARNING)
+            </button>
+            <div class="secondary-actions-flex">
+              <button class="btn-secondary-link" id="btn-view-affected">View affected area</button>
+              <button class="btn-secondary-link" id="btn-view-history">View historical events</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. PREVIOUS LANDSLIDE REPORTS -->
+        <section class="white-card" id="history">
+          <div class="card-header-simple">
+            <h3><span>📚</span> HISTORICAL LANDSLIDE REPORTS</h3>
+            <span style="font-size:11px; color:#64748b;">GSI & BRO Archive</span>
+          </div>
+
+          <!-- Quick Stats Bar -->
+          <div class="history-stats-bar">
+            <div class="history-stat-unit">
+              <strong id="hist-total-area">7</strong>
+              <span>In Selected Area</span>
+            </div>
+            <div class="history-stat-unit" style="border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0; padding:0 12px;">
+              <strong id="hist-total-radius" style="color:#ea580c;">4</strong>
+              <span>Within Radius</span>
+            </div>
+            <div class="history-stat-unit">
+              <strong id="hist-most-recent" style="color:#dc2626;">18 days ago</strong>
+              <span>Most Recent</span>
+            </div>
+          </div>
+
+          <!-- Timeline Feed -->
+          <div class="history-timeline-feed" id="hist-timeline-container">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </section>
+
+        <!-- 9. FIELD REPORTS -->
+        <section class="white-card" id="reports">
+          <div class="card-header-simple">
+            <h3><span>📷</span> FIELD REPORTS</h3>
+            <span style="font-size:10px; color:#0369a1; font-weight:700;">Ground Crowdsource</span>
+          </div>
+
+          <div id="field-reports-container" style="display:flex; flex-direction:column; gap:8px;">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       CREATE ALERT DISPATCH MODAL DIALOG
+       ========================================================================== -->
+  <div class="modal-overlay" id="alert-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🚨 Dispatch Official Landslide Warning</h3>
+        <button class="modal-close-btn" id="modal-close-alert">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:10px; margin-bottom:12px;">
+          <div style="font-size:11px; font-weight:800; color:#991b1b; text-transform:uppercase;">IMMEDIATE BROADCAST PROTOCOL</div>
+          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-top:2px;" id="modal-alert-location">Aizawl Corridor</div>
+          <div style="font-size:11px; color:#475569; margin-top:2px;">
+            Tier: <b id="modal-alert-level" style="color:#dc2626;">CRITICAL</b> | Buffer: <b id="modal-alert-radius">2.5 km</b> | Exposed: <b id="modal-alert-people">4,820 people</b>
+          </div>
+        </div>
+
+        <div style="font-size:12px; font-weight:700; margin-bottom:6px; color:#1e293b;">Select Communication Channels:</div>
+        <div style="display:flex; flex-direction:column; gap:6px; font-size:12px;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" checked accent-color="#dc2626"> <span>Public SMS Blast to Village Residents (Est. ~4,090 handsets)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" checked accent-color="#dc2626"> <span>VHF Wireless Dispatch to District Police & Traffic En-route NH-54</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" checked accent-color="#dc2626"> <span>Mobilize State Disaster Response Force (SDRF) Quick Response Team</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" checked accent-color="#dc2626"> <span>WhatsApp Notification to Village Disaster Management Committees</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary-link" onclick="window.app.closeAlertModal()">Cancel</button>
+        <button class="btn-create-alert" id="btn-confirm-dispatch" style="padding:8px 16px;">
+          Confirm & Transmit Alert
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet & App Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/static/js/nelens_map.js"></script>
+  <script src="/static/js/nelens_app.js"></script>
+</body>
+</html>

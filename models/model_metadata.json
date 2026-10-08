@@ -80,61 +80,61 @@
   ],
   "metrics": {
     "risk_classifier": {
-      "accuracy": 0.8588,
-      "f1_score": 0.8593,
-      "roc_auc_ovr": 0.9741
+      "accuracy": 0.8603,
+      "f1_score": 0.8607,
+      "roc_auc_ovr": 0.9742
     },
     "occurrence_classifier": {
-      "accuracy": 0.9209,
-      "f1_score": 0.8843,
-      "roc_auc": 0.9432
+      "accuracy": 0.9194,
+      "f1_score": 0.882,
+      "roc_auc": 0.9435
     },
     "lead_time_regressor": {
-      "mae_hours": 2.399,
-      "mae_minutes": 144.0,
-      "r2_score": 0.6946
+      "mae_hours": 2.404,
+      "mae_minutes": 144.2,
+      "r2_score": 0.6972
     }
   },
   "top_features": [
     {
       "Feature": "Soil_Moisture",
-      "Importance": 0.1502578854560852
+      "Importance": 0.11495678871870041
+    },
+    {
+      "Feature": "Soil_Type_Forest Clay Loam",
+      "Importance": 0.08805033564567566
     },
     {
       "Feature": "Historical_Flood_Frequency",
-      "Importance": 0.11456096917390823
-    },
-    {
-      "Feature": "Rainfall_Intensity",
-      "Importance": 0.09134317934513092
-    },
-    {
-      "Feature": "Catchment_Surge_Index",
-      "Importance": 0.08214576542377472
+      "Importance": 0.07768496870994568
     },
     {
       "Feature": "Rainfall_6h",
-      "Importance": 0.05012889578938484
+      "Importance": 0.07292388379573822
     },
     {
-      "Feature": "Land_Cover_Thick Canopy Forest",
-      "Importance": 0.046968135982751846
+      "Feature": "Rainfall_24h",
+      "Importance": 0.06705451011657715
+    },
+    {
+      "Feature": "Rainfall_Intensity",
+      "Importance": 0.05148401856422424
     },
     {
       "Feature": "Land_Cover_Concrete & Impermeable",
-      "Importance": 0.03743331506848335
+      "Importance": 0.041561055928468704
+    },
+    {
+      "Feature": "Soil_Saturation",
+      "Importance": 0.04130090773105621
     },
     {
       "Feature": "Distance_to_River",
-      "Importance": 0.034603413194417953
+      "Importance": 0.040678564459085464
     },
     {
-      "Feature": "Land_Cover_Cropland & Scrub",
-      "Importance": 0.029670849442481995
-    },
-    {
-      "Feature": "Soil_Type_Alluvial Loam",
-      "Importance": 0.027736952528357506
+      "Feature": "Land_Cover_Deciduous Forest",
+      "Importance": 0.04058438912034035
     }
   ]
 }
