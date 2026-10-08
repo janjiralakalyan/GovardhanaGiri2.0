@@ -6,12 +6,17 @@ and disaster response coordination for Telangana flash flood prone areas.
 """
 
 import os
+import sys
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from backend.predictor import ai_bridge
 from backend.mock_telemetry import (
@@ -54,7 +59,7 @@ class TelemetryUpdate(BaseModel):
 class AlertDispatch(BaseModel):
     station_id: str
     alert_tier: str
-    channels: list[str]  # e.g. ["public_siren", "sms_broadcast", "sdrf_dispatch"]
+    channels: List[str]  # e.g. ["public_siren", "sms_broadcast", "sdrf_dispatch"]
     custom_message: Optional[str] = None
 
 # API Endpoints
@@ -198,8 +203,10 @@ def model_info():
     return ai_bridge.metadata
 
 from backend.nelens_router import router as nelens_router
+from backend.copilot_router import router as copilot_router
 
 app.include_router(nelens_router)
+app.include_router(copilot_router)
 
 # Mount frontend directory for static assets if exists
 if os.path.exists(FRONTEND_DIR):

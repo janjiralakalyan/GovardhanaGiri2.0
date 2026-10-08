@@ -22,6 +22,7 @@ GovardhanaGiri 2.0 is an end-to-end AI-powered Early Warning and Decision Suppor
    - **River Stage Hydrograph Meter:** Visual indicator comparing live water level to bankfull danger mark.
    - **"What-If" Cloudburst Simulator:** Sliders to stress-test real-time hydro-meteorological shocks (e.g., sudden 120 mm/hr cloudburst or 98% saturated soil) and observe instant AI re-evaluations in <20ms.
    - **Multi-Channel Emergency Alert Dispatcher:** Simulates automated SMS broadcasts to ward populations, public warning sirens (via native Web Audio API), and SDRF/NDRF team mobilization.
+   - **Tri-Agent AI Incident Commander & NDMA Action Plan (IAP) Copilot:** Multi-agent collaborative intelligence with Worker Agent 1 (Groq Hazard Analyst), Worker Agent 2 (Groq NDMA/SPHERE Logistics Strategist), and Supreme Commander (Cohere Command Engine) synthesizing official Incident Action Plans and authentic multi-lingual emergency broadcasts in English, Telugu (తెలుగు), and Hindi (हिन्दी).
    - **NE-LENS Northeast India Landslide System:** Comprehensive companion monitoring portal covering 52 active telemetry points across Aizawl, Hunthar, Gangtok, Shillong, and Dima Hasao.
 
 ---
