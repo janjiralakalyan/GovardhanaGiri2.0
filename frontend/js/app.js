@@ -185,6 +185,17 @@ class GovardhanaGiriApp {
     document.getElementById('btn-apply-telemetry').addEventListener('click', () => {
       this.applyCustomTelemetry();
     });
+
+    // 3D Flood Map Fast Trigger Button on Map Bar
+    const btn3dDss = document.getElementById('btn-open-3d-dss');
+    if (btn3dDss) {
+      btn3dDss.addEventListener('click', () => {
+        const tab3d = document.querySelector('.tab-btn[data-tab="tab-3d-terrain"]');
+        if (tab3d) tab3d.click();
+        const mount = document.getElementById('tab-3d-terrain');
+        if (mount) mount.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
   }
 
   startClock() {

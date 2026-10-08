@@ -152,17 +152,82 @@
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
 }
 
+/* 6 Flood Hotspots 1-Click Fast Selector Bar */
+.t3d-fast-hotspots-bar {
+  position: absolute;
+  top: 56px;
+  left: 14px;
+  right: 270px;
+  background: rgba(10, 15, 30, 0.92);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 8px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 18;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.t3d-fast-hotspots-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #f59e0b;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.t3d-fast-hotspot-btns {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.t3d-fast-hotspot-btns::-webkit-scrollbar {
+  display: none;
+}
+
+.t3d-fast-btn {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.t3d-fast-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.t3d-fast-btn.active {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+
 /* 4-Stage "How It Becomes Risky" Evolution Stepper Banner */
 .t3d-risk-stepper-bar {
   position: absolute;
-  top: 62px;
+  top: 96px;
   left: 14px;
   right: 270px;
   background: rgba(10, 15, 30, 0.94);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: 10px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -172,7 +237,7 @@
 }
 
 .t3d-stepper-title {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
   color: #38bdf8;
   letter-spacing: 0.5px;
@@ -250,7 +315,7 @@
 /* Infrastructure Badges HUD (Below Stepper) */
 .terrain-3d-infra-hud {
   position: absolute;
-  top: 118px;
+  top: 138px;
   left: 14px;
   display: flex;
   gap: 8px;
@@ -264,8 +329,8 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
-  padding: 5px 10px;
-  font-size: 11px;
+  padding: 4px 9px;
+  font-size: 10.5px;
   color: #cbd5e1;
   display: inline-flex;
   align-items: center;
@@ -296,7 +361,9 @@
   position: absolute;
   bottom: 64px;
   left: 14px;
-  width: 320px;
+  width: 360px;
+  max-height: 240px;
+  overflow-y: auto;
   background: rgba(10, 15, 30, 0.94);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(56, 189, 248, 0.35);
@@ -452,6 +519,7 @@
   background: #1e293b;
   outline: none;
   -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
 }
 
@@ -557,6 +625,7 @@
   background: #1e293b;
   outline: none;
   -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
 }
 

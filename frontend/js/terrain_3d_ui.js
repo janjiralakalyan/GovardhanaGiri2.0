@@ -85,24 +85,26 @@ class Terrain3DComponent {
           <div class="t3d-area-select-wrap">
             <label for="${this.mountId}-area-dropdown">📍 Area:</label>
             <select class="t3d-area-select" id="${this.mountId}-area-dropdown">
-              <optgroup label="Telangana Flood Hotspots">
-                <option value="TEL-STN-03" ${this.config.stationId === 'TEL-STN-03' ? 'selected' : ''}>Medaram (Jampanna Vagu)</option>
-                <option value="TEL-STN-01" ${this.config.stationId === 'TEL-STN-01' ? 'selected' : ''}>Bhadrachalam (Godavari)</option>
-                <option value="TEL-STN-06" ${this.config.stationId === 'TEL-STN-06' ? 'selected' : ''}>Kuntala Falls Gorge</option>
-                <option value="TEL-STN-07" ${this.config.stationId === 'TEL-STN-07' ? 'selected' : ''}>Kadam Dam Spillway</option>
-                <option value="TEL-STN-08" ${this.config.stationId === 'TEL-STN-08' ? 'selected' : ''}>Prakash Nagar (Munneru)</option>
-                <option value="TEL-STN-10" ${this.config.stationId === 'TEL-STN-10' ? 'selected' : ''}>Musi River / Puranapool</option>
-                <option value="TEL-STN-02" ${this.config.stationId === 'TEL-STN-02' ? 'selected' : ''}>Charla (Taliperu Spillway)</option>
-                <option value="TEL-STN-04" ${this.config.stationId === 'TEL-STN-04' ? 'selected' : ''}>Eturnagaram (Dayam Vagu)</option>
+              <optgroup label="⚠️ 6 Primary Telangana Flood Risk Areas">
+                <option value="TEL-STN-01" ${this.config.stationId === 'TEL-STN-01' ? 'selected' : ''}>🌊 Bhadrachalam (Godavari Ghat)</option>
+                <option value="TEL-STN-03" ${this.config.stationId === 'TEL-STN-03' ? 'selected' : ''}>🏞️ Medaram (Jampanna Gorge)</option>
+                <option value="TEL-STN-06" ${this.config.stationId === 'TEL-STN-06' ? 'selected' : ''}>💦 Kuntala Falls Ravine (45m Drop)</option>
+                <option value="TEL-STN-07" ${this.config.stationId === 'TEL-STN-07' ? 'selected' : ''}>🏗️ Kadam Dam (Spillway & Forebay)</option>
+                <option value="TEL-STN-08" ${this.config.stationId === 'TEL-STN-08' ? 'selected' : ''}>🏙️ Prakash Nagar (Munneru Urban)</option>
+                <option value="TEL-STN-10" ${this.config.stationId === 'TEL-STN-10' ? 'selected' : ''}>🌉 Musi River (Puranapool Canal)</option>
               </optgroup>
-              <optgroup label="Mountain & Landslide Ghats">
+              <optgroup label="Other Telangana Basins & Ghats">
+                <option value="TEL-STN-02" ${this.config.stationId === 'TEL-STN-02' ? 'selected' : ''}>Charla (Taliperu Spillway)</option>
+                <option value="TEL-STN-04" ${this.config.stationId === 'TEL-STN-04' ? 'selected' : ''}>Eturnagaram (Dayam Confluence)</option>
+                <option value="TEL-STN-05" ${this.config.stationId === 'TEL-STN-05' ? 'selected' : ''}>Kerameri Ghat Range (610m)</option>
+                <option value="TEL-STN-09" ${this.config.stationId === 'TEL-STN-09' ? 'selected' : ''}>Mannanur Nallamala Plateau</option>
+              </optgroup>
+              <optgroup label="Northeast Mountain Landslides">
                 <option value="AIZAWL-01" ${this.config.stationId === 'AIZAWL-01' ? 'selected' : ''}>Aizawl (Tuirial & Durtlang, Mizoram)</option>
                 <option value="CHAMPHAI-02" ${this.config.stationId === 'CHAMPHAI-02' ? 'selected' : ''}>Champhai (Tiau Border, Mizoram)</option>
                 <option value="EKHASI-03" ${this.config.stationId === 'EKHASI-03' ? 'selected' : ''}>East Khasi Hills (Mawkdok/Sohra, Meghalaya)</option>
                 <option value="DIMAHASAO-04" ${this.config.stationId === 'DIMAHASAO-04' ? 'selected' : ''}>Dima Hasao (Jatinga Haflong, Assam)</option>
                 <option value="KOHIMA-05" ${this.config.stationId === 'KOHIMA-05' ? 'selected' : ''}>Kohima (Dzükou Foothills, Nagaland)</option>
-                <option value="TEL-STN-05" ${this.config.stationId === 'TEL-STN-05' ? 'selected' : ''}>Kerameri Ghat Range (610m, Telangana)</option>
-                <option value="TEL-STN-09" ${this.config.stationId === 'TEL-STN-09' ? 'selected' : ''}>Mannanur Nallamala Plateau (Telangana)</option>
               </optgroup>
             </select>
           </div>
@@ -121,10 +123,23 @@ class Terrain3DComponent {
           </div>
         </div>
 
+        <!-- 6 Flood Hotspot 1-Click Fast Selector Bar -->
+        <div class="t3d-fast-hotspots-bar">
+          <span class="t3d-fast-hotspots-label">⚡ 6 FLOOD HOTSPOTS:</span>
+          <div class="t3d-fast-hotspot-btns">
+            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-01' ? 'active' : ''}" data-stn="TEL-STN-01" title="Godavari River Ghat (Wide Braided Basin)">🌊 Bhadrachalam</button>
+            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-03' ? 'active' : ''}" data-stn="TEL-STN-03" title="Jampanna Vagu Gorge (Quartzite Canyon)">🏞️ Medaram</button>
+            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-06' ? 'active' : ''}" data-stn="TEL-STN-06" title="Kuntala Falls Ravine (45m Precipice & Plunge Pool)">💦 Kuntala Falls</button>
+            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-07' ? 'active' : ''}" data-stn="TEL-STN-07" title="Kadam Dam Radial Spillway & Forebay Lake">🏗️ Kadam Dam</button>
+            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-08' ? 'active' : ''}" data-stn="TEL-STN-08" title="Prakash Nagar Munneru (Urban Floodwall Embankment)">🏙️ Prakash Nagar</button>
+            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-10' ? 'active' : ''}" data-stn="TEL-STN-10" title="Musi River Basin / Puranapool (Urban Concrete Canal)">🌉 Musi River</button>
+          </div>
+        </div>
+
         <!-- 4-Stage Dynamic Risk Evolution Stepper (How It Becomes Risky) -->
         <div class="t3d-risk-stepper-bar">
           <div class="t3d-stepper-title">
-            <span>⚡ RISK EVOLUTION:</span>
+            <span>⚡ HOW THIS AREA BECOMES RISKY:</span>
           </div>
           <div class="t3d-step-nodes">
             <div class="t3d-step-node ${this.config.riskEvolutionPhase === 1 ? 'active-step' : ''}" data-phase="1" title="Initial normal conditions, low runoff, high stability">
@@ -137,7 +152,7 @@ class Terrain3DComponent {
             </div>
             <div class="t3d-step-node ${this.config.riskEvolutionPhase === 3 ? 'active-step' : ''}" data-phase="3" title="Soil saturated, surface flow accumulation, road warnings">
               <span class="t3d-step-num">PHASE 3</span>
-              <span class="t3d-step-name">🟠 Pore Pressure Surge</span>
+              <span class="t3d-step-name">🟠 Surge / Gate Overflow</span>
             </div>
             <div class="t3d-step-node critical-phase ${this.config.riskEvolutionPhase === 4 ? 'active-step' : ''}" data-phase="4" title="Extreme Cloudburst, flash breach, overtopping & slip rupture">
               <span class="t3d-step-num">PHASE 4</span>
@@ -165,22 +180,35 @@ class Terrain3DComponent {
         <!-- Dynamic Causality & Physics Breakdown (Why This Area Is Risky) -->
         <div class="t3d-causality-box" id="${this.mountId}-causality">
           <div class="t3d-causality-header">
-            <span>🔬 RISK CAUSALITY & MECHANICS</span>
-            <span style="font-size:9.5px; color:#94a3b8;" id="${this.mountId}-causality-state">LIVE CALCULATION</span>
+            <span>🔬 HOW THIS AREA BECOMES RISKY & LIVE CAUSALITY</span>
+            <span style="font-size:9.5px; color:#38bdf8;" id="${this.mountId}-causality-state">LIVE HYDRO-DYNAMIC ENGINE</span>
           </div>
           <div class="t3d-causality-list" id="${this.mountId}-causality-list">
-            <div class="t3d-causality-item">
-              <span class="icon">🌧️</span>
-              <div>Rainfall (<strong>${this.config.rainfall} mm/h</strong>) vs Soil Infiltration (<strong id="${this.mountId}-c-infil">3.8 mm/h</strong>).</div>
+            <!-- Dynamic Localized Causality Injected via updateCausalityNarrative -->
+          </div>
+        </div>
+
+        <!-- 12-Hour Hydrodynamic Forecast Timeline Scrubber -->
+        <div class="terrain-3d-timeline-bar">
+          <div class="t3d-timeline-controls">
+            <button class="t3d-play-btn" id="${this.mountId}-btn-play" title="Play / Pause 12-Hour Flood Wave Simulation">▶ Play</button>
+            <span class="t3d-timeline-label" id="${this.mountId}-lbl-time">T = 0.0h (Now)</span>
+          </div>
+          <div class="t3d-timeline-track-wrap">
+            <input type="range" class="t3d-timeline-range" id="${this.mountId}-sld-timeline" min="-6.0" max="6.0" step="0.1" value="0.0">
+            <div class="t3d-timeline-ticks">
+              <span>T-6h (Onset)</span>
+              <span>T-3h</span>
+              <span style="color:#38bdf8; font-weight:700;">T-0 (Now)</span>
+              <span style="color:#f59e0b; font-weight:700;">T+1.5h (Peak Surge)</span>
+              <span>T+3h</span>
+              <span>T+6h (Recession)</span>
             </div>
-            <div class="t3d-causality-item">
-              <span class="icon">🌊</span>
-              <div>Water Stage at <strong id="${this.mountId}-c-stage">${this.config.waterLevel} m</strong> (Danger Mark: <strong id="${this.mountId}-c-danger">5.2 m</strong>).</div>
-            </div>
-            <div class="t3d-causality-item">
-              <span class="icon">⛰️</span>
-              <div>Geotechnical Stability: <strong id="${this.mountId}-c-fos">FoS 1.85 (STABLE)</strong>.</div>
-            </div>
+          </div>
+          <div class="t3d-speed-btns">
+            <button class="t3d-spd-btn active" data-speed="1">1x</button>
+            <button class="t3d-spd-btn" data-speed="2">2x</button>
+            <button class="t3d-spd-btn" data-speed="5">5x</button>
           </div>
         </div>
 
@@ -295,15 +323,18 @@ class Terrain3DComponent {
     if (areaDropdown) {
       areaDropdown.addEventListener('change', (e) => {
         const stnId = e.target.value;
-        this.config.stationId = stnId;
-        if (this.visualizer) {
-          this.visualizer.setStation(stnId);
-          const prof = this.visualizer.getCurrentProfile();
-          this.config.mode = prof.mode;
-          this.updateAreaUIHeader(prof);
-        }
+        this.selectStation(stnId);
       });
     }
+
+    // 1b. 6 Flood Hotspot 1-Click Fast Buttons
+    const fastBtns = container.querySelectorAll('.t3d-fast-btn');
+    fastBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const stnId = btn.getAttribute('data-stn');
+        this.selectStation(stnId);
+      });
+    });
 
     // 2. 4-Stage Risk Evolution Stepper
     const stepNodes = container.querySelectorAll('.t3d-step-node');
@@ -517,28 +548,204 @@ class Terrain3DComponent {
         badgeHouses.innerHTML = `<span>🏘️ Settlements:</span> <strong style="color:${isCritical ? '#ef4444' : '#34d399'};">${data.floodedHousesCount} / ${data.totalHouses} Inundated</strong>`;
       }
 
-      // Update Causality Card values
-      const cStage = document.getElementById(`${this.mountId}-c-stage`);
-      const cDanger = document.getElementById(`${this.mountId}-c-danger`);
-      const cFos = document.getElementById(`${this.mountId}-c-fos`);
-      const valFos = document.getElementById(`${this.mountId}-val-fos`);
-      const valPore = document.getElementById(`${this.mountId}-val-pore`);
-
-      if (cStage && data.waterLevel !== undefined) cStage.textContent = `${data.waterLevel.toFixed(1)} m`;
-      if (cDanger && data.dangerWaterLevel !== undefined) cDanger.textContent = `${data.dangerWaterLevel.toFixed(1)} m`;
-
-      if (data.factorOfSafety !== undefined) {
-        const fosNum = parseFloat(data.factorOfSafety);
-        const text = fosNum < 1.0 ? `${data.factorOfSafety} (FAILURE ACTIVE)` : (fosNum < 1.3 ? `${data.factorOfSafety} (UNSTABLE)` : `${data.factorOfSafety} (STABLE)`);
-        const col = fosNum < 1.0 ? '#ef4444' : (fosNum < 1.3 ? '#f59e0b' : '#10b981');
-        if (cFos) cFos.innerHTML = `<span style="color:${col};">${text}</span>`;
-        if (valFos) valFos.innerHTML = `<span style="color:${col};">${text}</span>`;
-      }
-
-      if (valPore && data.porePressure !== undefined) {
-        valPore.textContent = `${data.porePressure} kPa`;
-      }
+      // Render Dynamic Causality Narrative
+      this.renderCausalityNarrative(data.stationId, data.riskPhase, data);
     });
+  }
+
+  selectStation(stnId) {
+    this.config.stationId = stnId;
+
+    // Update Dropdown
+    const dropdown = document.getElementById(`${this.mountId}-area-dropdown`);
+    if (dropdown) dropdown.value = stnId;
+
+    // Update Fast Hotspot Buttons active state
+    const container = document.getElementById(this.mountId);
+    if (container) {
+      const fastBtns = container.querySelectorAll('.t3d-fast-btn');
+      fastBtns.forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-stn') === stnId);
+      });
+    }
+
+    if (this.visualizer) {
+      this.visualizer.setStation(stnId);
+      const prof = this.visualizer.getCurrentProfile();
+      this.config.mode = prof.mode;
+      this.updateAreaUIHeader(prof);
+    }
+  }
+
+  renderCausalityNarrative(stationId, phase, data) {
+    const listEl = document.getElementById(`${this.mountId}-causality-list`);
+    if (!listEl) return;
+
+    const p = phase || this.config.riskEvolutionPhase || 2;
+    const stage = (data.waterLevel || this.config.waterLevel || 3.8).toFixed(1);
+    const danger = (data.dangerWaterLevel || 5.2).toFixed(1);
+    const rain = (data.rainfall || this.config.rainfall || 35).toFixed(0);
+    const sat = (data.saturation || this.config.saturation || 75).toFixed(0);
+
+    const causalityMap = {
+      'TEL-STN-01': {
+        // Bhadrachalam Godavari River Ghat
+        1: [
+          { icon: '🟢', title: 'Phase 1: Calm Baseflow', text: `Godavari River flowing steadily at <strong>${stage}m</strong> (Danger Mark: <strong>${danger}m</strong>). Temple vista bathing ghats, market complex, and 4-pier highway bridge completely dry.` },
+          { icon: '🌊', title: 'Hydrological Inflow', text: `Upper catchment flow accumulation normal. Infiltration buffer high with red alluvial soils absorbing monsoon moisture.` },
+          { icon: '🏥', title: 'Safety Status', text: `Zero settlements threatened. All riverbank approach corridors open.` }
+        ],
+        2: [
+          { icon: '🟡', title: 'Phase 2: Catchment Accumulation', text: `Precipitation (${rain} mm/h) across upstream Godavari basin funnels into main channel. Stage rising to <strong>${stage}m</strong> (approaching 1st Warning mark 13.1m).` },
+          { icon: '💧', title: 'Soil Saturation Saturation', text: `Soil moisture reached ${sat}%. Drainage channels discharging into Godavari with moderate velocity.` },
+          { icon: '⚠️', title: 'Advisory', text: `Riverbank warning sirens placed on alert. Lowland ghat visitors advised to move to upper terraces.` }
+        ],
+        3: [
+          { icon: '🟠', title: 'Phase 3: Saturated Bankfull Surcharge', text: `Massive inflow from Indravati & Pranhita confluences surges river stage to <strong>${stage}m</strong> (crossing 2nd Warning mark 14.6m). Lower ghat steps inundated.` },
+          { icon: '🌉', title: 'Infrastructure Threat', text: `Flood depth reaches bridge pier bases. Lowland riverside stalls submerged. Road access to Dummugudem monitored.` },
+          { icon: '🚨', title: 'Operational Action', text: `First responders deployed. High-ground shelters prepared at Bhadrachalam Model Residential School.` }
+        ],
+        4: [
+          { icon: '🔴', title: 'Phase 4: Critical Godavari Inundation', text: `Extreme deluge (${rain} mm/h) pushes Godavari stage to <strong>${stage}m</strong> (+${(stage - danger).toFixed(1)}m above 3rd Danger Mark ${danger}m)!` },
+          { icon: '🏘️', title: 'Catastrophic Overtopping', text: `Temple Riparian Ward & Lowland Market Quarters heavily inundated. Highway bridge deck threatened by turbulent whitewater.` },
+          { icon: '🚀', title: 'Emergency Evacuation Active', text: `Mandatory evacuation in progress via high-ground green corridor to ZPHS Camp.` }
+        ]
+      },
+      'TEL-STN-03': {
+        // Medaram Jampanna Vagu Gorge
+        1: [
+          { icon: '🟢', title: 'Phase 1: Calm Baseflow', text: `Jampanna Vagu flowing at normal base stage <strong>${stage}m</strong> (Danger: <strong>${danger}m</strong>). Causeway bridge clear, quartzite canyon banks dry.` },
+          { icon: '🌲', title: 'Forest Infiltration', text: `Thick canopy deciduous forest absorbing runoff. Infiltration capacity stable at 3.8 mm/h.` },
+          { icon: '🏥', title: 'Safety Status', text: `All tribal hamlets secure. Vehicle passage across causeway unimpeded.` }
+        ],
+        2: [
+          { icon: '🟡', title: 'Phase 2: Canyon Infiltration', text: `Heavy cloudburst (${rain} mm/h) over Mulugu hills. Steep 19.5° quartzite valley slopes funnel rapid sheet runoff directly into the narrow gorge.` },
+          { icon: '📈', title: 'Stage Acceleration', text: `Water level rises swiftly to <strong>${stage}m</strong>. Turbidity and streamline velocity increasing.` },
+          { icon: '⚠️', title: 'Flash Warning', text: `Early warning issued to Jampanna Bathing Ghat devotees and tribal forest settlers.` }
+        ],
+        3: [
+          { icon: '🟠', title: 'Phase 3: Gorge Funneling & Causeway Overtopping', text: `Soil fully saturated (${sat}%). Channel stage surges to <strong>${stage}m</strong> near danger mark. Water overtops the low causeway slab by +0.3m, severing vehicle crossing.` },
+          { icon: '🌊', title: 'Hydraulic Bottleneck', text: `Narrow 12m canyon gorge constricts flood discharge, generating turbulent backward surge waves.` },
+          { icon: '🚨', title: 'Operational Action', text: `Police barricade causeway. Riparian hut residents ordered to move up to Mid-Slope terraces.` }
+        ],
+        4: [
+          { icon: '🔴', title: 'Phase 4: Critical 45-Min Flash Flood Crest', text: `Torrential deluge (${rain} mm/h) creates a violent flash wave reaching <strong>${stage}m</strong> (+${(stage - danger).toFixed(1)}m over danger mark ${danger}m)!` },
+          { icon: '🏘️', title: 'Riparian Submergence', text: `Jampanna Bathing Ghat platform & Tribal Hamlet East submerged under 1.8m turbulent water. Lowland road completely cut off.` },
+          { icon: '🚀', title: 'Emergency High-Ground Flight', text: `Evacuees moving along lit green ridge corridor to ZPHS Hill Top Shelter.` }
+        ]
+      },
+      'TEL-STN-06': {
+        // Kuntala Falls Gorge & Ravine
+        1: [
+          { icon: '🟢', title: 'Phase 1: Scenic Flow Equilibrium', text: `Kadem stream cascading down 45m vertical cliff at normal stage <strong>${stage}m</strong> (Danger: <strong>${danger}m</strong>). Plunge pool basin calm, tourist pathways open.` },
+          { icon: '🪨', title: 'Basalt Geology', text: `Deccan basalt rock formations stable. Ravine forest acting as natural sponge.` },
+          { icon: '🏥', title: 'Safety Status', text: `Lower viewing deck clear. Exit trail open to parking pavilion.` }
+        ],
+        2: [
+          { icon: '🟡', title: 'Phase 2: Upper Plateau Runoff Surge', text: `Intense downpour (${rain} mm/h) across Neradigonda plateau. Upstream Kadem stream catchment volume doubles within 30 minutes.` },
+          { icon: '💦', title: 'Plunge Pool Turbulence', text: `Waterfall discharge explodes with heavy mist spray. Stage reaches <strong>${stage}m</strong> in the plunge basin.` },
+          { icon: '⚠️', title: 'Tourist Evacuation', text: `Forest guards sound siren to evacuate all tourists from lower plunge pool stairs.` }
+        ],
+        3: [
+          { icon: '🟠', title: 'Phase 3: Plunge Pool Surge & Footbridge Threat', text: `Water level in confined circular plunge pool boils to <strong>${stage}m</strong>, nearing 6.0m danger threshold. Violent spray and whitewater engulf lower viewing deck.` },
+          { icon: '🌉', title: 'Canyon Narrowing', text: `Ravine outlet width (10m) cannot discharge incoming waterfall volume, causing vertical water buildup.` },
+          { icon: '🚨', title: 'Operational Action', text: `Suspension footbridge closed. Ravine tourist enclave evacuated to upper plateau shelter.` }
+        ],
+        4: [
+          { icon: '🔴', title: 'Phase 4: Catastrophic Ravine Flash Deluge', text: `Cloudburst (${rain} mm/h) triggers massive hydraulic jump reaching <strong>${stage}m</strong> (+${(stage - danger).toFixed(1)}m above danger level)!` },
+          { icon: '🌊', title: 'Pathways Swallowed', text: `Plunge pool overflows completely, drowning the suspension footbridge and washing away lower walking trails.` },
+          { icon: '🚀', title: 'High-Ground Refuge', text: `All personnel assembled at Forest Rest House High Ground Camp.` }
+        ]
+      },
+      'TEL-STN-07': {
+        // Kadam Dam Spillway & Reservoir
+        1: [
+          { icon: '🟢', title: 'Phase 1: Normal Conservation Storage', text: `Reservoir forebay stage at <strong>${stage}m</strong> (Full Reservoir Level FRL: <strong>${danger}m</strong>). 3 radial spillway gates closed. Downstream tailrace channel dry.` },
+          { icon: '🏗️', title: 'Dam Structural Integrity', text: `Concrete gravity dam wall stable with zero uplift pressure. Sluice gates delivering regulated irrigation flow.` },
+          { icon: '🏥', title: 'Safety Status', text: `Peddur village and downstream tailrace settlements safe.` }
+        ],
+        2: [
+          { icon: '🟡', title: 'Phase 2: Heavy Inflow Surcharge', text: `Catchment rainfall (${rain} mm/h) pushes reservoir inflow to 45,000 cusecs. Forebay level climbs steadily to <strong>${stage}m</strong>.` },
+          { icon: '⚙️', title: 'Hydraulic Gate Management', text: `Irrigation engineers open sluice gates 30% to moderate forebay rate of rise.` },
+          { icon: '⚠️', title: 'Downstream Alert', text: `First flood warning broadcast to Peddur & downstream Kadam riverside villages.` }
+        ],
+        3: [
+          { icon: '🟠', title: 'Phase 3: Radial Spillway Emergency Hoisting', text: `Inflow spikes to 1.2 lakh cusecs; forebay reaches <strong>${stage}m</strong> near FRL ${danger}m. All 3 radial spillway gates hoisted, discharging massive roaring white torrent into tailrace.` },
+          { icon: '🌊', title: 'Tailrace Plunge Surge', text: `Downstream riverbed rapidly fills with high-velocity discharge (8.2 m/s), scouring banks and threatening low-lying farmland.` },
+          { icon: '🚨', title: 'Operational Action', text: `Downstream causeway closed. Spillway Tailrace Colony evacuated.` }
+        ],
+        4: [
+          { icon: '🔴', title: 'Phase 4: Unprecedented Dam Crest Surcharge', text: `Massive cloudburst inflow (3.5 lakh cusecs) overwhelms gate capacity; water overtops dam spillway crest at <strong>${stage}m</strong> (+${(stage - danger).toFixed(1)}m above FRL)!` },
+          { icon: '🏘️', title: 'Downstream Lowland Inundation', text: `Spillway Tailrace Colony & Peddur lowlands inundated under 2.2m raging floodwater; approach road bridge submerged.` },
+          { icon: '🚀', title: 'Emergency Flood Relief', text: `Population shifted to Kadam Irrigation Project High-Ground Camp.` }
+        ]
+      },
+      'TEL-STN-08': {
+        // Prakash Nagar Munneru River Urban
+        1: [
+          { icon: '🟢', title: 'Phase 1: Normal Urban River Flow', text: `Munneru river stage at <strong>${stage}m</strong> (Danger Mark: <strong>${danger}m</strong>). Concrete floodwalls offer 6.2m freeboard. Khammam city traffic moving smoothly.` },
+          { icon: '🏙️', title: 'Drainage Status', text: `City stormwater gravity outfalls discharging freely. No backwater accumulation.` },
+          { icon: '🏥', title: 'Safety Status', text: `Prakash Nagar embankment huts and town market dry and secure.` }
+        ],
+        2: [
+          { icon: '🟡', title: 'Phase 2: Impervious Urban Storm Runoff', text: `High rainfall (${rain} mm/h) over 72% impervious concrete urban catchment creates instantaneous storm drainage surge into Munneru. Stage rises to <strong>${stage}m</strong>.` },
+          { icon: '📈', title: 'Hydrograph Steepness', text: `Runoff coefficient 0.85 generates rapid hydrograph peak within 50 minutes.` },
+          { icon: '⚠️', title: 'Urban Flood Warning', text: `Municipal Corporation alerts Prakash Nagar and low-lying Munneru riverbank huts.` }
+        ],
+        3: [
+          { icon: '🟠', title: 'Phase 3: Floodwall Buffer Breach & Surcharge', text: `Upstream flash runoff pushes river stage to <strong>${stage}m</strong> near 9.2m danger level. Floodwall freeboard reduced to 0.4m; storm drains back-flood low streets.` },
+          { icon: '🌉', title: 'Bridge Scour Threat', text: `Water level reaches multi-span highway bridge pier caps. Debris accumulation at bridge girders.` },
+          { icon: '🚨', title: 'Operational Action', text: `Prakash Nagar Embankment Huts evacuation initiated. Municipal pumps activated.` }
+        ],
+        4: [
+          { icon: '🔴', title: 'Phase 4: Critical Urban Floodwall Overtopping', text: `Cloudburst deluge surges Munneru to <strong>${stage}m</strong> (+${(stage - danger).toFixed(1)}m above danger mark ${danger}m)!` },
+          { icon: '🏘️', title: 'Massive Settlement Inundation', text: `Floodwater overtops concrete floodwalls, submerging Prakash Nagar huts & Lowland Colony under 1.8m water; main bridge closed.` },
+          { icon: '🚀', title: 'Emergency Transit Shelter', text: `Residents relocated to Khammam ZP High School & Municipal Stadium Pavilion.` }
+        ]
+      },
+      'TEL-STN-10': {
+        // Musi River Basin / Puranapool Bridge Urban Canal
+        1: [
+          { icon: '🟢', title: 'Phase 1: Regulated Canal Baseflow', text: `Musi canal stage flowing at base <strong>${stage}m</strong> (Danger Mark: <strong>${danger}m</strong>). Historic Puranapool stone arches clear. Embankment roads dry.` },
+          { icon: '🏢', title: 'Dense Urban Setting', text: `Canal retaining walls contain baseflow through Hyderabad old city corridor.` },
+          { icon: '🏥', title: 'Safety Status', text: `Puranapool & Chaderghat tenements safe. Arterial bridge traffic normal.` }
+        ],
+        2: [
+          { icon: '🟡', title: 'Phase 2: 88% Concrete Flash Runoff', text: `Heavy storm (${rain} mm/h) over Greater Hyderabad. 88% impervious surface creates immediate 92% runoff into Musi canal; stage rises to <strong>${stage}m</strong>.` },
+          { icon: '⚡', title: 'Urban Flash Hydrograph', text: `City nullahs (storm conduits) surcharge rapidly, feeding torrents into Musi.` },
+          { icon: '⚠️', title: 'GHMC Flood Advisory', text: `GHMC issues orange alert for Puranapool, Chaderghat, and Moosarambagh lowlands.` }
+        ],
+        3: [
+          { icon: '🟠', title: 'Phase 3: Stone Arch Keystones Submergence', text: `Canal stage surges to <strong>${stage}m</strong>, nearing 5.8m danger mark. Water level reaches arch keystones of historic Puranapool bridge; drainage outfalls back-flood.` },
+          { icon: '🌊', title: 'Backwater Choking', text: `Constricted canal sections cause water to back up into low-lying colony alleys.` },
+          { icon: '🚨', title: 'Operational Action', text: `Puranapool bridge closed to vehicular traffic. SDRF teams staged with inflatable rescue boats.` }
+        ],
+        4: [
+          { icon: '🔴', title: 'Phase 4: Catastrophic Canal Bank Overtopping', text: `Extreme deluge (${rain} mm/h) forces Musi stage to <strong>${stage}m</strong> (+${(stage - danger).toFixed(1)}m above danger level ${danger}m)!` },
+          { icon: '🏘️', title: 'High-Density Urban Inundation', text: `Musi overtops concrete retaining walls, inundating 12+ Puranapool & Chaderghat tenement clusters under 1.6m water; bridge impassable.` },
+          { icon: '🚀', title: 'Immediate Evacuation', text: `Civilians shifted to Bahadurpura Relief Transit Complex & High-Level Community Halls.` }
+        ]
+      }
+    };
+
+    // Generic fallback for other stations (Charla, Eturnagaram, Northeast landslides, etc.)
+    const defaultCausality = [
+      { icon: p === 1 ? '🟢' : (p === 2 ? '🟡' : (p === 3 ? '🟠' : '🔴')), title: `Phase ${p} Dynamic Simulation`, text: `Rainfall (<strong>${rain} mm/h</strong>) vs Soil Saturation (<strong>${sat}%</strong>). Water Stage: <strong>${stage}m</strong> (Danger: <strong>${danger}m</strong>).` },
+      { icon: '🔬', title: 'Live Geotechnical & Hydraulic Mechanics', text: data.factorOfSafety ? `Slope Stability Factor of Safety: FoS <strong>${data.factorOfSafety}</strong> (Pore Pressure: <strong>${data.porePressure} kPa</strong>).` : `Flow accumulation and terrain slope govern local overland runoff and river stage response.` },
+      { icon: '🏥', title: 'Evacuation Decision Status', text: p >= 4 ? `Immediate mandatory evacuation to nearest high-ground safety shelter active.` : (p >= 3 ? `Pre-emptive warning issued; low-lying routes monitored.` : `All infrastructure and evacuation routes normal.`) }
+    ];
+
+    const stnNarrative = causalityMap[stationId] ? (causalityMap[stationId][p] || causalityMap[stationId][2]) : defaultCausality;
+
+    listEl.innerHTML = stnNarrative.map(item => `
+      <div class="t3d-causality-item">
+        <span class="icon">${item.icon}</span>
+        <div>
+          <strong style="color:#f8fafc; font-size:11.5px; display:block; margin-bottom:2px;">${item.title}</strong>
+          <div style="font-size:11px; color:#cbd5e1; line-height:1.45;">${item.text}</div>
+        </div>
+      </div>
+    `).join('');
   }
 
   updateAreaUIHeader(prof) {
@@ -559,10 +766,7 @@ class Terrain3DComponent {
   updateWithStationTelemetry(stn) {
     if (!stn) return;
     const stnId = stn.id;
-    this.config.stationId = stnId;
-
-    const dropdown = document.getElementById(`${this.mountId}-area-dropdown`);
-    if (dropdown) dropdown.value = stnId;
+    this.selectStation(stnId);
 
     const tel = stn.telemetry || {};
     const rain = tel.Rainfall_Intensity || tel.Rainfall_1h || 35;
@@ -576,7 +780,6 @@ class Terrain3DComponent {
     this.config.slopeAngle = slope;
 
     if (this.visualizer) {
-      this.visualizer.setStation(stnId);
       this.visualizer.setTelemetry({
         rainfall: rain,
         saturation: sat,

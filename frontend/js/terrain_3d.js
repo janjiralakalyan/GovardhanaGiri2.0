@@ -886,71 +886,237 @@ class Terrain3DVisualizer {
   buildBridgeInfrastructure(profile) {
     const bridgeY = profile.bridgeElev !== undefined ? profile.bridgeElev : 0.2;
     const bridgeZ = -8.0;
+    const morph = profile.morphType || 'canyon_gorge';
 
-    const deckGeom = new THREE.BoxGeometry(26, 0.8, 3.5);
-    const deckMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.7 });
-    this.bridgeDeck = new THREE.Mesh(deckGeom, deckMat);
-    this.bridgeDeck.position.set(0, bridgeY, bridgeZ);
-    this.bridgeDeck.castShadow = true;
-    this.bridgeGroup.add(this.bridgeDeck);
+    if (morph === 'urban_canal') {
+      // Musi River / Puranapool - Historic Stone Multi-Arch Bridge
+      const bridgeLen = 30;
+      const deckGeom = new THREE.BoxGeometry(bridgeLen, 0.9, 4.0);
+      const stoneMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.9 });
+      this.bridgeDeck = new THREE.Mesh(deckGeom, stoneMat);
+      this.bridgeDeck.position.set(0, bridgeY, bridgeZ);
+      this.bridgeDeck.castShadow = true;
+      this.bridgeGroup.add(this.bridgeDeck);
 
-    // Pillars
-    [-8, 8].forEach(px => {
-      const pillar = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.9, 0.9, 6.0, 16),
-        new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 })
-      );
-      pillar.position.set(px, bridgeY - 3.0, bridgeZ);
-      this.bridgeGroup.add(pillar);
-    });
+      // Stone Arch Openings
+      [-8, 0, 8].forEach(archX => {
+        const archGeom = new THREE.CylinderGeometry(2.2, 2.2, 4.2, 16, 1, false, 0, Math.PI);
+        archGeom.rotateZ(Math.PI / 2);
+        archGeom.rotateY(Math.PI / 2);
+        const archMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.95 });
+        const arch = new THREE.Mesh(archGeom, archMat);
+        arch.position.set(archX, bridgeY - 1.2, bridgeZ);
+        this.bridgeGroup.add(arch);
 
-    // Warning beacon
+        // Stone Piers
+        const pierGeom = new THREE.BoxGeometry(1.6, 4.5, 4.2);
+        const pier = new THREE.Mesh(pierGeom, stoneMat);
+        pier.position.set(archX + 4.0, bridgeY - 2.2, bridgeZ);
+        this.bridgeGroup.add(pier);
+      });
+
+      // Balustrades
+      const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+      [-1.9, 1.9].forEach(rz => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(bridgeLen, 0.4, 0.2), railMat);
+        rail.position.set(0, bridgeY + 0.65, bridgeZ + rz);
+        this.bridgeGroup.add(rail);
+      });
+
+    } else if (morph === 'urban_river') {
+      // Prakash Nagar Munneru - Modern Multi-Span Concrete Highway Bridge + Floodwalls
+      const bridgeLen = 32;
+      const deckGeom = new THREE.BoxGeometry(bridgeLen, 0.75, 4.5);
+      const concreteMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+      this.bridgeDeck = new THREE.Mesh(deckGeom, concreteMat);
+      this.bridgeDeck.position.set(0, bridgeY, bridgeZ);
+      this.bridgeDeck.castShadow = true;
+      this.bridgeGroup.add(this.bridgeDeck);
+
+      // 4 Concrete Pier Columns
+      [-10, -3.3, 3.3, 10].forEach(px => {
+        const pier = new THREE.Mesh(
+          new THREE.BoxGeometry(1.4, 6.0, 4.5),
+          new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 })
+        );
+        pillar_pos: pier.position.set(px, bridgeY - 3.0, bridgeZ);
+        this.bridgeGroup.add(pier);
+      });
+
+      // Concrete Floodwalls along river banks
+      [-12, 12].forEach(fx => {
+        const wallGeom = new THREE.BoxGeometry(0.8, 3.2, 45);
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.75 });
+        const wall = new THREE.Mesh(wallGeom, wallMat);
+        wall.position.set(fx, 1.2, 0);
+        wall.castShadow = true;
+        this.bridgeGroup.add(wall);
+      });
+
+    } else if (morph === 'waterfall_ravine') {
+      // Kuntala Falls - Suspension Footbridge across gorge outlet
+      const span = 20;
+      const deckGeom = new THREE.BoxGeometry(span, 0.35, 2.0);
+      const woodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.85 });
+      this.bridgeDeck = new THREE.Mesh(deckGeom, woodMat);
+      this.bridgeDeck.position.set(0, bridgeY, 18);
+      this.bridgeDeck.castShadow = true;
+      this.bridgeGroup.add(this.bridgeDeck);
+
+      // Suspension Cable Towers
+      [-8, 8].forEach(tx => {
+        const tower = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.25, 0.35, 6.5, 8),
+          new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.6 })
+        );
+        tower.position.set(tx, bridgeY + 2.5, 18);
+        this.bridgeGroup.add(tower);
+      });
+
+    } else if (morph === 'wide_river') {
+      // Bhadrachalam Godavari - Massive 4-Pier Highway Bridge & Bathing Ghat Steps
+      const bridgeLen = 36;
+      const deckGeom = new THREE.BoxGeometry(bridgeLen, 0.9, 4.2);
+      const deckMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 });
+      this.bridgeDeck = new THREE.Mesh(deckGeom, deckMat);
+      this.bridgeDeck.position.set(0, bridgeY, bridgeZ);
+      this.bridgeDeck.castShadow = true;
+      this.bridgeGroup.add(this.bridgeDeck);
+
+      // 4 Heavy Cylindrical Piers
+      [-12, -4, 4, 12].forEach(px => {
+        const pillar = new THREE.Mesh(
+          new THREE.CylinderGeometry(1.2, 1.2, 8.0, 16),
+          new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 })
+        );
+        pillar.position.set(px, bridgeY - 4.0, bridgeZ);
+        this.bridgeGroup.add(pillar);
+      });
+
+      // Stepped Bathing Ghat Terraces along the riverbank
+      for (let s = 0; s < 5; s++) {
+        const stepGeom = new THREE.BoxGeometry(22, 0.4, 1.2);
+        const stepMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85 });
+        const step = new THREE.Mesh(stepGeom, stepMat);
+        step.position.set(15 + s * 1.0, -1.8 + s * 0.4, 8);
+        this.bridgeGroup.add(step);
+      }
+
+    } else {
+      // Medaram Jampanna Vagu - Low Causeway Slab Bridge with Warning Markers
+      const deckGeom = new THREE.BoxGeometry(24, 0.5, 3.2);
+      const deckMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 });
+      this.bridgeDeck = new THREE.Mesh(deckGeom, deckMat);
+      this.bridgeDeck.position.set(0, bridgeY, bridgeZ);
+      this.bridgeDeck.castShadow = true;
+      this.bridgeGroup.add(this.bridgeDeck);
+
+      // Low Culvert Piers
+      [-8, -2.5, 2.5, 8].forEach(px => {
+        const pillar = new THREE.Mesh(
+          new THREE.BoxGeometry(1.2, 3.0, 3.4),
+          new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 })
+        );
+        pillar.position.set(px, bridgeY - 1.5, bridgeZ);
+        this.bridgeGroup.add(pillar);
+      });
+
+      // Striped Hazard Markers
+      [-10, 10].forEach(mx => {
+        const post = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.18, 0.18, 2.2, 8),
+          new THREE.MeshStandardMaterial({ color: 0xf59e0b })
+        );
+        post.position.set(mx, bridgeY + 1.1, bridgeZ);
+        this.bridgeGroup.add(post);
+      });
+    }
+
+    // Dynamic Flood Warning Beacon on Bridge
     this.bridgeBeacon = new THREE.Mesh(
-      new THREE.SphereGeometry(0.6, 16, 16),
+      new THREE.SphereGeometry(0.65, 16, 16),
       new THREE.MeshBasicMaterial({ color: 0x10b981 })
     );
-    this.bridgeBeacon.position.set(0, bridgeY + 1.2, bridgeZ);
+    this.bridgeBeacon.position.set(0, bridgeY + 1.3, bridgeZ);
     this.bridgeGroup.add(this.bridgeBeacon);
   }
 
   buildDamSpillwayInfrastructure(profile) {
-    // Concrete Dam Wall across the canyon at z = 0
-    const damGeom = new THREE.BoxGeometry(38, 8.0, 4.0);
-    const damMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 });
+    // Concrete Gravity Dam across canyon at z = 0
+    const damGeom = new THREE.BoxGeometry(42, 9.0, 5.0);
+    const damMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.45 });
     const dam = new THREE.Mesh(damGeom, damMat);
-    dam.position.set(0, 0.5, 0);
+    dam.position.set(0, 0.8, 0);
     dam.castShadow = true;
     this.damMeshGroup.add(dam);
 
-    // Radial Spillway Gates (3 gates)
-    [-6, 0, 6].forEach(gx => {
+    // Dam Crest Roadway
+    const crestRoad = new THREE.Mesh(
+      new THREE.BoxGeometry(42, 0.4, 5.2),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 })
+    );
+    crestRoad.position.set(0, 5.3, 0);
+    this.damMeshGroup.add(crestRoad);
+
+    // 3 Radial Spillway Arched Gates
+    [-7, 0, 7].forEach(gx => {
       const gate = new THREE.Mesh(
-        new THREE.BoxGeometry(3.5, 4.5, 4.2),
-        new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.3 })
+        new THREE.BoxGeometry(4.0, 5.2, 5.4),
+        new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.85, roughness: 0.25 })
       );
-      gate.position.set(gx, 0.2, 0);
+      gate.position.set(gx, 0.6, 0);
       this.damMeshGroup.add(gate);
+
+      // Gate Hoist Gantry Towers
+      const tower = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 4.0, 1.2),
+        new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.7 })
+      );
+      tower.position.set(gx, 6.8, 0);
+      this.damMeshGroup.add(tower);
     });
+
+    // Downstream Spillway Chute & Flip Bucket
+    const chuteGeom = new THREE.BoxGeometry(26, 1.2, 16);
+    const chuteMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.7 });
+    const chute = new THREE.Mesh(chuteGeom, chuteMat);
+    chute.position.set(0, -1.8, 8);
+    chute.rotateX(0.18);
+    this.damMeshGroup.add(chute);
   }
 
   buildWaterfallPrecipice(profile) {
+    // 45m Waterfall sheet mesh at z = 0
+    const fallGeom = new THREE.PlaneGeometry(7.5, 12.0, 16, 16);
+    const fallMat = new THREE.MeshStandardMaterial({
+      color: 0xbae6fd,
+      roughness: 0.1,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.82,
+      side: THREE.DoubleSide
+    });
+    const fallMesh = new THREE.Mesh(fallGeom, fallMat);
+    fallMesh.position.set(0, 2.5, 0.5);
+    this.waterfallMeshGroup.add(fallMesh);
+
     // Waterfall water spray particle emitter
-    const sprayCount = 450;
+    const sprayCount = 500;
     const sprayGeom = new THREE.BufferGeometry();
     const sprayPos = new Float32Array(sprayCount * 3);
 
     for (let i = 0; i < sprayCount; i++) {
-      sprayPos[i * 3] = (Math.random() - 0.5) * 8.0;
-      sprayPos[i * 3 + 1] = Math.random() * 8.0 - 2.0;
-      sprayPos[i * 3 + 2] = Math.random() * 6.0 + 4.0;
+      sprayPos[i * 3] = (Math.random() - 0.5) * 9.0;
+      sprayPos[i * 3 + 1] = Math.random() * 9.0 - 3.0;
+      sprayPos[i * 3 + 2] = Math.random() * 8.0 + 3.0;
     }
 
     sprayGeom.setAttribute('position', new THREE.BufferAttribute(sprayPos, 3));
     const sprayMat = new THREE.PointsMaterial({
       color: 0xe0f2fe,
-      size: 0.8,
+      size: 0.85,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending
     });
 
@@ -964,37 +1130,86 @@ class Terrain3DVisualizer {
       { name: 'Riparian Village East', x: 8, z: -18, houses: 4 }
     ];
 
+    const morph = profile.morphType || 'canyon_gorge';
     this.settlementNodes = [];
-    const houseGeom = new THREE.BoxGeometry(2.0, 1.5, 2.0);
-    const roofGeom = new THREE.ConeGeometry(1.6, 1.0, 4);
-    roofGeom.rotateY(Math.PI / 4);
 
     clusters.forEach(cluster => {
       const node = { name: cluster.name, x: cluster.x, z: cluster.z, houses: [] };
+      const houseCount = cluster.houses || 4;
 
-      for (let i = 0; i < (cluster.houses || 4); i++) {
-        const hx = cluster.x + (i % 2) * 2.8 - 1.4 + (Math.random() - 0.5) * 0.8;
-        const hz = cluster.z + Math.floor(i / 2) * 2.8 - 1.4 + (Math.random() - 0.5) * 0.8;
+      for (let i = 0; i < houseCount; i++) {
+        const hx = cluster.x + (i % 3) * 3.2 - 2.8 + (Math.random() - 0.5) * 0.8;
+        const hz = cluster.z + Math.floor(i / 3) * 3.2 - 2.8 + (Math.random() - 0.5) * 0.8;
         const hy = this.getElevationAt(hx, hz, profile);
 
         const houseGroup = new THREE.Group();
-        const baseMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.8 });
-        const roofMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.6 });
 
-        const base = new THREE.Mesh(houseGeom, baseMat);
-        base.position.y = 0.75;
-        base.castShadow = true;
-        houseGroup.add(base);
+        if (morph === 'urban_canal' || morph === 'urban_river') {
+          // Urban Tenements & Multi-Story Buildings
+          const stories = 1 + (i % 3);
+          const bldgHeight = stories * 1.8;
+          const bldgGeom = new THREE.BoxGeometry(2.6, bldgHeight, 2.6);
+          const baseMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+          const roofMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 });
 
-        const roof = new THREE.Mesh(roofGeom, roofMat);
-        roof.position.y = 2.0;
-        roof.castShadow = true;
-        houseGroup.add(roof);
+          const base = new THREE.Mesh(bldgGeom, baseMat);
+          base.position.y = bldgHeight / 2;
+          base.castShadow = true;
+          houseGroup.add(base);
 
-        houseGroup.position.set(hx, hy, hz);
-        this.settlementsGroup.add(houseGroup);
+          const roof = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.3, 2.8), roofMat);
+          roof.position.y = bldgHeight + 0.15;
+          roof.castShadow = true;
+          houseGroup.add(roof);
 
-        node.houses.push({ group: houseGroup, baseMesh: base, roofMesh: roof, elevation: hy });
+          houseGroup.position.set(hx, hy, hz);
+          this.settlementsGroup.add(houseGroup);
+          node.houses.push({ group: houseGroup, baseMesh: base, roofMesh: roof, elevation: hy });
+
+        } else if (morph === 'wide_river' && cluster.name.includes('Temple')) {
+          // Temple Pagoda Tower with Spire Gopuram
+          const baseGeom = new THREE.BoxGeometry(3.6, 2.4, 3.6);
+          const baseMat = new THREE.MeshStandardMaterial({ color: 0xfde047, roughness: 0.5 });
+          const base = new THREE.Mesh(baseGeom, baseMat);
+          base.position.y = 1.2;
+          base.castShadow = true;
+          houseGroup.add(base);
+
+          const towerGeom = new THREE.ConeGeometry(2.0, 3.5, 4);
+          towerGeom.rotateY(Math.PI / 4);
+          const roofMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.7, roughness: 0.3 });
+          const roof = new THREE.Mesh(towerGeom, roofMat);
+          roof.position.y = 4.15;
+          roof.castShadow = true;
+          houseGroup.add(roof);
+
+          houseGroup.position.set(hx, hy, hz);
+          this.settlementsGroup.add(houseGroup);
+          node.houses.push({ group: houseGroup, baseMesh: base, roofMesh: roof, elevation: hy });
+
+        } else {
+          // Pitched Thatch & Tiled Village Huts
+          const houseGeom = new THREE.BoxGeometry(2.2, 1.4, 2.2);
+          const roofGeom = new THREE.ConeGeometry(1.8, 1.2, 4);
+          roofGeom.rotateY(Math.PI / 4);
+
+          const baseMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.85 });
+          const roofMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.6 });
+
+          const base = new THREE.Mesh(houseGeom, baseMat);
+          base.position.y = 0.7;
+          base.castShadow = true;
+          houseGroup.add(base);
+
+          const roof = new THREE.Mesh(roofGeom, roofMat);
+          roof.position.y = 1.95;
+          roof.castShadow = true;
+          houseGroup.add(roof);
+
+          houseGroup.position.set(hx, hy, hz);
+          this.settlementsGroup.add(houseGroup);
+          node.houses.push({ group: houseGroup, baseMesh: base, roofMesh: roof, elevation: hy });
+        }
       }
 
       this.settlementNodes.push(node);
