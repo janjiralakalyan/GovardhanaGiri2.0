@@ -1,8 +1,9 @@
 /**
  * GovardhanaGiri 2.0: Interactive Geospatial GIS Map Engine (Leaflet)
- * Accurately marks all 10 Telangana hotspots across districts:
- * - Adilabad, Kumuram Bheem Asifabad, Nirmal, Mulugu, Bhadradri Kothagudem, Khammam, Nagarkurnool, Hyderabad
- * Features: Watermark-free basemaps, permanent station badges, danger buffer zones, and safe shelters.
+ * Accurately renders Telangana physical geography:
+ * 🌊 Major River Corridors (Godavari, Krishna, Munneru, Kadam, Jampanna Vagu, Musi, Taliperu)
+ * 🏔️ Hill Ranges & Ghat Sections (Kerameri Ghats, Nallamala Range, Papikondalu, Nirmal Escarpment)
+ * 📍 Pinpoint Monitoring Hotspots with permanent name badges & danger buffer zones.
  */
 
 class FloodMapEngine {
@@ -14,13 +15,17 @@ class FloodMapEngine {
     this.stations = [];
     this.bufferGroup = null;
     this.shelterLayerGroup = null;
+    this.riversLayerGroup = null;
+    this.ghatsLayerGroup = null;
     this.activeFilter = 'ALL';
     this.baseLayers = {};
     this.currentBaseLayerKey = 'dark';
     this.showShelters = false;
+    this.showRivers = true;
+    this.showGhats = true;
   }
 
-  init() {
+  async init() {
     // 1. Watermark-Free Base Tile Layers
     this.baseLayers = {
       'dark': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -42,7 +47,7 @@ class FloodMapEngine {
       })
     };
 
-    // 2. Initialize Leaflet Map centered on Telangana state geographic centroid (17.8° N, 79.5° E)
+    // 2. Center Leaflet Map on Telangana (17.9° N, 79.5° E)
     this.map = L.map(this.containerId, {
       zoomControl: true,
       attributionControl: true
@@ -51,9 +56,105 @@ class FloodMapEngine {
     // Default: Dark Mode
     this.baseLayers['dark'].addTo(this.map);
 
-    // Groups for Shelters & Inundation Danger Buffers
+    // Feature Layer Groups
+    this.ghatsLayerGroup = L.layerGroup().addTo(this.map);
+    this.riversLayerGroup = L.layerGroup().addTo(this.map);
     this.bufferGroup = L.layerGroup().addTo(this.map);
     this.shelterLayerGroup = L.layerGroup().addTo(this.map);
+
+    // 3. Load Rivers and Ghat Geography Vectors
+    await this.loadGeographyFeatures();
+  }
+
+  async loadGeographyFeatures() {
+    try {
+      const res = await fetch('/api/geography');
+      if (!res.ok) return;
+      const data = await res.json();
+      this.renderGeographyFeatures(data);
+    } catch (e) {
+      console.warn("Failed to load geography vectors:", e);
+    }
+  }
+
+  renderGeographyFeatures(geoJson) {
+    if (!geoJson || !geoJson.features) return;
+    this.riversLayerGroup.clearLayers();
+    this.ghatsLayerGroup.clearLayers();
+
+    geoJson.features.forEach(feat => {
+      const props = feat.properties;
+
+      if (props.category === 'River') {
+        // Render River as animated water corridor polyline
+        const latLngs = feat.geometry.coordinates.map(pt => [pt[1], pt[0]]);
+        
+        // Outer glowing water halo
+        const haloLine = L.polyline(latLngs, {
+          color: '#00f2fe',
+          weight: props.weight ? props.weight + 4 : 8,
+          opacity: 0.25,
+          lineCap: 'round',
+          lineJoin: 'round'
+        });
+        
+        // Core river streamline
+        const riverLine = L.polyline(latLngs, {
+          color: props.color || '#38bdf8',
+          weight: props.weight || 3.5,
+          opacity: 0.9,
+          dashArray: props.name.includes('Corridor') ? null : '6, 4'
+        });
+
+        riverLine.bindTooltip(`🌊 ${props.name}`, {
+          sticky: true,
+          className: 'river-tooltip'
+        });
+
+        this.riversLayerGroup.addLayer(haloLine);
+        this.riversLayerGroup.addLayer(riverLine);
+
+      } else if (props.category === 'Ghat') {
+        // Render Ghat / Mountain Range as shaded terrain polygon
+        const latLngs = feat.geometry.coordinates[0].map(pt => [pt[1], pt[0]]);
+        
+        const ghatPolygon = L.polygon(latLngs, {
+          color: '#10b981',
+          weight: 1.8,
+          opacity: 0.7,
+          fillColor: '#059669',
+          fillOpacity: 0.12,
+          dashArray: '5, 5'
+        });
+
+        ghatPolygon.bindTooltip(`🏔️ ${props.name} (${props.elevation_m})`, {
+          sticky: true,
+          className: 'ghat-tooltip'
+        });
+
+        this.ghatsLayerGroup.addLayer(ghatPolygon);
+      }
+    });
+  }
+
+  toggleRivers(force) {
+    this.showRivers = force !== undefined ? force : !this.showRivers;
+    if (this.showRivers) {
+      this.map.addLayer(this.riversLayerGroup);
+    } else {
+      this.map.removeLayer(this.riversLayerGroup);
+    }
+    return this.showRivers;
+  }
+
+  toggleGhats(force) {
+    this.showGhats = force !== undefined ? force : !this.showGhats;
+    if (this.showGhats) {
+      this.map.addLayer(this.ghatsLayerGroup);
+    } else {
+      this.map.removeLayer(this.ghatsLayerGroup);
+    }
+    return this.showGhats;
   }
 
   switchBaseLayer(layerKey) {
@@ -74,8 +175,11 @@ class FloodMapEngine {
     const col = colorMap[riskLevel] || '#38bdf8';
     const isCritical = riskLevel === 'Critical';
 
-    // Short display name for map badge
-    const shortName = stn.village_area.split('/')[0].split('(')[0].trim();
+    // Short display label
+    let shortName = stn.village_area.split('/')[0].split('(')[0].trim();
+    if (shortName.length > 18) {
+      shortName = shortName.split(' ')[0] + ' ' + (shortName.split(' ')[1] || '');
+    }
 
     return `
       <div class="custom-geo-marker ${isSelected ? 'marker-selected' : ''}" style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:pointer;">
@@ -144,7 +248,7 @@ class FloodMapEngine {
             <span style="font-size:11px; font-weight:600;">Status:</span>
             <span style="font-size:11px; font-weight:700; padding:3px 8px; border-radius:4px; background:${bufferColor}; color:#fff;">${risk}</span>
           </div>
-          <div style="font-size:11.5px; color:#e2e8f0;">🌊 River: <strong>${stn.river_name}</strong></div>
+          <div style="font-size:11.5px; color:#e2e8f0;">🌊 River/Torrent: <strong>${stn.river_name}</strong></div>
           <div style="font-size:11.5px; margin-top:3px; color:#38bdf8;">Stage: <strong>${stn.telemetry.Water_Level} m</strong> / Danger: <strong>${stn.danger_water_level} m</strong></div>
           <div style="font-size:10px; color:#64748b; margin-top:5px;">Coordinates: ${stn.lat.toFixed(4)}°N, ${stn.lon.toFixed(4)}°E | Elev: ${stn.elevation}m</div>
         </div>
@@ -196,14 +300,6 @@ class FloodMapEngine {
       `);
       this.shelterLayerGroup.addLayer(sMarker);
     });
-  }
-
-  toggleShelters(force) {
-    this.showShelters = force !== undefined ? force : !this.showShelters;
-    const curr = this.stations.find(s => s.id === this.selectedStationId);
-    if (curr) {
-      this.renderShelters(curr.shelters, curr.lat, curr.lon);
-    }
   }
 
   fitAllStations() {

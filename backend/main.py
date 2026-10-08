@@ -66,6 +66,16 @@ def health_check():
         "ai_engine": "XGBoost Hazard Models Active"
     }
 
+@app.get("/api/geography")
+def get_geography_layers():
+    """Returns geospatial features for Telangana rivers, streams, and ghat ranges."""
+    geo_path = os.path.join(BASE_DIR, "data", "telangana_geography_layers.json")
+    if os.path.exists(geo_path):
+        import json
+        with open(geo_path, "r") as f:
+            return json.load(f)
+    return {"type": "FeatureCollection", "features": []}
+
 @app.get("/api/stations")
 def list_stations():
     """Returns all 10 Telangana stations enriched with live AI hazard predictions."""
@@ -187,15 +197,31 @@ def dispatch_alert(req: AlertDispatch):
 def model_info():
     return ai_bridge.metadata
 
+from backend.nelens_router import router as nelens_router
+
+app.include_router(nelens_router)
+
 # Mount frontend directory for static assets if exists
 if os.path.exists(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
     @app.get("/")
     def serve_frontend_index():
+        nelens_path = os.path.join(FRONTEND_DIR, "nelens.html")
+        if os.path.exists(nelens_path):
+            return FileResponse(nelens_path)
         return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+
+    @app.get("/floods")
+    def serve_flood_index():
+        return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+
+    @app.get("/nelens")
+    def serve_nelens_explicit():
+        return FileResponse(os.path.join(FRONTEND_DIR, "nelens.html"))
 
 if __name__ == "__main__":
     import uvicorn
     print("[GovardhanaGiri 2.0] Starting server at http://127.0.0.1:8000 ...")
     uvicorn.run("backend.main:app", host="127.0.0.1", port=8000, reload=True)
+
