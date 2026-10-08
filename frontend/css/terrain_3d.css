@@ -1,84 +1,100 @@
 /* ==========================================================================
    GOVARDHANA GIRI 2.0 & NE-LENS: ADVANCED 3D DECISION SUPPORT SYSTEM (DSS) CSS
+   Clean, Professional, Non-Overlapping Precision HUD Layout
    ========================================================================== */
 
 .terrain-3d-wrapper {
   position: relative;
   width: 100%;
-  height: 580px;
+  height: 600px;
   background: radial-gradient(circle at center, #0a1128 0%, #020617 100%);
   border-radius: 14px;
   overflow: hidden;
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  border: 1px solid rgba(56, 189, 248, 0.35);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), inset 0 0 25px rgba(56, 189, 248, 0.08);
   font-family: 'Inter', sans-serif;
   user-select: none;
+  box-sizing: border-box;
 }
 
 .terrain-3d-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   cursor: grab;
+  z-index: 1;
 }
 
 .terrain-3d-canvas-container:active {
   cursor: grabbing;
 }
 
-/* Floating Top Operations HUD */
-.terrain-3d-hud-top {
+/* -------------------------------------------------------------
+   1. UNIFIED TOP OPERATIONS HUD CONTAINER (Non-Colliding 2-Row Stack)
+   ------------------------------------------------------------- */
+.t3d-top-hud {
   position: absolute;
-  top: 12px;
-  left: 14px;
-  right: 14px;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Row 1: Title, Dropdown, and Tools */
+.t3d-hud-row-main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  pointer-events: none;
-  z-index: 20;
   gap: 10px;
 }
 
-.terrain-3d-title-badge {
+.t3d-title-block {
   pointer-events: auto;
-  background: rgba(10, 15, 30, 0.92);
+  background: rgba(10, 15, 30, 0.94);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  border-radius: 10px;
-  padding: 8px 14px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 8px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
-.terrain-3d-title-badge h4 {
+.t3d-title-block h4 {
   margin: 0;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 800;
   color: #f8fafc;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
-.terrain-3d-title-badge span.mode-pill {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 20px;
+.t3d-title-block span.mode-pill {
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #0284c7, #0369a1);
   color: #ffffff;
   border: 1px solid #38bdf8;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
-/* Dynamic Area Selector Dropdown in HUD */
+/* Area Selector Dropdown in Row 1 */
 .t3d-area-select-wrap {
   pointer-events: auto;
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(15, 23, 42, 0.94);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(56, 189, 248, 0.4);
   border-radius: 8px;
@@ -96,44 +112,44 @@
   background: #0f172a;
   border: 1px solid #334155;
   color: #f8fafc;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: 5px;
   outline: none;
   cursor: pointer;
-  max-width: 220px;
+  max-width: 240px;
 }
 
 .t3d-area-select:focus {
   border-color: #38bdf8;
 }
 
+/* Controls Strip in Row 1 */
 .terrain-3d-controls-strip {
   pointer-events: auto;
   display: flex;
-  gap: 5px;
-  background: rgba(10, 15, 30, 0.92);
+  gap: 4px;
+  background: rgba(10, 15, 30, 0.94);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   padding: 4px 6px;
-  flex-wrap: wrap;
 }
 
 .t3d-btn {
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #cbd5e1;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 5px 9px;
-  border-radius: 6px;
+  padding: 4px 8px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   white-space: nowrap;
 }
 
@@ -141,52 +157,52 @@
   background: #0284c7;
   color: #ffffff;
   border-color: #38bdf8;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
 }
 
 .t3d-btn.active {
   background: linear-gradient(135deg, #0284c7, #0369a1);
   color: #ffffff;
   border-color: #38bdf8;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
 }
 
-/* 6 Flood Hotspots 1-Click Fast Selector Bar */
-.t3d-fast-hotspots-bar {
-  position: absolute;
-  top: 56px;
-  left: 14px;
-  right: 270px;
-  background: rgba(10, 15, 30, 0.92);
+/* Row 2: 6 Flood Hotspots + 4 Risk Phases */
+.t3d-hud-row-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.t3d-sub-group {
+  pointer-events: auto;
+  background: rgba(10, 15, 30, 0.94);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(56, 189, 248, 0.3);
   border-radius: 8px;
-  padding: 5px 10px;
+  padding: 4px 8px;
   display: flex;
   align-items: center;
   gap: 8px;
-  z-index: 18;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
-.t3d-fast-hotspots-label {
-  font-size: 10px;
+.t3d-sub-label {
+  font-size: 9.5px;
   font-weight: 800;
   color: #f59e0b;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   white-space: nowrap;
 }
 
-.t3d-fast-hotspot-btns {
+.t3d-fast-btns-wrap {
   display: flex;
-  gap: 5px;
-  flex: 1;
+  gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
 }
 
-.t3d-fast-hotspot-btns::-webkit-scrollbar {
+.t3d-fast-btns-wrap::-webkit-scrollbar {
   display: none;
 }
 
@@ -194,10 +210,10 @@
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #e2e8f0;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 5px;
+  padding: 3px 7px;
+  border-radius: 4px;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
@@ -207,59 +223,26 @@
   background: #0284c7;
   color: #ffffff;
   border-color: #38bdf8;
-  transform: translateY(-1px);
 }
 
 .t3d-fast-btn.active {
   background: linear-gradient(135deg, #0284c7, #0369a1);
   color: #ffffff;
   border-color: #38bdf8;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
 }
 
-/* 4-Stage "How It Becomes Risky" Evolution Stepper Banner */
-.t3d-risk-stepper-bar {
-  position: absolute;
-  top: 96px;
-  left: 14px;
-  right: 270px;
-  background: rgba(10, 15, 30, 0.94);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  border-radius: 10px;
-  padding: 6px 12px;
+/* 4-Phase Stepper Nodes */
+.t3d-phase-stepper-wrap {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  z-index: 18;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-}
-
-.t3d-stepper-title {
-  font-size: 10.5px;
-  font-weight: 800;
-  color: #38bdf8;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.t3d-step-nodes {
-  display: flex;
-  gap: 6px;
-  flex: 1;
-  max-width: 600px;
+  gap: 4px;
 }
 
 .t3d-step-node {
-  flex: 1;
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(30, 41, 59, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  padding: 4px 6px;
+  border-radius: 5px;
+  padding: 3px 6px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -275,28 +258,20 @@
 
 .t3d-step-node.active-step {
   border-color: #f59e0b;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(220, 38, 38, 0.25));
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(220, 38, 38, 0.3));
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
 }
 
 .t3d-step-node.active-step.critical-phase {
   border-color: #ef4444;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(127, 29, 29, 0.5));
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
-  animation: pulse-border 1.5s infinite;
-}
-
-@keyframes pulse-border {
-  0% { box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
-  50% { box-shadow: 0 0 18px rgba(239, 68, 68, 0.8); }
-  100% { box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.45), rgba(127, 29, 29, 0.6));
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
 }
 
 .t3d-step-num {
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 800;
   color: #94a3b8;
-  letter-spacing: 0.3px;
 }
 
 .t3d-step-node.active-step .t3d-step-num {
@@ -304,38 +279,73 @@
 }
 
 .t3d-step-name {
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 700;
   color: #e2e8f0;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-/* Infrastructure Badges HUD (Below Stepper) */
-.terrain-3d-infra-hud {
+/* -------------------------------------------------------------
+   2. LEFT FLOATING CARD: WHY THIS AREA BECOMES RISKY & BADGES
+   ------------------------------------------------------------- */
+.t3d-left-card {
   position: absolute;
-  top: 138px;
-  left: 14px;
-  display: flex;
-  gap: 8px;
-  pointer-events: auto;
+  bottom: 12px;
+  left: 12px;
+  width: 330px;
+  max-height: 250px;
+  background: rgba(10, 15, 30, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 10px;
+  padding: 10px 12px;
   z-index: 15;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+  color: #f8fafc;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.t3d-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #38bdf8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+
+.t3d-live-tag {
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 1px 5px;
+  background: rgba(2, 132, 199, 0.4);
+  color: #38bdf8;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.t3d-infra-badges-row {
+  display: flex;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
 .t3d-infra-badge {
-  background: rgba(10, 15, 30, 0.92);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
-  padding: 4px 9px;
-  font-size: 10.5px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 9.5px;
   color: #cbd5e1;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  gap: 4px;
 }
 
 .t3d-infra-badge strong {
@@ -356,166 +366,106 @@
   border-color: rgba(56, 189, 248, 0.3);
 }
 
-/* Dynamic Causality & Physics Breakdown Overlay (Bottom Left) */
-.t3d-causality-box {
-  position: absolute;
-  bottom: 64px;
-  left: 14px;
-  width: 360px;
-  max-height: 240px;
-  overflow-y: auto;
-  background: rgba(10, 15, 30, 0.94);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  border-radius: 10px;
-  padding: 10px 14px;
-  z-index: 15;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.65);
-  color: #f8fafc;
-  pointer-events: auto;
-  transition: all 0.3s ease;
-}
-
-.t3d-causality-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11px;
-  font-weight: 800;
-  color: #38bdf8;
-  margin-bottom: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 4px;
-}
-
 .t3d-causality-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 10.5px;
-  color: #cbd5e1;
+  gap: 6px;
+  overflow-y: auto;
+  max-height: 165px;
+  padding-right: 4px;
+  scrollbar-width: thin;
 }
 
 .t3d-causality-item {
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  line-height: 1.35;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 5px 8px;
 }
 
 .t3d-causality-item span.icon {
-  font-size: 12px;
+  font-size: 13px;
+  margin-top: 1px;
 }
 
 .t3d-causality-item strong {
   color: #f59e0b;
 }
 
-/* Interactive Spatial Probe Floating Tooltip */
-.t3d-probe-tooltip {
-  position: absolute;
-  top: 118px;
-  left: calc(50% - 135px);
-  width: 270px;
-  background: rgba(10, 15, 30, 0.96);
-  backdrop-filter: blur(16px);
-  border: 1px solid #38bdf8;
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: #f8fafc;
-  z-index: 25;
-  pointer-events: none;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.25);
-}
-
-.t3d-probe-title {
-  font-size: 10.5px;
-  font-weight: 800;
-  color: #38bdf8;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  padding-bottom: 4px;
-}
-
-.t3d-probe-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  margin-bottom: 3px;
-  color: #94a3b8;
-}
-
-.t3d-probe-row strong {
-  font-family: 'JetBrains Mono', monospace;
-  color: #f8fafc;
-}
-
-/* 12-Hour Hydrodynamic Forecast Timeline Scrubber Bar */
+/* -------------------------------------------------------------
+   3. BOTTOM CENTER TIMELINE BAR (Scrubber & Speeds)
+   ------------------------------------------------------------- */
 .terrain-3d-timeline-bar {
   position: absolute;
   bottom: 12px;
-  left: 14px;
-  right: 270px;
+  left: 350px;
+  right: 260px;
+  height: 48px;
   background: rgba(10, 15, 30, 0.94);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(56, 189, 248, 0.35);
-  border-radius: 10px;
-  padding: 8px 14px;
+  border-radius: 8px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
   gap: 12px;
   z-index: 15;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+  color: #f8fafc;
+  pointer-events: auto;
+  box-sizing: border-box;
 }
 
 .t3d-timeline-controls {
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .t3d-play-btn {
-  background: #0284c7;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
   border: 1px solid #38bdf8;
   color: #ffffff;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 6px;
+  padding: 4px 10px;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .t3d-play-btn:hover {
-  background: #0369a1;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+  background: #0284c7;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
 }
 
 .t3d-play-btn.active {
-  background: #ef4444;
-  border-color: #f87171;
+  background: #dc2626;
+  border-color: #ef4444;
 }
 
 .t3d-timeline-label {
-  font-size: 11px;
-  font-weight: 800;
   font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
   color: #38bdf8;
-  min-width: 85px;
 }
 
 .t3d-timeline-track-wrap {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .t3d-timeline-range {
   width: 100%;
-  height: 6px;
-  border-radius: 3px;
+  height: 4px;
+  border-radius: 2px;
   background: #1e293b;
   outline: none;
   -webkit-appearance: none;
@@ -526,36 +476,36 @@
 .t3d-timeline-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: #38bdf8;
   cursor: pointer;
-  box-shadow: 0 0 10px #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
   border: 2px solid #ffffff;
 }
 
 .t3d-timeline-ticks {
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 8.5px;
   color: #64748b;
-  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .t3d-speed-btns {
   display: flex;
-  gap: 4px;
+  gap: 2px;
 }
 
 .t3d-spd-btn {
   background: rgba(30, 41, 59, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #94a3b8;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
-  padding: 4px 6px;
-  border-radius: 4px;
+  padding: 3px 5px;
+  border-radius: 3px;
   cursor: pointer;
 }
 
@@ -565,50 +515,53 @@
   border-color: #38bdf8;
 }
 
-/* Interactive Right Sidebar Controls */
+/* -------------------------------------------------------------
+   4. RIGHT FLOATING PANEL: STRESS SIMULATOR
+   ------------------------------------------------------------- */
 .terrain-3d-sidebar {
   position: absolute;
-  top: 62px;
-  right: 14px;
+  top: 96px;
+  right: 12px;
   bottom: 12px;
-  width: 245px;
+  width: 235px;
   background: rgba(10, 15, 30, 0.95);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(56, 189, 248, 0.3);
   border-radius: 10px;
-  padding: 12px;
+  padding: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
   z-index: 15;
   color: #f8fafc;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  box-sizing: border-box;
 }
 
 .terrain-3d-sidebar h5 {
   margin: 0;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   color: #38bdf8;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 6px;
+  padding-bottom: 4px;
 }
 
 .t3d-slider-row {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .t3d-slider-header {
   display: flex;
   justify-content: space-between;
-  font-size: 10.5px;
-  margin-bottom: 3px;
+  font-size: 10px;
+  margin-bottom: 2px;
   color: #cbd5e1;
 }
 
@@ -620,8 +573,8 @@
 
 .t3d-range-input {
   width: 100%;
-  height: 5px;
-  border-radius: 3px;
+  height: 4px;
+  border-radius: 2px;
   background: #1e293b;
   outline: none;
   -webkit-appearance: none;
@@ -632,49 +585,87 @@
 .t3d-range-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #38bdf8;
   cursor: pointer;
-  box-shadow: 0 0 8px #38bdf8;
-  border: 2px solid #ffffff;
+  box-shadow: 0 0 6px #38bdf8;
+  border: 1.5px solid #ffffff;
 }
 
-/* Quick Telemetry Indicators in Sidebar */
 .t3d-telemetry-pill-box {
   background: rgba(15, 23, 42, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 6px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
+  font-size: 9.5px;
 }
 
 .t3d-tel-pill-row {
   display: flex;
   justify-content: space-between;
-  font-size: 10.5px;
-}
-
-.t3d-tel-pill-row span {
   color: #94a3b8;
 }
 
 .t3d-tel-pill-row strong {
+  color: #f8fafc;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* -------------------------------------------------------------
+   5. SPATIAL PROBE TOOLTIP (Pinned to cursor dynamically)
+   ------------------------------------------------------------- */
+.t3d-probe-tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99999;
+  background: rgba(10, 15, 30, 0.96);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 8px;
+  padding: 6px 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
+  color: #f8fafc;
+  min-width: 160px;
+  font-size: 10px;
+}
+
+.t3d-probe-title {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #38bdf8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 2px;
+  margin-bottom: 4px;
+}
+
+.t3d-probe-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+  color: #94a3b8;
+}
+
+.t3d-probe-row strong {
   font-family: 'JetBrains Mono', monospace;
   color: #f8fafc;
 }
 
-/* 3D Fullscreen Modal Container */
+/* -------------------------------------------------------------
+   6. 3D FULLSCREEN MODAL CONTAINER
+   ------------------------------------------------------------- */
 .t3d-modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(2, 6, 23, 0.92);
+  background: rgba(2, 6, 23, 0.94);
   backdrop-filter: blur(12px);
   z-index: 99999;
   display: flex;
@@ -698,7 +689,7 @@
 }
 
 .t3d-modal-header {
-  padding: 12px 18px;
+  padding: 10px 16px;
   background: rgba(15, 23, 42, 0.96);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
@@ -708,7 +699,7 @@
 
 .t3d-modal-header h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   color: #f8fafc;
   display: flex;
@@ -720,6 +711,5 @@
   flex: 1;
   position: relative;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 50px);
 }
-

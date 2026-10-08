@@ -49,9 +49,9 @@ class Terrain3DComponent {
         <!-- 3D WebGL Canvas Mount -->
         <div class="terrain-3d-canvas-container" id="${this.mountId}-canvas"></div>
 
-        <!-- Floating Spatial Elevation & Depth Probe Tooltip -->
+        <!-- Floating Spatial Elevation & Depth Probe Tooltip (Mouse Tracker) -->
         <div class="t3d-probe-tooltip" id="${this.mountId}-probe-tooltip" style="display:none;">
-          <div class="t3d-probe-title">🎯 3D SPATIAL TERRAIN PROBE</div>
+          <div class="t3d-probe-title">🎯 SPATIAL TERRAIN PROBE</div>
           <div class="t3d-probe-row">
             <span>Elevation:</span>
             <strong id="${this.mountId}-pb-elev">142.5 m MSL</strong>
@@ -61,7 +61,7 @@ class Terrain3DComponent {
             <strong id="${this.mountId}-pb-depth" style="color:#38bdf8;">0.0 m (Dry Ground)</strong>
           </div>
           <div class="t3d-probe-row">
-            <span>Inundation Status:</span>
+            <span>Status:</span>
             <strong id="${this.mountId}-pb-status" style="color:#10b981;">SAFE ZONE</strong>
           </div>
           <div class="t3d-probe-row">
@@ -70,125 +70,126 @@ class Terrain3DComponent {
           </div>
         </div>
 
-        <!-- Top Floating Operations HUD Bar -->
-        <div class="terrain-3d-hud-top">
-          <div class="terrain-3d-title-badge">
-            <span style="font-size:16px;">${isFlood ? '🌊' : '⛰️'}</span>
-            <div>
-              <h4 id="${this.mountId}-title">${this.config.title}</h4>
-              <div style="font-size:10px; color:#94a3b8;" id="${this.mountId}-subtitle">Multi-Area DEM with Dynamic Risk Evolution</div>
+        <!-- Top Unified Operations HUD Container -->
+        <div class="t3d-top-hud">
+          <!-- Row 1: Title, Dropdown, and Camera Tools -->
+          <div class="t3d-hud-row-main">
+            <div class="t3d-title-block">
+              <span style="font-size:15px;">${isFlood ? '🌊' : '⛰️'}</span>
+              <div>
+                <h4 id="${this.mountId}-title">${this.config.title}</h4>
+                <div style="font-size:9.5px; color:#94a3b8;" id="${this.mountId}-subtitle">Multi-Area 3D Terrain & Hydrodynamic Decision System</div>
+              </div>
+              <span class="mode-pill" id="${this.mountId}-pill">${isFlood ? 'FLOOD DSS' : 'LANDSLIDE DSS'}</span>
             </div>
-            <span class="mode-pill" id="${this.mountId}-pill">${isFlood ? 'FLASH FLOOD DSS' : 'LANDSLIDE SLIP DSS'}</span>
+
+            <!-- Area Selector Dropdown -->
+            <div class="t3d-area-select-wrap">
+              <label for="${this.mountId}-area-dropdown">📍 Area:</label>
+              <select class="t3d-area-select" id="${this.mountId}-area-dropdown">
+                <optgroup label="⚠️ 6 Primary Telangana Flood Risk Areas">
+                  <option value="TEL-STN-01" ${this.config.stationId === 'TEL-STN-01' ? 'selected' : ''}>🌊 Bhadrachalam (Godavari Ghat)</option>
+                  <option value="TEL-STN-03" ${this.config.stationId === 'TEL-STN-03' ? 'selected' : ''}>🏞️ Medaram (Jampanna Gorge)</option>
+                  <option value="TEL-STN-06" ${this.config.stationId === 'TEL-STN-06' ? 'selected' : ''}>💦 Kuntala Falls Ravine (45m Drop)</option>
+                  <option value="TEL-STN-07" ${this.config.stationId === 'TEL-STN-07' ? 'selected' : ''}>🏗️ Kadam Dam (Spillway & Forebay)</option>
+                  <option value="TEL-STN-08" ${this.config.stationId === 'TEL-STN-08' ? 'selected' : ''}>🏙️ Prakash Nagar (Munneru Urban)</option>
+                  <option value="TEL-STN-10" ${this.config.stationId === 'TEL-STN-10' ? 'selected' : ''}>🌉 Musi River (Puranapool Canal)</option>
+                </optgroup>
+                <optgroup label="Other Telangana Basins & Ghats">
+                  <option value="TEL-STN-02" ${this.config.stationId === 'TEL-STN-02' ? 'selected' : ''}>Charla (Taliperu Spillway)</option>
+                  <option value="TEL-STN-04" ${this.config.stationId === 'TEL-STN-04' ? 'selected' : ''}>Eturnagaram (Dayam Confluence)</option>
+                  <option value="TEL-STN-05" ${this.config.stationId === 'TEL-STN-05' ? 'selected' : ''}>Kerameri Ghat Range (610m)</option>
+                  <option value="TEL-STN-09" ${this.config.stationId === 'TEL-STN-09' ? 'selected' : ''}>Mannanur Nallamala Plateau</option>
+                </optgroup>
+                <optgroup label="Northeast Mountain Landslides">
+                  <option value="AIZAWL-01" ${this.config.stationId === 'AIZAWL-01' ? 'selected' : ''}>Aizawl (Tuirial & Durtlang, Mizoram)</option>
+                  <option value="CHAMPHAI-02" ${this.config.stationId === 'CHAMPHAI-02' ? 'selected' : ''}>Champhai (Tiau Border, Mizoram)</option>
+                  <option value="EKHASI-03" ${this.config.stationId === 'EKHASI-03' ? 'selected' : ''}>East Khasi Hills (Mawkdok/Sohra, Meghalaya)</option>
+                  <option value="DIMAHASAO-04" ${this.config.stationId === 'DIMAHASAO-04' ? 'selected' : ''}>Dima Hasao (Jatinga Haflong, Assam)</option>
+                  <option value="KOHIMA-05" ${this.config.stationId === 'KOHIMA-05' ? 'selected' : ''}>Kohima (Dzükou Foothills, Nagaland)</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <!-- Camera Controls & Layer Toggles -->
+            <div class="terrain-3d-controls-strip">
+              <button class="t3d-btn active" data-cam="iso" title="Isometric Aerial View">📐 Orbit</button>
+              <button class="t3d-btn" data-cam="top" title="Top-Down 2D DEM Map">🗺️ 2D</button>
+              <button class="t3d-btn" data-cam="cross-section" title="Geological Cross-Section">✂️ Slice</button>
+              <button class="t3d-btn" id="${this.mountId}-btn-drone" title="Autonomous Drone Aerial Patrol Flight">🚁 Drone</button>
+              <button class="t3d-btn" id="${this.mountId}-btn-heatmap" title="Toggle 3D Hazard Risk Heatmap Overlay">🔥 Heatmap</button>
+              <button class="t3d-btn active" id="${this.mountId}-btn-runoff" title="Toggle Hydrological Runoff Streamlines">💧 Runoff</button>
+              <button class="t3d-btn" id="${this.mountId}-toggle-wire" title="Toggle Topological Wireframe">🕸️ Wire</button>
+            </div>
           </div>
 
-          <!-- Dynamic Detected Area Selector Dropdown -->
-          <div class="t3d-area-select-wrap">
-            <label for="${this.mountId}-area-dropdown">📍 Area:</label>
-            <select class="t3d-area-select" id="${this.mountId}-area-dropdown">
-              <optgroup label="⚠️ 6 Primary Telangana Flood Risk Areas">
-                <option value="TEL-STN-01" ${this.config.stationId === 'TEL-STN-01' ? 'selected' : ''}>🌊 Bhadrachalam (Godavari Ghat)</option>
-                <option value="TEL-STN-03" ${this.config.stationId === 'TEL-STN-03' ? 'selected' : ''}>🏞️ Medaram (Jampanna Gorge)</option>
-                <option value="TEL-STN-06" ${this.config.stationId === 'TEL-STN-06' ? 'selected' : ''}>💦 Kuntala Falls Ravine (45m Drop)</option>
-                <option value="TEL-STN-07" ${this.config.stationId === 'TEL-STN-07' ? 'selected' : ''}>🏗️ Kadam Dam (Spillway & Forebay)</option>
-                <option value="TEL-STN-08" ${this.config.stationId === 'TEL-STN-08' ? 'selected' : ''}>🏙️ Prakash Nagar (Munneru Urban)</option>
-                <option value="TEL-STN-10" ${this.config.stationId === 'TEL-STN-10' ? 'selected' : ''}>🌉 Musi River (Puranapool Canal)</option>
-              </optgroup>
-              <optgroup label="Other Telangana Basins & Ghats">
-                <option value="TEL-STN-02" ${this.config.stationId === 'TEL-STN-02' ? 'selected' : ''}>Charla (Taliperu Spillway)</option>
-                <option value="TEL-STN-04" ${this.config.stationId === 'TEL-STN-04' ? 'selected' : ''}>Eturnagaram (Dayam Confluence)</option>
-                <option value="TEL-STN-05" ${this.config.stationId === 'TEL-STN-05' ? 'selected' : ''}>Kerameri Ghat Range (610m)</option>
-                <option value="TEL-STN-09" ${this.config.stationId === 'TEL-STN-09' ? 'selected' : ''}>Mannanur Nallamala Plateau</option>
-              </optgroup>
-              <optgroup label="Northeast Mountain Landslides">
-                <option value="AIZAWL-01" ${this.config.stationId === 'AIZAWL-01' ? 'selected' : ''}>Aizawl (Tuirial & Durtlang, Mizoram)</option>
-                <option value="CHAMPHAI-02" ${this.config.stationId === 'CHAMPHAI-02' ? 'selected' : ''}>Champhai (Tiau Border, Mizoram)</option>
-                <option value="EKHASI-03" ${this.config.stationId === 'EKHASI-03' ? 'selected' : ''}>East Khasi Hills (Mawkdok/Sohra, Meghalaya)</option>
-                <option value="DIMAHASAO-04" ${this.config.stationId === 'DIMAHASAO-04' ? 'selected' : ''}>Dima Hasao (Jatinga Haflong, Assam)</option>
-                <option value="KOHIMA-05" ${this.config.stationId === 'KOHIMA-05' ? 'selected' : ''}>Kohima (Dzükou Foothills, Nagaland)</option>
-              </optgroup>
-            </select>
-          </div>
+          <!-- Row 2: 6 Flood Hotspots + 4 Risk Phases -->
+          <div class="t3d-hud-row-sub">
+            <!-- 6 Hotspot Quick Pills -->
+            <div class="t3d-sub-group">
+              <span class="t3d-sub-label">⚡ 6 FLOOD HOTSPOTS:</span>
+              <div class="t3d-fast-btns-wrap">
+                <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-01' ? 'active' : ''}" data-stn="TEL-STN-01">🌊 Bhadrachalam</button>
+                <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-03' ? 'active' : ''}" data-stn="TEL-STN-03">🏞️ Medaram</button>
+                <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-06' ? 'active' : ''}" data-stn="TEL-STN-06">💦 Kuntala Falls</button>
+                <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-07' ? 'active' : ''}" data-stn="TEL-STN-07">🏗️ Kadam Dam</button>
+                <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-08' ? 'active' : ''}" data-stn="TEL-STN-08">🏙️ Prakash Nagar</button>
+                <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-10' ? 'active' : ''}" data-stn="TEL-STN-10">🌉 Musi River</button>
+              </div>
+            </div>
 
-          <!-- Tactical Camera Angle & Overlay Switcher -->
-          <div class="terrain-3d-controls-strip">
-            <button class="t3d-btn active" data-cam="iso" title="Isometric Aerial View">📐 Orbit</button>
-            <button class="t3d-btn" data-cam="cross-section" title="Geological Cross-Section">✂️ Slice</button>
-            <button class="t3d-btn" data-cam="top" title="Top-Down 2D DEM Map">🗺️ 2D DEM</button>
-            <button class="t3d-btn" data-cam="bridge" title="Bridge & Embankment View">🌉 Bridge</button>
-            <button class="t3d-btn" data-cam="shelter" title="High-Ground Shelter Safe Zone">🏥 Shelter</button>
-            <button class="t3d-btn" id="${this.mountId}-btn-drone" title="Autonomous Drone Aerial Patrol Flight">🚁 Drone</button>
-            <button class="t3d-btn" id="${this.mountId}-btn-heatmap" title="Toggle 3D Hazard Risk Heatmap Overlay">🔥 Heatmap</button>
-            <button class="t3d-btn active" id="${this.mountId}-btn-runoff" title="Toggle Hydrological Runoff Streamlines">💧 Runoff</button>
-            <button class="t3d-btn" id="${this.mountId}-toggle-wire" title="Toggle Topological Wireframe">🕸️ Wire</button>
+            <!-- 4-Phase Stepper -->
+            <div class="t3d-sub-group">
+              <span class="t3d-sub-label">⚡ HOW IT BECOMES RISKY:</span>
+              <div class="t3d-phase-stepper-wrap">
+                <div class="t3d-step-node ${this.config.riskEvolutionPhase === 1 ? 'active-step' : ''}" data-phase="1">
+                  <span class="t3d-step-num">PHASE 1</span>
+                  <span class="t3d-step-name">🟢 Calm Base</span>
+                </div>
+                <div class="t3d-step-node ${this.config.riskEvolutionPhase === 2 ? 'active-step' : ''}" data-phase="2">
+                  <span class="t3d-step-num">PHASE 2</span>
+                  <span class="t3d-step-name">🟡 Rain Infil</span>
+                </div>
+                <div class="t3d-step-node ${this.config.riskEvolutionPhase === 3 ? 'active-step' : ''}" data-phase="3">
+                  <span class="t3d-step-num">PHASE 3</span>
+                  <span class="t3d-step-name">🟠 Surge Warn</span>
+                </div>
+                <div class="t3d-step-node critical-phase ${this.config.riskEvolutionPhase === 4 ? 'active-step' : ''}" data-phase="4">
+                  <span class="t3d-step-num">PHASE 4</span>
+                  <span class="t3d-step-name">🔴 Overtopping</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- 6 Flood Hotspot 1-Click Fast Selector Bar -->
-        <div class="t3d-fast-hotspots-bar">
-          <span class="t3d-fast-hotspots-label">⚡ 6 FLOOD HOTSPOTS:</span>
-          <div class="t3d-fast-hotspot-btns">
-            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-01' ? 'active' : ''}" data-stn="TEL-STN-01" title="Godavari River Ghat (Wide Braided Basin)">🌊 Bhadrachalam</button>
-            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-03' ? 'active' : ''}" data-stn="TEL-STN-03" title="Jampanna Vagu Gorge (Quartzite Canyon)">🏞️ Medaram</button>
-            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-06' ? 'active' : ''}" data-stn="TEL-STN-06" title="Kuntala Falls Ravine (45m Precipice & Plunge Pool)">💦 Kuntala Falls</button>
-            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-07' ? 'active' : ''}" data-stn="TEL-STN-07" title="Kadam Dam Radial Spillway & Forebay Lake">🏗️ Kadam Dam</button>
-            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-08' ? 'active' : ''}" data-stn="TEL-STN-08" title="Prakash Nagar Munneru (Urban Floodwall Embankment)">🏙️ Prakash Nagar</button>
-            <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-10' ? 'active' : ''}" data-stn="TEL-STN-10" title="Musi River Basin / Puranapool (Urban Concrete Canal)">🌉 Musi River</button>
+        <!-- Left Floating Card: Risk Causality & Infrastructure Status -->
+        <div class="t3d-left-card" id="${this.mountId}-causality">
+          <div class="t3d-card-header">
+            <span>🔬 WHY THIS AREA BECOMES RISKY</span>
+            <span class="t3d-live-tag">LIVE DYNAMICS</span>
           </div>
-        </div>
 
-        <!-- 4-Stage Dynamic Risk Evolution Stepper (How It Becomes Risky) -->
-        <div class="t3d-risk-stepper-bar">
-          <div class="t3d-stepper-title">
-            <span>⚡ HOW THIS AREA BECOMES RISKY:</span>
-          </div>
-          <div class="t3d-step-nodes">
-            <div class="t3d-step-node ${this.config.riskEvolutionPhase === 1 ? 'active-step' : ''}" data-phase="1" title="Initial normal conditions, low runoff, high stability">
-              <span class="t3d-step-num">PHASE 1</span>
-              <span class="t3d-step-name">🟢 Calm Baseflow</span>
+          <!-- Infrastructure Badges Row -->
+          <div class="t3d-infra-badges-row">
+            <div class="t3d-infra-badge safe" id="${this.mountId}-badge-bridge">
+              <span>🌉 Bridge:</span> <strong>CLEAR</strong>
             </div>
-            <div class="t3d-step-node ${this.config.riskEvolutionPhase === 2 ? 'active-step' : ''}" data-phase="2" title="Rainfall onset, soil absorbs water, rising saturation">
-              <span class="t3d-step-num">PHASE 2</span>
-              <span class="t3d-step-name">🟡 Infiltration & Runoff</span>
+            <div class="t3d-infra-badge safe" id="${this.mountId}-badge-road">
+              <span>🛣️ Road:</span> <strong>OPEN</strong>
             </div>
-            <div class="t3d-step-node ${this.config.riskEvolutionPhase === 3 ? 'active-step' : ''}" data-phase="3" title="Soil saturated, surface flow accumulation, road warnings">
-              <span class="t3d-step-num">PHASE 3</span>
-              <span class="t3d-step-name">🟠 Surge / Gate Overflow</span>
-            </div>
-            <div class="t3d-step-node critical-phase ${this.config.riskEvolutionPhase === 4 ? 'active-step' : ''}" data-phase="4" title="Extreme Cloudburst, flash breach, overtopping & slip rupture">
-              <span class="t3d-step-num">PHASE 4</span>
-              <span class="t3d-step-name">🔴 Critical Inundation</span>
+            <div class="t3d-infra-badge safe" id="${this.mountId}-badge-houses">
+              <span>🏘️ Settlements:</span> <strong>0/16 Safe</strong>
             </div>
           </div>
-        </div>
 
-        <!-- Infrastructure Status HUD (Floating Below Stepper) -->
-        <div class="terrain-3d-infra-hud" id="${this.mountId}-infra-hud">
-          <div class="t3d-infra-badge safe" id="${this.mountId}-badge-bridge">
-            <span>🌉 Bridge / Culvert:</span> <strong>CLEAR (+1.4m)</strong>
-          </div>
-          <div class="t3d-infra-badge safe" id="${this.mountId}-badge-road">
-            <span>🛣️ Lowland Access:</span> <strong>OPEN</strong>
-          </div>
-          <div class="t3d-infra-badge safe" id="${this.mountId}-badge-houses">
-            <span>🏘️ Settlements:</span> <strong>0 / 16 Inundated</strong>
-          </div>
-          <div class="t3d-infra-badge safe" style="border-color:#10b981; background:rgba(6,78,59,0.75);">
-            <span>🏥 Evacuation Path:</span> <strong style="color:#34d399;">100% DRY CLEAR</strong>
-          </div>
-        </div>
-
-        <!-- Dynamic Causality & Physics Breakdown (Why This Area Is Risky) -->
-        <div class="t3d-causality-box" id="${this.mountId}-causality">
-          <div class="t3d-causality-header">
-            <span>🔬 HOW THIS AREA BECOMES RISKY & LIVE CAUSALITY</span>
-            <span style="font-size:9.5px; color:#38bdf8;" id="${this.mountId}-causality-state">LIVE HYDRO-DYNAMIC ENGINE</span>
-          </div>
+          <!-- Dynamic Causality List -->
           <div class="t3d-causality-list" id="${this.mountId}-causality-list">
-            <!-- Dynamic Localized Causality Injected via updateCausalityNarrative -->
+            <!-- Populated dynamically via renderCausalityNarrative -->
           </div>
         </div>
 
-        <!-- 12-Hour Hydrodynamic Forecast Timeline Scrubber -->
+        <!-- Bottom Center Timeline Bar -->
         <div class="terrain-3d-timeline-bar">
           <div class="t3d-timeline-controls">
             <button class="t3d-play-btn" id="${this.mountId}-btn-play" title="Play / Pause 12-Hour Flood Wave Simulation">▶ Play</button>
@@ -197,12 +198,12 @@ class Terrain3DComponent {
           <div class="t3d-timeline-track-wrap">
             <input type="range" class="t3d-timeline-range" id="${this.mountId}-sld-timeline" min="-6.0" max="6.0" step="0.1" value="0.0">
             <div class="t3d-timeline-ticks">
-              <span>T-6h (Onset)</span>
+              <span>T-6h</span>
               <span>T-3h</span>
               <span style="color:#38bdf8; font-weight:700;">T-0 (Now)</span>
-              <span style="color:#f59e0b; font-weight:700;">T+1.5h (Peak Surge)</span>
+              <span style="color:#f59e0b; font-weight:700;">T+1.5h (Peak)</span>
               <span>T+3h</span>
-              <span>T+6h (Recession)</span>
+              <span>T+6h</span>
             </div>
           </div>
           <div class="t3d-speed-btns">
@@ -212,33 +213,9 @@ class Terrain3DComponent {
           </div>
         </div>
 
-        <!-- 12-Hour Hydrodynamic Forecast Timeline Scrubber -->
-        <div class="terrain-3d-timeline-bar">
-          <div class="t3d-timeline-controls">
-            <button class="t3d-play-btn" id="${this.mountId}-btn-play" title="Play / Pause 12-Hour Flood Wave Simulation">▶ Play</button>
-            <span class="t3d-timeline-label" id="${this.mountId}-lbl-time">T = 0.0h (Now)</span>
-          </div>
-          <div class="t3d-timeline-track-wrap">
-            <input type="range" class="t3d-timeline-range" id="${this.mountId}-sld-timeline" min="-6.0" max="6.0" step="0.1" value="0.0">
-            <div class="t3d-timeline-ticks">
-              <span>T-6h (Onset)</span>
-              <span>T-3h</span>
-              <span style="color:#38bdf8; font-weight:700;">T-0 (Now)</span>
-              <span style="color:#f59e0b; font-weight:700;">T+1.5h (Peak Surge)</span>
-              <span>T+3h</span>
-              <span>T+6h (Recession)</span>
-            </div>
-          </div>
-          <div class="t3d-speed-btns">
-            <button class="t3d-spd-btn active" data-speed="1">1x</button>
-            <button class="t3d-spd-btn" data-speed="2">2x</button>
-            <button class="t3d-spd-btn" data-speed="5">5x</button>
-          </div>
-        </div>
-
-        <!-- Parameter Shock Controls in Right Sidebar -->
+        <!-- Right Floating Panel: Stress Simulator -->
         <div class="terrain-3d-sidebar">
-          <h5><span>⚙️ Stress Simulator</span> <span style="font-size:10px; color:#94a3b8;">Real-Time</span></h5>
+          <h5><span>⚙️ Stress Simulator</span> <span style="font-size:9.5px; color:#94a3b8;">Real-Time</span></h5>
           
           <div class="t3d-slider-row">
             <div class="t3d-slider-header">
@@ -258,7 +235,7 @@ class Terrain3DComponent {
 
           <div class="t3d-slider-row">
             <div class="t3d-slider-header">
-              <span>Stream Water Stage</span>
+              <span>Water Stage</span>
               <span class="val-num" id="${this.mountId}-lbl-stage">${this.config.waterLevel} m</span>
             </div>
             <input type="range" class="t3d-range-input" id="${this.mountId}-sld-stage" min="0.5" max="18.0" step="0.1" value="${this.config.waterLevel}">
@@ -272,7 +249,7 @@ class Terrain3DComponent {
             <input type="range" class="t3d-range-input" id="${this.mountId}-sld-slope" min="10" max="55" step="1" value="${this.config.slopeAngle}">
           </div>
 
-          <!-- Quick Telemetry & Geotechnical Metric Pill Box -->
+          <!-- Telemetry Metric Pill Box -->
           <div class="t3d-telemetry-pill-box">
             <div class="t3d-tel-pill-row">
               <span>FoS Factor:</span>
@@ -280,7 +257,7 @@ class Terrain3DComponent {
             </div>
             <div class="t3d-tel-pill-row">
               <span>Pore Pressure (u):</span>
-              <strong id="${this.mountId}-val-pore">14.2 kPa</strong>
+              <strong id="${this.mountId}-val-pore" style="color:#38bdf8;">14.2 kPa</strong>
             </div>
             <div class="t3d-tel-pill-row">
               <span>Base Elevation:</span>
@@ -290,7 +267,6 @@ class Terrain3DComponent {
               <span>Danger Mark:</span>
               <strong id="${this.mountId}-val-danger-lvl" style="color:#ef4444;">5.2 m</strong>
             </div>
-          </div>
         </div>
       </div>
     `;
@@ -492,11 +468,28 @@ class Terrain3DComponent {
     const pbDepth = document.getElementById(`${this.mountId}-pb-depth`);
     const pbStatus = document.getElementById(`${this.mountId}-pb-status`);
     const pbTime = document.getElementById(`${this.mountId}-pb-time`);
+    const canvasWrap = document.getElementById(`${this.mountId}-canvas`);
+
+    if (canvasWrap && probeTooltip) {
+      canvasWrap.addEventListener('pointerleave', () => {
+        probeTooltip.style.display = 'none';
+      });
+      canvasWrap.addEventListener('pointermove', (e) => {
+        if (probeTooltip.style.display === 'block') {
+          probeTooltip.style.left = `${e.clientX + 14}px`;
+          probeTooltip.style.top = `${e.clientY + 14}px`;
+        }
+      });
+    }
 
     window.addEventListener('terrain3d-probe', (e) => {
       const d = e.detail;
       if (probeTooltip) {
         probeTooltip.style.display = 'block';
+        if (d.clientCoords) {
+          probeTooltip.style.left = `${d.clientCoords.clientX + 14}px`;
+          probeTooltip.style.top = `${d.clientCoords.clientY + 14}px`;
+        }
         if (pbElev) pbElev.textContent = `${d.elevationMeters} m MSL`;
         if (pbDepth) {
           pbDepth.textContent = d.isInundated ? `${d.waterDepthMeters} m Submerged` : '0.0 m (Dry Ground)';
