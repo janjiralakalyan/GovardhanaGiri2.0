@@ -16,6 +16,7 @@
   <!-- Custom Stylesheets -->
   <link rel="stylesheet" href="/static/css/dashboard.css">
   <link rel="stylesheet" href="/static/css/terrain_3d.css">
+  <link rel="stylesheet" href="/static/css/copilot.css">
 </head>
 <body>
 
@@ -33,6 +34,9 @@
       <a href="/nelens" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background:rgba(30,58,138,0.7); border:1px solid #3b82f6; color:#93c5fd; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700;">
         ⛰️ Switch to NE-LENS (Landslides)
       </a>
+      <button class="btn-copilot-launch" id="btn-launch-copilot">
+        🤖 AI Commander (IAP)
+      </button>
       <button class="audio-toggle-btn" id="btn-open-3d-modal" style="background:#0284c7; border-color:#38bdf8; color:#fff;">
         🌐 3D Terrain DEM
       </button>
@@ -183,6 +187,7 @@
         <!-- Inspector Tabs -->
         <div class="panel-tabs">
           <button class="tab-btn active" data-tab="tab-telemetry">Live Telemetry</button>
+          <button class="tab-btn" data-tab="tab-copilot" style="color:#c084fc; font-weight:700;">🤖 AI Action Plan</button>
           <button class="tab-btn" data-tab="tab-simulator">What-If Cloudburst Lab</button>
           <button class="tab-btn" data-tab="tab-3d-terrain">🌊 3D Canyon & Flood</button>
           <button class="tab-btn" data-tab="tab-shelters">Safe Shelters & Evacuation</button>
@@ -226,6 +231,40 @@
             <div class="telemetry-item">
               <span class="telemetry-item-label">Land Cover</span>
               <span class="telemetry-item-val" id="tel-val-land-cover">Canopy Forest</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 1B: AI Incident Action Plan (Quick Inspector View) -->
+        <div class="tab-content" id="tab-copilot">
+          <div class="sim-card" style="border-color: rgba(168, 85, 247, 0.4);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:700; color:#c084fc; font-size:13.5px;">🤖 Tri-Agent Incident Action Plan</div>
+                <div style="font-size:11px; color:var(--text-muted);">Groq Hazard Worker + Groq Logistics Worker + Cohere Supreme Commander</div>
+              </div>
+              <button class="btn-copilot-launch" onclick="CopilotApp.openModal()" style="padding:5px 10px; font-size:11px;">
+                ⚡ Open EOC War Room
+              </button>
+            </div>
+
+            <div style="margin-top:12px; display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;">
+              <div style="background:rgba(19, 29, 58, 0.7); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Mandated Food Rations</div>
+                <div style="font-size:16px; font-weight:800; color:#38bdf8;" id="ins-copilot-food">--</div>
+                <div style="font-size:10px; color:var(--text-secondary);">48h dry meal packs</div>
+              </div>
+              <div style="background:rgba(19, 29, 58, 0.7); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Rescue Boat Fleet</div>
+                <div style="font-size:16px; font-weight:800; color:#4ade80;" id="ins-copilot-boats">--</div>
+                <div style="font-size:10px; color:var(--text-secondary);">Motorized SDRF IRBs</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <button class="btn-secondary-action" onclick="CopilotApp.openModal()" style="width:100%; border-color:rgba(168,85,247,0.5); color:#d8b4fe;">
+                🎖️ Review Full Multi-Lingual Directives & SOPs
+              </button>
             </div>
           </div>
         </div>
@@ -320,6 +359,191 @@
     </div>
   </main>
 
+  <!-- AI Incident Commander & IAP Copilot Modal -->
+  <div class="copilot-modal-overlay" id="copilot-modal">
+    <div class="copilot-modal-container">
+      
+      <!-- Modal Header -->
+      <div class="copilot-modal-header">
+        <div class="copilot-header-left">
+          <div class="copilot-badge-icon">🎖️</div>
+          <div class="copilot-title-group">
+            <h2>
+              AI Incident Commander & IAP Copilot
+              <span class="copilot-arch-tag">HYPER-LOCAL EARLY WARNING</span>
+            </h2>
+            <p>Automated Hydro-Meteorological Risk Evaluation & NDMA Emergency Protocol</p>
+          </div>
+        </div>
+
+        <div class="copilot-header-actions">
+          <select id="copilot-station-picker" class="copilot-station-select" aria-label="Select Incident Station">
+            <!-- Populated via JS -->
+          </select>
+          <button class="btn-close-modal" id="btn-close-copilot" title="Close Commander EOC">✕</button>
+        </div>
+      </div>
+
+      <!-- Modal Body (2 Columns) -->
+      <div class="copilot-body-grid">
+        
+        <!-- Left Column: IAP & Deliberation Panel -->
+        <div class="copilot-iap-panel">
+          
+          <!-- Live Telemetry & Threat Summary Bar -->
+          <div class="telemetry-summary-bar">
+            <div class="summary-metric-card risk-card">
+              <span class="summary-card-label">CURRENT THREAT LEVEL</span>
+              <div class="summary-metric-row">
+                <span class="summary-risk-badge critical" id="copilot-summary-risk">CRITICAL ALERT</span>
+                <span class="summary-pulse-dot" id="copilot-summary-dot"></span>
+              </div>
+              <span class="summary-card-sub" id="copilot-summary-station">Bhadrachalam Godavari River Ghat</span>
+            </div>
+
+            <div class="summary-metric-card">
+              <span class="summary-card-label">EVACUATION LEAD TIME</span>
+              <span class="summary-metric-val highlight-gold" id="copilot-summary-leadtime">⚡ 4.2 Hours</span>
+              <span class="summary-card-sub">Actionable Window Remaining</span>
+            </div>
+
+            <div class="summary-metric-card">
+              <span class="summary-card-label">TARGET POPULATION AT RISK</span>
+              <span class="summary-metric-val" id="copilot-summary-pop">3,250 Persons</span>
+              <span class="summary-card-sub" id="copilot-summary-evac-pct">65% Immediate Evacuation Zone</span>
+            </div>
+          </div>
+
+          <!-- Controls Strip -->
+          <div class="iap-controls-strip">
+            <button class="btn-generate-iap" id="btn-trigger-iap">
+              ⚡ Generate NDMA Action Plan (IAP)
+            </button>
+            <button class="btn-print-iap" id="btn-print-iap">
+              🖨️ Print / Export IAP
+            </button>
+          </div>
+
+          <!-- NDMA Resource Matrix Cards -->
+          <div class="resource-cards-grid">
+            <div class="resource-metric-card">
+              <span class="res-card-label">Mandated Food Packets</span>
+              <span class="res-card-val" id="copilot-res-food">--</span>
+              <span class="res-card-sub">48h dry meal rations</span>
+            </div>
+
+            <div class="resource-metric-card">
+              <span class="res-card-label">Clean Potable Water</span>
+              <span class="res-card-val" id="copilot-res-water">--</span>
+              <span class="res-card-sub">10,000L heavy tankers</span>
+            </div>
+
+            <div class="resource-metric-card">
+              <span class="res-card-label">SDRF Rescue Boats</span>
+              <span class="res-card-val" id="copilot-res-boats">--</span>
+              <span class="res-card-sub">Motorized IRBs</span>
+            </div>
+
+            <div class="resource-metric-card">
+              <span class="res-card-label">First Responders</span>
+              <span class="res-card-val" id="copilot-res-staff">--</span>
+              <span class="res-card-sub">SDRF/NDRF officers</span>
+            </div>
+          </div>
+
+          <!-- Multi-Lingual Public Broadcast Section -->
+          <div class="broadcast-tabs-box">
+            <div class="broadcast-tabs-header">
+              <div class="broadcast-lang-btns">
+                <button class="btn-lang-tab active" data-lang="english">🇬🇧 English</button>
+                <button class="btn-lang-tab" data-lang="telugu">🇮🇳 తెలుగు (Telugu)</button>
+                <button class="btn-lang-tab" data-lang="hindi">🇮🇳 हिन्दी (Hindi)</button>
+              </div>
+
+              <div class="broadcast-actions-right">
+                <button class="btn-broadcast-action" id="btn-play-broadcast">
+                  🔊 Play Audio
+                </button>
+                <button class="btn-broadcast-action" id="btn-copy-broadcast">
+                  📋 Copy
+                </button>
+                <button class="btn-broadcast-action" id="btn-dispatch-broadcast" style="background:#dc2626; color:#fff; border-color:#ef4444;">
+                  🚨 Dispatch
+                </button>
+              </div>
+            </div>
+
+            <div class="broadcast-text-box" id="copilot-broadcast-text">
+              Click "Generate NDMA Action Plan" to synthesize multi-lingual emergency broadcasts.
+            </div>
+          </div>
+
+          <!-- Emergency Operations Analysis Details -->
+          <div class="deliberation-box">
+            <div class="deliberation-header">
+              <span>🔬 Section 1: Hydrological & Hazard Telemetry Assessment</span>
+            </div>
+            <div class="deliberation-content" id="copilot-w1-text">
+              Awaiting trigger...
+            </div>
+          </div>
+
+          <div class="deliberation-box">
+            <div class="deliberation-header">
+              <span>📦 Section 2: NDMA Logistics & Resource Deployment Strategy</span>
+            </div>
+            <div class="deliberation-content" id="copilot-w2-text">
+              Awaiting trigger...
+            </div>
+          </div>
+
+          <div class="deliberation-box">
+            <div class="deliberation-header">
+              <span>🎖️ Section 3: Official Commander Executive Directives & SOPs</span>
+            </div>
+            <div class="deliberation-content" id="copilot-cmd-text">
+              Awaiting trigger...
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Interactive Copilot Chat -->
+        <div class="copilot-chat-panel">
+          <div class="chat-panel-header">
+            <h3>💬 Incident Commander Advisory Chat</h3>
+            <span style="font-size:11px; color:#a855f7; font-family:var(--font-mono);">ONLINE</span>
+          </div>
+
+          <div class="chat-messages-container" id="copilot-chat-msgs">
+            <div class="chat-bubble bot">
+              <div>
+                <strong>Greetings, Incident Commander.</strong> I am your AI Disaster Copilot connected to the live telemetry stream across all 10 Telangana hotspots. Ask me about submergence zones, evacuation choke-points, relief calculations, or standard operating procedures.
+              </div>
+              <div class="chat-bubble-meta">
+                <span>🛡️</span>
+                <span>Supreme Incident Commander Copilot</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Prompts Chips -->
+          <div class="quick-prompts-strip" id="copilot-quick-prompts">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="chat-input-bar">
+            <input type="text" id="copilot-chat-input" class="chat-input-field" placeholder="Ask Commander Copilot (e.g. Which wards in Bhadrachalam need immediate evacuation?)...">
+            <button class="btn-send-chat" id="btn-copilot-send" title="Send Directive Query">➤</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container"></div>
 
@@ -333,5 +557,6 @@
   <script src="/static/js/audio_alerts.js"></script>
   <script src="/static/js/map.js"></script>
   <script src="/static/js/app.js"></script>
+  <script src="/static/js/copilot.js"></script>
 </body>
 </html>

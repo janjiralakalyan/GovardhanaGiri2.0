@@ -360,6 +360,18 @@ class GovardhanaGiriApp {
       this.terrain3D.updateWithStationTelemetry(stn);
     }
 
+    // 6. Update AI Action Plan inspector preview
+    const foodElem = document.getElementById('ins-copilot-food');
+    const boatsElem = document.getElementById('ins-copilot-boats');
+    if (foodElem && boatsElem) {
+      const pop = stn.population || 5000;
+      const mult = pred.risk_level === 'Critical' ? 1.0 : (pred.risk_level === 'High' ? 0.65 : 0.3);
+      const targetPop = Math.max(100, Math.floor(pop * mult));
+      foodElem.textContent = `${(targetPop * 6).toLocaleString()} pkts`;
+      const boats = Math.max(2, Math.ceil((targetPop * 0.20) / 40));
+      boatsElem.textContent = `${boats} IRBs`;
+    }
+
     // 6. Update Shelters List
     const shelterContainer = document.getElementById('shelter-list-container');
     shelterContainer.innerHTML = '';
