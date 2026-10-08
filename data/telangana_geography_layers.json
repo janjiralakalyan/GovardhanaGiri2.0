@@ -1,0 +1,282 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Godavari River",
+        "category": "River",
+        "type": "Major River Corridor",
+        "description": "Telangana's lifeline; prone to massive monsoonal floods (>43/53 ft at Bhadrachalam)",
+        "color": "#00f2fe",
+        "weight": 4
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [78.35, 18.95],
+          [78.55, 18.98],
+          [78.85, 18.92],
+          [79.20, 18.85],
+          [79.55, 18.82],
+          [79.91, 18.80],
+          [80.05, 18.68],
+          [80.35, 18.52],
+          [80.44, 18.33],
+          [80.58, 18.15],
+          [80.75, 17.92],
+          [80.89, 17.67],
+          [81.08, 17.55],
+          [81.25, 17.48]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Krishna River & Srisailam Basin",
+        "category": "River",
+        "type": "Major River Corridor",
+        "description": "Forms the southern border along Nallamala hills",
+        "color": "#00f2fe",
+        "weight": 3.5
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [77.65, 16.42],
+          [78.02, 16.35],
+          [78.35, 16.22],
+          [78.65, 16.12],
+          [78.88, 16.05],
+          [79.15, 16.20],
+          [79.52, 16.55],
+          [79.98, 16.82]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Munneru River (Flash Flood Corridor)",
+        "category": "River",
+        "type": "Tributary Torrent",
+        "description": "Drains through Khammam Urban core; subject to violent sudden surges",
+        "color": "#38bdf8",
+        "weight": 3
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [79.88, 17.65],
+          [80.02, 17.45],
+          [80.12, 17.32],
+          [80.15, 17.25],
+          [80.20, 17.10],
+          [80.28, 16.85]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kadam River & Stream Gorge",
+        "category": "River",
+        "type": "Ghat Mountain River",
+        "description": "Originates in Adilabad hills, plunges at Kuntala Falls, flows to Kadam Dam and Godavari",
+        "color": "#38bdf8",
+        "weight": 3
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [78.42, 19.42],
+          [78.48, 19.31],
+          [78.58, 19.22],
+          [78.78, 19.12],
+          [78.88, 19.02],
+          [78.98, 18.95]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Jampanna Vagu (Medaram Corridor)",
+        "category": "River",
+        "type": "Forested Torrent",
+        "description": "Steep forest stream famous for torrential flash flooding across Medaram grounds",
+        "color": "#38bdf8",
+        "weight": 2.5
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [80.12, 18.22],
+          [80.24, 18.31],
+          [80.32, 18.38],
+          [80.42, 18.42]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Musi River Urban Basin",
+        "category": "River",
+        "type": "Urban River Basin",
+        "description": "Flows through Hyderabad metropolitan core; flash flood risk from Himayatsagar/Osmansagar",
+        "color": "#38bdf8",
+        "weight": 3
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [78.18, 17.35],
+          [78.35, 17.38],
+          [78.46, 17.37],
+          [78.58, 17.35],
+          [78.75, 17.32],
+          [79.15, 17.15],
+          [79.62, 16.95]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Taliperu River",
+        "category": "River",
+        "type": "Border Tributary",
+        "description": "Rapid runoff from Chhattisgarh hill boundary feeding into Charla and Godavari",
+        "color": "#38bdf8",
+        "weight": 2.5
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [80.85, 18.32],
+          [80.78, 18.20],
+          [80.71, 18.06],
+          [80.72, 17.98]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerameri & Satmala Ghat Range",
+        "category": "Ghat",
+        "type": "Hill Range & Ghat Pass",
+        "description": "Highest hill range in Northern Telangana (elevation 550-700m, steep basaltic slopes)",
+        "color": "#10b981",
+        "elevation_m": "650m"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [78.85, 19.55],
+            [79.35, 19.60],
+            [79.48, 19.42],
+            [79.25, 19.32],
+            [78.92, 19.35],
+            [78.85, 19.55]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Adilabad-Nirmal Escarpment & Kuntala Ravines",
+        "category": "Ghat",
+        "type": "Rocky Basaltic Ravines",
+        "description": "Steep waterfall gorges and Kadam river headwater catchment",
+        "color": "#10b981",
+        "elevation_m": "480m"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [78.35, 19.38],
+            [78.65, 19.40],
+            [78.75, 19.22],
+            [78.48, 19.18],
+            [78.35, 19.38]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nallamala Hills & Amrabad Plateau",
+        "category": "Ghat",
+        "type": "Deep Gorges & Tiger Reserve Plateau",
+        "description": "Rugged quartzite sandstone plateau with steep drop into Krishna & Dindi ravines (elev 580-680m)",
+        "color": "#10b981",
+        "elevation_m": "680m"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [78.60, 16.48],
+            [79.05, 16.45],
+            [79.15, 16.18],
+            [78.75, 16.12],
+            [78.60, 16.48]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Papikondalu & Godavari Hill Gorge",
+        "category": "Ghat",
+        "type": "Eastern Ghats Foothill Gorge",
+        "description": "Flanks of Godavari river south of Bhadrachalam, creating natural flood choke points",
+        "color": "#10b981",
+        "elevation_m": "520m"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [80.82, 17.68],
+            [81.18, 17.65],
+            [81.35, 17.38],
+            [80.95, 17.42],
+            [80.82, 17.68]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eturnagaram & Pakhal Forest Catchment Range",
+        "category": "Ghat",
+        "type": "Dense Forested Hill Range",
+        "description": "Catchment hills generating sudden runoff into Dayam and Jampanna Vagu",
+        "color": "#10b981",
+        "elevation_m": "380m"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [80.05, 18.45],
+            [80.52, 18.42],
+            [80.48, 18.15],
+            [80.12, 18.18],
+            [80.05, 18.45]
+          ]
+        ]
+      }
+    }
+  ]
+}
