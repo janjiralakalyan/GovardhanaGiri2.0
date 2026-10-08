@@ -26,12 +26,12 @@ class FloodMapEngine {
   }
 
   async init() {
-    // 1. Watermark-Free High-Contrast Base Tile Layers
+    // 1. Free Tile Layers (No API Key Required)
     this.baseLayers = {
-      'dark': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      'dark': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        subdomains: 'abcd',
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        className: 'dark-tiles',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }),
       'topo': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 17,
@@ -41,10 +41,9 @@ class FloodMapEngine {
         maxZoom: 19,
         attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics'
       }),
-      'streets': L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      'streets': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        subdomains: 'abcd',
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       })
     };
 
@@ -255,7 +254,11 @@ class FloodMapEngine {
           </div>
           <div style="font-size:11.5px; color:#e2e8f0;">🌊 River/Torrent: <strong>${stn.river_name}</strong></div>
           <div style="font-size:11.5px; margin-top:3px; color:#38bdf8;">Stage: <strong>${stn.telemetry.Water_Level} m</strong> / Danger: <strong>${stn.danger_water_level} m</strong></div>
-          <div style="font-size:10px; color:#64748b; margin-top:5px;">Coordinates: ${stn.lat.toFixed(4)}°N, ${stn.lon.toFixed(4)}°E | Elev: ${stn.elevation}m</div>
+          <div style="font-size:10px; color:#64748b; margin-top:5px; margin-bottom:8px;">Coordinates: ${stn.lat.toFixed(4)}°N, ${stn.lon.toFixed(4)}°E | Elev: ${stn.elevation}m</div>
+          
+          <button onclick="window.app.trigger3DFromMap('${stn.id}')" style="width:100%; background:linear-gradient(135deg, #0284c7, #0369a1); border:1px solid #38bdf8; color:#ffffff; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 10px rgba(2,132,199,0.4);">
+            <span>🌊</span> <span>Visualize 3D Inundation DEM</span>
+          </button>
         </div>
       `;
       marker.bindPopup(popupHtml);

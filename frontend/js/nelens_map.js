@@ -1,7 +1,7 @@
 /**
  * NE-LENS: Northeast India Landslide GIS Map Engine
- * Leaflet-powered operational map with risk polygons, 2.5km buffers,
- * historical events, road corridors, rivers, sensors, and layer toggles.
+ * Leaflet-powered operational map with all detected districts, risk polygons,
+ * 2.5km hazard buffers, historical events, road corridors, and 1-click 3D DEM visualization.
  */
 
 class NeLensMapEngine {
@@ -9,9 +9,11 @@ class NeLensMapEngine {
     this.containerId = containerId;
     this.onLocationSelected = onLocationSelected;
     this.map = null;
+    this.locations = [];
 
     // Layer groups for toggle control
     this.layers = {
+      districtPins: null,
       riskZones: null,
       previousLandslides: null,
       villages: null,
@@ -22,10 +24,13 @@ class NeLensMapEngine {
 
     this.activeLocationId = null;
     this.bufferCircle = null;
-    this.locationMarkers = {};
+    this.districtMarkers = {};
   }
 
-  init(initialLat = 23.7271, initialLon = 92.7176, initialZoom = 13) {
+  init(initialLat = 24.8, initialLon = 93.0, initialZoom = 7.5) {
+    const container = document.getElementById(this.containerId);
+    if (!container) return;
+
     this.map = L.map(this.containerId, {
       zoomControl: true,
       attributionControl: false
@@ -39,19 +44,88 @@ class NeLensMapEngine {
     }).addTo(this.map);
 
     // Initialize layer groups
+    this.layers.districtPins = L.layerGroup().addTo(this.map);
     this.layers.riskZones = L.layerGroup().addTo(this.map);
     this.layers.previousLandslides = L.layerGroup().addTo(this.map);
     this.layers.villages = L.layerGroup().addTo(this.map);
     this.layers.roads = L.layerGroup().addTo(this.map);
     this.layers.rivers = L.layerGroup().addTo(this.map);
     this.layers.sensors = L.layerGroup().addTo(this.map);
+
+    setTimeout(() => {
+      if (this.map) this.map.invalidateSize();
+    }, 200);
+  }
+
+  renderAllLocations(locations, activeLocId) {
+    this.locations = locations;
+    this.layers.districtPins.clearLayers();
+    this.districtMarkers = {};
+
+    locations.forEach(loc => {
+      const isSelected = loc.id === activeLocId;
+      const isCritical = loc.risk_level === "CRITICAL";
+      const riskCol = isCritical ? "#dc2626" : (loc.risk_level === "HIGH" ? "#ea580c" : (loc.risk_level === "MODERATE" ? "#ca8a04" : "#16a34a"));
+
+      const markerHtml = `
+        <div class="nelens-map-marker ${isSelected ? 'selected' : ''}" style="position:relative; display:flex; flex-direction:column; align-items:center; cursor:pointer;">
+          <div style="position:absolute; top:2px; width:${isCritical ? '42px' : '30px'}; height:${isCritical ? '42px' : '30px'}; border-radius:50%; background:${riskCol}; opacity:0.35; animation: pulse ${isCritical ? '0.9s' : '1.6s'} infinite ease-in-out;"></div>
+          <div style="width:18px; height:18px; border-radius:50%; background:${riskCol}; border:2.5px solid #ffffff; box-shadow:0 0 14px ${riskCol}; z-index:2;"></div>
+          <div style="margin-top:3px; white-space:nowrap; background:rgba(10,15,30,0.92); backdrop-filter:blur(8px); border:1px solid ${riskCol}; color:#ffffff; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:800; font-family:'Inter',sans-serif; box-shadow:0 4px 12px rgba(0,0,0,0.6); pointer-events:none; z-index:3;">
+            <span style="color:${riskCol}; margin-right:3px;">●</span>${loc.district}
+          </div>
+        </div>
+      `;
+
+      const icon = L.divIcon({
+        className: 'nelens-pin-icon',
+        html: markerHtml,
+        iconSize: [42, 48],
+        iconAnchor: [21, 9]
+      });
+
+      const marker = L.marker([loc.lat, loc.lon], { icon }).addTo(this.layers.districtPins);
+
+      const popupHtml = `
+        <div style="font-family:'Inter',sans-serif; min-width:230px; color:#0f172a; padding:4px;">
+          <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">${loc.state} • DETECTED LANDSLIDE AREA</div>
+          <div style="font-size:14px; font-weight:800; color:#0f172a; margin-top:1px;">${loc.corridor_name}</div>
+          <div style="font-size:11px; color:#475569; margin-bottom:6px;">${loc.district}</div>
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; margin:6px 0; background:${riskCol}15; border:1px solid ${riskCol}40; padding:5px 8px; border-radius:6px;">
+            <span style="font-size:11.5px; font-weight:700; color:#0f172a;">Risk Score: <strong>${loc.risk_score}/100</strong></span>
+            <span style="font-size:11px; font-weight:800; padding:2px 7px; border-radius:4px; background:${riskCol}; color:#fff;">${loc.risk_level}</span>
+          </div>
+
+          <div style="font-size:11px; color:#334155; line-height:1.55; margin-bottom:8px;">
+            <div>🌧️ 24h Rain: <b>${loc.risk_drivers.rainfall_24h.value} mm</b> | Slope: <b>${loc.risk_drivers.slope.value}°</b></div>
+            <div>💧 Soil Saturation: <b>${loc.risk_drivers.soil_moisture.value}%</b> | Radius: <b>${loc.affected_radius_km} km</b></div>
+            <div>👥 Population at Risk: <b>${loc.exposure.population_affected.toLocaleString()}</b></div>
+          </div>
+
+          <button onclick="window.app.trigger3DFromMap('${loc.id}')" style="width:100%; background:linear-gradient(135deg, #0284c7, #0369a1); border:1px solid #38bdf8; color:#ffffff; font-size:11.5px; font-weight:700; padding:7px 10px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 10px rgba(2,132,199,0.4);">
+            <span>⛰️</span> <span>Visualize 3D Slope DEM</span>
+          </button>
+        </div>
+      `;
+
+      marker.bindPopup(popupHtml);
+
+      marker.on('click', () => {
+        if (this.onLocationSelected) {
+          this.onLocationSelected(loc.id);
+        }
+      });
+
+      this.districtMarkers[loc.id] = marker;
+    });
   }
 
   renderLocation(loc, isSelected = true) {
     this.activeLocationId = loc.id;
     const center = [loc.lat, loc.lon];
 
-    // Clear previous dynamic layers
+    // Clear previous dynamic detail layers
     this.layers.riskZones.clearLayers();
     this.layers.previousLandslides.clearLayers();
     this.layers.villages.clearLayers();
@@ -67,14 +141,14 @@ class NeLensMapEngine {
     this.bufferCircle = L.circle(center, {
       radius: radiusMeters,
       color: riskCol,
-      weight: 2,
+      weight: 2.5,
       opacity: 0.9,
       fillColor: riskCol,
-      fillOpacity: 0.12,
+      fillOpacity: isCritical ? 0.22 : 0.12,
       dashArray: isCritical ? "6, 6" : null
     }).addTo(this.layers.riskZones);
 
-    // 2. RISK ZONE POLYGON (Simulated steep slope catchment)
+    // 2. RISK ZONE POLYGON
     const polyCoords = [
       [loc.lat + 0.016, loc.lon - 0.012],
       [loc.lat + 0.021, loc.lon + 0.008],
@@ -85,63 +159,26 @@ class NeLensMapEngine {
     ];
     L.polygon(polyCoords, {
       color: riskCol,
-      weight: 1.5,
+      weight: 1.8,
       fillColor: riskCol,
-      fillOpacity: isCritical ? 0.28 : 0.18
+      fillOpacity: isCritical ? 0.32 : 0.20
     }).bindTooltip(`<b>Hazard Catchment:</b> ${loc.corridor_name}<br>Risk: ${loc.risk_score}/100 (${loc.risk_level})`, {
       sticky: true
     }).addTo(this.layers.riskZones);
 
-    // 3. CENTROID PIN (Active Location)
-    const pinHtml = `
-      <div style="position:relative; width:34px; height:34px; display:flex; align-items:center; justify-content:center;">
-        <div style="position:absolute; width:36px; height:36px; border-radius:50%; background:${riskCol}; opacity:0.35; animation: pulse 1.5s infinite ease-in-out;"></div>
-        <div style="width:18px; height:18px; border-radius:50%; background:${riskCol}; border:2.5px solid #ffffff; box-shadow:0 0 14px ${riskCol};"></div>
-      </div>
-    `;
-    const centroidIcon = L.divIcon({
-      className: 'centroid-icon',
-      html: pinHtml,
-      iconSize: [34, 34],
-      iconAnchor: [17, 17]
-    });
-
-    const centroidMarker = L.marker(center, { icon: centroidIcon }).addTo(this.layers.riskZones);
-    
-    // COMPACT POPUP FORMAT EXACTLY AS SPECIFIED
-    const compactPopupHtml = `
-      <div style="font-family:'Inter',sans-serif; min-width:210px; color:#0f172a; padding:2px;">
-        <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">LOCATION</div>
-        <div style="font-size:14px; font-weight:800; color:#0f172a; margin-bottom:4px;">${loc.corridor_name}</div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin:6px 0; background:${riskCol}15; padding:4px 8px; border-radius:4px;">
-          <span style="font-size:12px; font-weight:700;">Risk: ${loc.risk_score}/100</span>
-          <span style="font-size:11px; font-weight:800; color:${riskCol};">${loc.risk_level}</span>
-        </div>
-        <div style="font-size:11px; color:#334155; line-height:1.6;">
-          <div><b>Affected Radius:</b> ${loc.affected_radius_km} km</div>
-          <div><b>Previous Landslides:</b> ${loc.historical_reports ? loc.historical_reports.total_in_radius : 4}</div>
-          <div><b>Rainfall:</b> ${loc.risk_drivers.rainfall_24h.value} mm / 24h</div>
-          <div><b>Slope:</b> ${loc.risk_drivers.slope.value}°</div>
-          <div><b>Soil Moisture:</b> ${loc.risk_drivers.soil_moisture.value}%</div>
-        </div>
-      </div>
-    `;
-    centroidMarker.bindPopup(compactPopupHtml);
-    if (isSelected) centroidMarker.openPopup();
-
-    // 4. PREVIOUS LANDSLIDES MARKERS
+    // 3. PREVIOUS LANDSLIDES MARKERS
     if (loc.historical_reports && loc.historical_reports.events) {
       loc.historical_reports.events.forEach(ev => {
         const hIcon = L.divIcon({
           className: 'history-pin',
-          html: `<div style="background:#475569; color:#fff; border:1.5px solid #fff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:10px; box-shadow:0 0 8px rgba(0,0,0,0.5);">📚</div>`,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10]
+          html: `<div style="background:#475569; color:#fff; border:1.5px solid #fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:11px; box-shadow:0 0 8px rgba(0,0,0,0.5);">📚</div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
         });
         const hMarker = L.marker([ev.lat, ev.lon], { icon: hIcon }).addTo(this.layers.previousLandslides);
         hMarker.bindPopup(`
           <div style="font-family:'Inter',sans-serif; color:#0f172a; font-size:12px;">
-            <div style="font-weight:800; color:#b91c1c;">● Previous Event (${ev.time_ago})</div>
+            <div style="font-weight:800; color:#b91c1c;">● Previous Landslide Event (${ev.time_ago})</div>
             <div style="font-weight:700; margin:2px 0;">${ev.type}</div>
             <div style="font-size:11px; color:#64748b;">${ev.affected}</div>
             <div style="font-size:11px; margin-top:4px;">${ev.description}</div>
@@ -151,25 +188,23 @@ class NeLensMapEngine {
       });
     }
 
-    // 5. VILLAGES IN VICINITY
-    const villageOffsets = [
-      { name: loc.exposure.villages_list[0] || "Tuirial Veng", dLat: 0.008, dLon: -0.007, pop: "1,840" },
-      { name: loc.exposure.villages_list[1] || "Durtlang North", dLat: 0.014, dLon: 0.006, pop: "2,120" },
-      { name: loc.exposure.villages_list[2] || "Sihphir Outskirts", dLat: -0.011, dLon: -0.009, pop: "860" }
-    ];
-    villageOffsets.forEach(v => {
+    // 4. VILLAGES IN VICINITY
+    const villageList = loc.exposure.villages_list || ["Tuirial Veng", "Durtlang North", "Sihphir Outskirts"];
+    villageList.forEach((vName, idx) => {
+      const dLat = (idx === 0 ? 0.008 : (idx === 1 ? 0.014 : -0.011));
+      const dLon = (idx === 0 ? -0.007 : (idx === 1 ? 0.006 : -0.009));
       const vIcon = L.divIcon({
         className: 'village-pin',
-        html: `<div style="background:#0284c7; color:#fff; border:1.5px solid #fff; border-radius:4px; padding:1px 5px; font-size:10px; font-weight:700; white-space:nowrap; box-shadow:0 0 8px rgba(2,132,199,0.5);">🏘 ${v.name}</div>`,
-        iconSize: [80, 20],
-        iconAnchor: [40, 10]
+        html: `<div style="background:#0284c7; color:#fff; border:1.5px solid #fff; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:700; white-space:nowrap; box-shadow:0 0 8px rgba(2,132,199,0.5);">🏘 ${vName}</div>`,
+        iconSize: [85, 22],
+        iconAnchor: [42, 11]
       });
-      L.marker([loc.lat + v.dLat, loc.lon + v.dLon], { icon: vIcon })
-        .bindPopup(`<b>Village: ${v.name}</b><br>Est. Population: ${v.pop}<br>Status: Inside ${loc.affected_radius_km} km Hazard Buffer`)
+      L.marker([loc.lat + dLat, loc.lon + dLon], { icon: vIcon })
+        .bindPopup(`<b>Village: ${vName}</b><br>Status: Monitored in ${loc.district}`)
         .addTo(this.layers.villages);
     });
 
-    // 6. ROADS (Polyline vectors)
+    // 5. ROADS
     const roadPoints = [
       [loc.lat - 0.024, loc.lon - 0.016],
       [loc.lat - 0.012, loc.lon - 0.009],
@@ -180,10 +215,10 @@ class NeLensMapEngine {
     L.polyline(roadPoints, {
       color: "#f59e0b",
       weight: 4,
-      dashArray: "1, 6"
-    }).bindTooltip("<b>Road Network:</b> NH-54 Bypass Corridor (High Vulnerability)", { sticky: true }).addTo(this.layers.roads);
+      dashArray: "2, 6"
+    }).bindTooltip(`<b>Road Corridor:</b> ${loc.exposure.roads_list ? loc.exposure.roads_list[0] : 'High Vulnerability Section'}`, { sticky: true }).addTo(this.layers.roads);
 
-    // 7. RIVERS / GULLIES
+    // 6. RIVERS / GULLIES
     const riverPoints = [
       [loc.lat + 0.028, loc.lon - 0.022],
       [loc.lat + 0.015, loc.lon - 0.015],
@@ -193,29 +228,29 @@ class NeLensMapEngine {
     ];
     L.polyline(riverPoints, {
       color: "#38bdf8",
-      weight: 3,
+      weight: 3.5,
       opacity: 0.85
-    }).bindTooltip("<b>Drainage Corridor:</b> Tuirial River Drainage", { sticky: true }).addTo(this.layers.rivers);
+    }).bindTooltip("<b>Drainage / Torrent Corridor</b>", { sticky: true }).addTo(this.layers.rivers);
 
-    // 8. MONITORING SENSORS
+    // 7. MONITORING SENSORS
     const sensorOffsets = [
-      { name: "AWS-Rain Gauge #04", dLat: 0.005, dLon: 0.008, type: "Tipping Bucket" },
-      { name: "TDR-Soil Sensor #02", dLat: -0.006, dLon: -0.005, type: "Volumetric Moisture" }
+      { name: "AWS-Rain Gauge", dLat: 0.005, dLon: 0.008, type: "Tipping Bucket Precipitation" },
+      { name: "TDR-Soil Sensor", dLat: -0.006, dLon: -0.005, type: "Volumetric Moisture & Pore Pressure" }
     ];
     sensorOffsets.forEach(s => {
       const sIcon = L.divIcon({
         className: 'sensor-pin',
-        html: `<div style="background:#10b981; color:#fff; border:1px solid #fff; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:10px;">📡</div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
+        html: `<div style="background:#10b981; color:#fff; border:1px solid #fff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:11px;">📡</div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
       });
       L.marker([loc.lat + s.dLat, loc.lon + s.dLon], { icon: sIcon })
-        .bindPopup(`<b>Station: ${s.name}</b><br>Type: ${s.type}<br>Status: Operational (Live Stream)`)
+        .bindPopup(`<b>Station: ${s.name}</b><br>Type: ${s.type}<br>Status: Live Operational Stream`)
         .addTo(this.layers.sensors);
     });
 
     if (isSelected) {
-      this.map.flyTo(center, 13, { duration: 0.8 });
+      this.map.flyTo(center, 12.5, { duration: 0.9 });
     }
   }
 

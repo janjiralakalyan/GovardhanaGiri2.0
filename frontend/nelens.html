@@ -13,8 +13,9 @@
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   
-  <!-- Custom Stylesheet -->
+  <!-- Custom Stylesheets -->
   <link rel="stylesheet" href="/static/css/nelens.css">
+  <link rel="stylesheet" href="/static/css/terrain_3d.css">
 </head>
 <body>
 
@@ -33,12 +34,23 @@
     <nav class="header-nav">
       <a class="nav-link active" href="#overview">Overview</a>
       <a class="nav-link" href="#map">Risk Map</a>
+      <a class="nav-link" href="#section-3d-slope">3D Slope DEM</a>
       <a class="nav-link" href="#history">Historical Events</a>
       <a class="nav-link" href="#alerts">Alerts</a>
       <a class="nav-link" href="#reports">Reports</a>
     </nav>
 
     <div class="header-controls">
+      <!-- Switch to GovardhanaGiri Telangana Floods -->
+      <a href="/floods" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background:#0284c7; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700;">
+        🌊 Telangana Floods
+      </a>
+
+      <!-- Launch Fullscreen 3D DEM Modal -->
+      <button class="t3d-btn" id="btn-nelens-3d-modal" style="background:#475569; color:#fff; border-color:#64748b;">
+        🌐 3D DEM
+      </button>
+
       <!-- Location Selector -->
       <div class="location-dropdown-wrap">
         <label for="location-selector">District:</label>
@@ -315,6 +327,17 @@
           </div>
 
         </div>
+
+        <!-- 3D GEOTECHNICAL SLOPE SLIP-SURFACE DEM SECTION -->
+        <section class="white-card" id="section-3d-slope" style="margin-top: 14px;">
+          <div class="card-header-simple" style="display:flex; justify-content:space-between; align-items:center;">
+            <h3><span>⛰️</span> 3D GEOTECHNICAL SLOPE SLIP-SURFACE & FACTOR OF SAFETY DEM</h3>
+            <div style="display:flex; gap:8px;">
+              <button class="t3d-btn" id="btn-nelens-fullscreen-3d" style="background:#0284c7; color:#fff;">⛶ Fullscreen 3D</button>
+            </div>
+          </div>
+          <div id="nelens-3d-slope-mount" style="min-height: 440px;"></div>
+        </section>
       </div>
 
       <!-- ======================================================================
@@ -510,8 +533,12 @@
     </div>
   </div>
 
-  <!-- Leaflet & App Scripts -->
+  <!-- Leaflet & 3D Three.js Engine Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="/static/js/terrain_3d.js"></script>
+  <script src="/static/js/terrain_3d_ui.js"></script>
   <script src="/static/js/nelens_map.js"></script>
   <script src="/static/js/nelens_app.js"></script>
 </body>

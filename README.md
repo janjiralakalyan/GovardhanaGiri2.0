@@ -18,9 +18,11 @@ GovardhanaGiri 2.0 is an end-to-end AI-powered Early Warning and Decision Suppor
 
 3. **High-Tech Emergency Operations Dashboard:**
    - **Interactive Geospatial Map (Leaflet.js Multi-Basemap):** Switchable between Dark Ops, Topo Contours (OpenTopoMap), and Satellite (ESRI), with color-coded radar pulse markers, danger buffer rings, and high-ground shelters.
+   - **3D WebGL Terrain & Geotechnical Slope Slip-Surface DEM (Three.js):** Real-time 3D simulation of river canyon flood surges with physical wave dynamics, alongside geotechnical Bishop circular failure planes, live Factor-of-Safety (FoS) calculations, and groundwater pore-pressure models.
    - **River Stage Hydrograph Meter:** Visual indicator comparing live water level to bankfull danger mark.
    - **"What-If" Cloudburst Simulator:** Sliders to stress-test real-time hydro-meteorological shocks (e.g., sudden 120 mm/hr cloudburst or 98% saturated soil) and observe instant AI re-evaluations in <20ms.
    - **Multi-Channel Emergency Alert Dispatcher:** Simulates automated SMS broadcasts to ward populations, public warning sirens (via native Web Audio API), and SDRF/NDRF team mobilization.
+   - **NE-LENS Northeast India Landslide System:** Comprehensive companion monitoring portal covering 52 active telemetry points across Aizawl, Hunthar, Gangtok, Shillong, and Dima Hasao.
 
 ---
 

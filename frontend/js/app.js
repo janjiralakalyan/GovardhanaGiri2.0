@@ -9,6 +9,7 @@ class GovardhanaGiriApp {
     this.stations = [];
     this.selectedStationId = "TEL-STN-03"; // Default: Medaram (SS Tadwai)
     this.mapEngine = null;
+    this.terrain3D = null;
     this.isSirenActive = false;
     this.autoRefreshInterval = null;
   }
@@ -18,19 +19,27 @@ class GovardhanaGiriApp {
     this.mapEngine = new FloodMapEngine('flood-map', (id) => this.selectStation(id));
     await this.mapEngine.init();
 
-    // 2. Setup Event Listeners
+    // 2. Initialize 3D Terrain & Hydrodynamic Surge Engine
+    if (typeof Terrain3DComponent !== 'undefined') {
+      this.terrain3D = new Terrain3DComponent('inspector-3d-terrain-mount', {
+        mode: 'flood',
+        title: '3D River Canyon & Inundation DEM (Telangana)'
+      });
+    }
+
+    // 3. Setup Event Listeners
     this.bindEvents();
 
-    // 3. Start Clock
+    // 4. Start Clock
     this.startClock();
 
-    // 4. Fetch Initial Station Data
+    // 5. Fetch Initial Station Data
     await this.fetchStations();
 
-    // 5. Fit All 10 Telangana Hotspots across the State
+    // 6. Fit All 10 Telangana Hotspots across the State
     this.mapEngine.fitAllStations();
 
-    // 6. Select Default Station for inspector without auto-zooming
+    // 7. Select Default Station for inspector without auto-zooming
     this.selectStation(this.selectedStationId, false);
   }
 
@@ -77,7 +86,7 @@ class GovardhanaGiriApp {
       });
     }
 
-    // Inspector Tabs (Telemetry vs Simulator vs Shelters)
+    // Inspector Tabs (Telemetry vs Simulator vs 3D Terrain vs Shelters)
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -85,6 +94,11 @@ class GovardhanaGiriApp {
         e.target.classList.add('active');
         const tabId = e.target.getAttribute('data-tab');
         document.getElementById(tabId).classList.add('active');
+
+        // If switching to 3D tab, trigger resize observer on Three.js canvas
+        if (tabId === 'tab-3d-terrain' && this.terrain3D && this.terrain3D.visualizer) {
+          setTimeout(() => this.terrain3D.visualizer.onWindowResize(), 50);
+        }
 
         // Show shelters only when the user is on the Shelters tab
         if (tabId === 'tab-shelters') {
@@ -100,6 +114,35 @@ class GovardhanaGiriApp {
         }
       });
     });
+
+    // 3D Fullscreen Modal Buttons
+    const open3dBtn = document.getElementById('btn-open-3d-modal');
+    if (open3dBtn) {
+      open3dBtn.addEventListener('click', () => {
+        const curr = this.stations.find(s => s.id === this.selectedStationId);
+        const tel = curr ? curr.telemetry : {};
+        window.openTerrain3DModal('flood', {
+          stationId: this.selectedStationId,
+          rainfall: tel.Rainfall_Intensity || 35.0,
+          saturation: tel.Soil_Saturation || 75.0,
+          waterLevel: tel.Water_Level || 3.8
+        });
+      });
+    }
+
+    const expand3dBtn = document.getElementById('btn-expand-3d');
+    if (expand3dBtn) {
+      expand3dBtn.addEventListener('click', () => {
+        const curr = this.stations.find(s => s.id === this.selectedStationId);
+        const tel = curr ? curr.telemetry : {};
+        window.openTerrain3DModal('flood', {
+          stationId: this.selectedStationId,
+          rainfall: tel.Rainfall_Intensity || 35.0,
+          saturation: tel.Soil_Saturation || 75.0,
+          waterLevel: tel.Water_Level || 3.8
+        });
+      });
+    }
 
     // Reset Map to State Overview (Fit All 10 Stations)
     const fitBtn = document.getElementById('btn-fit-all');
@@ -221,8 +264,19 @@ class GovardhanaGiriApp {
     // Update Station Strip Active State
     this.renderStationStrip();
 
-    // Update Inspector UI
+    // Update Inspector UI & 3D Terrain
     this.updateInspectorUI(stn);
+  }
+
+  trigger3DFromMap(stationId) {
+    this.selectStation(stationId, true);
+    // Switch to 3D tab
+    const tab3dBtn = document.querySelector('.tab-btn[data-tab="tab-3d-terrain"]');
+    if (tab3dBtn) tab3dBtn.click();
+    const mount = document.getElementById('tab-3d-terrain');
+    if (mount) {
+      mount.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   updateInspectorUI(stn) {
@@ -290,7 +344,12 @@ class GovardhanaGiriApp {
     document.getElementById('slider-rain-1h').value = stn.telemetry.Rainfall_1h;
     document.getElementById('slider-rain-1h-val').textContent = `${stn.telemetry.Rainfall_1h} mm`;
 
-    // 5. Update Shelters List
+    // 5. Update 3D Terrain & Hydrodynamic Component
+    if (this.terrain3D) {
+      this.terrain3D.updateWithStationTelemetry(stn);
+    }
+
+    // 6. Update Shelters List
     const shelterContainer = document.getElementById('shelter-list-container');
     shelterContainer.innerHTML = '';
     stn.shelters.forEach(sh => {
