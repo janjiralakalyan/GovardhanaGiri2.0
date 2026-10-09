@@ -97,8 +97,8 @@ const CopilotApp = {
     document.querySelectorAll(".btn-lang-tab").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         document.querySelectorAll(".btn-lang-tab").forEach((b) => b.classList.remove("active"));
-        e.target.classList.add("active");
-        this.activeLang = e.target.dataset.lang;
+        btn.classList.add("active");
+        this.activeLang = btn.dataset.lang;
         this.updateBroadcastDisplay();
       });
     });
