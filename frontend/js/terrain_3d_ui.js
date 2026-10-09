@@ -925,12 +925,11 @@ class Terrain3DComponent {
       const alarmPill = document.getElementById(`${this.mountId}-alarm-pill`);
 
       if (alarmBanner && alarmTitle && alarmDetails && alarmPill) {
-        if (data.alarmTriggered) {
+        if (data.alarmTriggered && data.alarmLevel === 'CRITICAL') {
           alarmBanner.style.display = 'flex';
-          const isCrit = data.alarmLevel === 'CRITICAL';
-          alarmBanner.className = `t3d-alarm-banner ${isCrit ? 'alarm-critical' : 'alarm-warning'}`;
-          alarmPill.className = `t3d-alarm-status-pill ${isCrit ? 'crit' : 'warn'}`;
-          alarmPill.textContent = isCrit ? '🚨 CRITICAL SIREN ACTIVE' : '⚠️ ALARM ARMED';
+          alarmBanner.className = 't3d-alarm-banner alarm-critical';
+          alarmPill.className = 't3d-alarm-status-pill crit';
+          alarmPill.textContent = '🚨 CRITICAL SIREN ACTIVE';
 
           if (data.mode === 'flood') {
             const hasDam = data.stationId === 'TEL-STN-07' || data.stationId === 'TEL-STN-02';

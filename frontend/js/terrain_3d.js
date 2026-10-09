@@ -378,6 +378,25 @@ class Terrain3DVisualizer {
     this.init();
   }
 
+  createDropletTexture() {
+    if (this._dropletTexture) return this._dropletTexture;
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+    grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.8)');
+    grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.25)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(32, 32, 32, 0, Math.PI * 2);
+    ctx.fill();
+    this._dropletTexture = new THREE.CanvasTexture(canvas);
+    return this._dropletTexture;
+  }
+
   /* -------------------------------------------------------------
      AREA TOPOGRAPHIC REGISTRY (Telangana & Northeast Hotspots)
      ------------------------------------------------------------- */
@@ -1423,10 +1442,12 @@ class Terrain3DVisualizer {
     geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const mat = new THREE.PointsMaterial({
-      size: 1.8,
+      size: 2.2,
+      map: this.createDropletTexture(),
+      alphaTest: 0.01,
       vertexColors: true,
       transparent: true,
-      opacity: 0.82,
+      opacity: 0.85,
       blending: THREE.AdditiveBlending
     });
 
@@ -1464,9 +1485,11 @@ class Terrain3DVisualizer {
 
     const sprayMat = new THREE.PointsMaterial({
       color: 0xffffff,
-      size: 1.4,
+      size: 1.8,
+      map: this.createDropletTexture(),
+      alphaTest: 0.01,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.78,
       blending: THREE.AdditiveBlending
     });
 
@@ -1941,7 +1964,9 @@ class Terrain3DVisualizer {
     sprayGeom.setAttribute('position', new THREE.BufferAttribute(sprayPos, 3));
     const damSprayMat = new THREE.PointsMaterial({
       color: 0xffffff,
-      size: 1.6,
+      size: 2.0,
+      map: this.createDropletTexture(),
+      alphaTest: 0.01,
       transparent: true,
       opacity: 0.85,
       blending: THREE.AdditiveBlending
@@ -1995,7 +2020,9 @@ class Terrain3DVisualizer {
     sprayGeom.setAttribute('position', new THREE.BufferAttribute(sprayPos, 3));
     const sprayMat = new THREE.PointsMaterial({
       color: 0xe0f2fe,
-      size: 0.85,
+      size: 1.2,
+      map: this.createDropletTexture(),
+      alphaTest: 0.01,
       transparent: true,
       opacity: 0.8,
       blending: THREE.AdditiveBlending
@@ -3456,19 +3483,19 @@ class Terrain3DVisualizer {
      ------------------------------------------------------------- */
   buildRainSystem() {
     const rain = this.options.rainfall || 0;
-    const rainCount = Math.min(5500, Math.floor(rain * 38));
+    const rainCount = Math.min(750, Math.floor(rain * 6));
     if (rainCount <= 0) return;
 
     const rainGeom = new THREE.BufferGeometry();
     const rainPositions = new Float32Array(rainCount * 3);
     const rainVelocities = [];
 
-    const intensityFactor = Math.min(2.5, 0.8 + (rain / 50) * 0.9);
+    const intensityFactor = Math.min(2.2, 0.8 + (rain / 50) * 0.8);
 
     for (let i = 0; i < rainCount; i++) {
-      rainPositions[i * 3] = (Math.random() - 0.5) * 140;
-      rainPositions[i * 3 + 1] = Math.random() * 70 + 5;
-      rainPositions[i * 3 + 2] = (Math.random() - 0.5) * 140;
+      rainPositions[i * 3] = (Math.random() - 0.5) * 85;
+      rainPositions[i * 3 + 1] = Math.random() * 50 + 5;
+      rainPositions[i * 3 + 2] = (Math.random() - 0.5) * 85;
       
       rainVelocities.push({
         vy: (2.2 + Math.random() * 2.8) * intensityFactor,
@@ -3482,9 +3509,11 @@ class Terrain3DVisualizer {
 
     const rainMat = new THREE.PointsMaterial({
       color: rain > 80 ? 0xbae6fd : 0x93c5fd,
-      size: Math.min(1.4, 0.65 + (rain / 120) * 0.75),
+      size: Math.min(0.65, 0.32 + (rain / 120) * 0.28),
+      map: this.createDropletTexture(),
+      alphaTest: 0.01,
       transparent: true,
-      opacity: Math.min(0.88, 0.45 + (rain / 100) * 0.4),
+      opacity: Math.min(0.42, 0.18 + (rain / 100) * 0.18),
       blending: THREE.AdditiveBlending
     });
 
@@ -3501,25 +3530,30 @@ class Terrain3DVisualizer {
     const sat = this.options.saturation;
     const t = this.options.timelineHour;
 
-    const waveSurgeFactor = Math.exp(-Math.pow(t - 1.5, 2) / 8.0);
-    const dynamicStage = Math.max(0.8, this.options.waterLevel + (waveSurgeFactor * 2.8) - 1.0);
+    const isPresentBaseline = (this.options.riskEvolutionPhase === 1);
+    const waveSurgeFactor = isPresentBaseline ? 0 : Math.exp(-Math.pow(t - 1.5, 2) / 8.0);
+    const dynamicStage = isPresentBaseline 
+      ? Math.min(1.8, (this.options.waterLevel || 3.8) * 0.4) 
+      : Math.max(0.8, this.options.waterLevel + (waveSurgeFactor * 2.8) - 1.0);
 
     if (profile.mode === 'flood') {
-      const targetWaterY = -3.0 + (dynamicStage * 1.05) + (rain / 120) * 2.2;
+      const targetWaterY = isPresentBaseline
+        ? -2.5 + (dynamicStage * 0.1)
+        : -3.0 + (dynamicStage * 1.05) + (rain / 120) * 2.2;
       if (this.waterMesh) {
         this.waterMesh.position.y = targetWaterY;
 
         // Dynamic water color reflecting turbidity and flood surge
         if (this.waterMesh.material && this.waterMesh.material.color && typeof this.waterMesh.material.color.setHex === 'function') {
-          if (dynamicStage > (profile.dangerWaterLevel * 0.85) || rain > 80) {
+          if (!isPresentBaseline && (dynamicStage > (profile.dangerWaterLevel * 0.85) || rain > 80)) {
             this.waterMesh.material.color.setHex(0x991b1b); // Muddy critical red
             this.waterMesh.material.opacity = 0.95;
-          } else if (dynamicStage > (profile.dangerWaterLevel * 0.55) || rain > 45) {
+          } else if (!isPresentBaseline && (dynamicStage > (profile.dangerWaterLevel * 0.55) || rain > 45)) {
             this.waterMesh.material.color.setHex(0xd97706); // Turbid amber
             this.waterMesh.material.opacity = 0.88;
           } else {
             this.waterMesh.material.color.setHex(0x0284c7); // Clear blue
-            this.waterMesh.material.opacity = 0.78;
+            this.waterMesh.material.opacity = 0.75;
           }
         }
       }

@@ -132,9 +132,9 @@ class GovardhanaGiriApp {
       if (typeof window.openTerrain3DModal === 'function') {
         window.openTerrain3DModal('flood', {
           stationId: this.selectedStationId || (curr && curr.id) || 'TEL-STN-03',
-          rainfall: tel.Rainfall_Intensity || 35.0,
-          saturation: tel.Soil_Saturation || 75.0,
-          waterLevel: tel.Water_Level || 3.8,
+          rainfall: tel.Rainfall_Intensity !== undefined ? tel.Rainfall_Intensity : 12.0,
+          saturation: tel.Soil_Saturation !== undefined ? tel.Soil_Saturation : 55.0,
+          waterLevel: tel.Water_Level !== undefined ? tel.Water_Level : 2.4,
           autoRunSimulation: autoRunSim
         });
       }
