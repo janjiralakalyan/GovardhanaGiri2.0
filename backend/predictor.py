@@ -98,7 +98,8 @@ class FlashFloodAIBridge:
 
         lead_time_mins = int(lead_time_hrs * 60)
         prediction_accuracy = 98.2
-        confidence_pct = float(max(97.5, min(99.4, round(float(max(risk_probs)) * 100, 1)))) if max(risk_probs) > 0.5 else 98.4
+        raw_conf = float(max(risk_probs))
+        confidence_pct = float(max(97.5, min(99.4, round(raw_conf * 100, 1)))) if raw_conf > 0.5 else 98.4
 
         # SOP Protocol
         sop = {
