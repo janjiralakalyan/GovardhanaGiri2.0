@@ -335,6 +335,12 @@ class Terrain3DVisualizer {
     this.rainParticles = null;
     this.runoffParticles = null;
     this.dangerContoursGroup = null;
+    this.skyDomeMesh = null;
+    this.mountainMistGroup = null;
+    this.mountainMistParticles = [];
+    this.lowerValleyDebrisMesh = null;
+    this.riverStreamMesh = null;
+    this.debrisSplinterRubbleGroup = null;
 
     // Dam Engineering & Hydrodynamic Spillway System
     this.damGates = [];
@@ -832,10 +838,10 @@ class Terrain3DVisualizer {
   }
 
   setupLighting() {
-    this.ambientLight = new THREE.AmbientLight(0x38bdf8, 0.45);
+    this.ambientLight = new THREE.AmbientLight(0x38bdf8, 0.52);
     this.scene.add(this.ambientLight);
 
-    this.sunLight = new THREE.DirectionalLight(0xfff7ed, 1.35);
+    this.sunLight = new THREE.DirectionalLight(0xfff7ed, 1.45);
     this.sunLight.position.set(85, 110, 55);
     this.sunLight.castShadow = true;
     this.sunLight.shadow.mapSize.width = 2048;
@@ -846,9 +852,10 @@ class Terrain3DVisualizer {
     this.sunLight.shadow.camera.right = 65;
     this.sunLight.shadow.camera.top = 65;
     this.sunLight.shadow.camera.bottom = -65;
+    this.sunLight.shadow.bias = -0.0005;
     this.scene.add(this.sunLight);
 
-    this.hemiLight = new THREE.HemisphereLight(0x0ea5e9, 0x0f172a, 0.7);
+    this.hemiLight = new THREE.HemisphereLight(0x0ea5e9, 0x1c1917, 0.75);
     this.scene.add(this.hemiLight);
 
     this.hazardLight = new THREE.PointLight(0xef4444, 2.2, 50);
@@ -877,6 +884,11 @@ class Terrain3DVisualizer {
     if (this.treesGroup) this.scene.remove(this.treesGroup);
     if (this.markersGroup) this.scene.remove(this.markersGroup);
     if (this.settlementsGroup) this.scene.remove(this.settlementsGroup);
+    if (this.skyDomeMesh) this.scene.remove(this.skyDomeMesh);
+    if (this.mountainMistGroup) this.scene.remove(this.mountainMistGroup);
+    if (this.lowerValleyDebrisMesh) this.scene.remove(this.lowerValleyDebrisMesh);
+    if (this.riverStreamMesh) this.scene.remove(this.riverStreamMesh);
+    if (this.debrisSplinterRubbleGroup) this.scene.remove(this.debrisSplinterRubbleGroup);
     this.safeZoneGroup = null;
 
     this.markersGroup = new THREE.Group();
@@ -893,6 +905,8 @@ class Terrain3DVisualizer {
     this.dustCloudsGroup = new THREE.Group();
     this.treesGroup = new THREE.Group();
     this.seepageStreamlinesGroup = new THREE.Group();
+    this.mountainMistGroup = new THREE.Group();
+    this.debrisSplinterRubbleGroup = new THREE.Group();
 
     this.scene.add(this.markersGroup);
     this.scene.add(this.settlementsGroup);
@@ -908,8 +922,13 @@ class Terrain3DVisualizer {
     this.scene.add(this.dustCloudsGroup);
     this.scene.add(this.treesGroup);
     this.scene.add(this.seepageStreamlinesGroup);
+    this.scene.add(this.mountainMistGroup);
+    this.scene.add(this.debrisSplinterRubbleGroup);
 
     const profile = this.getCurrentProfile();
+
+    // 1. Build Atmospheric Sky Dome & Natural Lighting Environment
+    this.buildAtmosphericSkyDome(profile);
 
     if (profile.mode === 'flood') {
       this.buildDynamicAreaTerrain(profile);
@@ -923,10 +942,13 @@ class Terrain3DVisualizer {
       this.buildFloodMarkers(profile);
     } else {
       this.buildLandslideSlopeTerrain(profile);
+      this.buildDriftingMountainMist(profile);
       this.buildSlipFailurePlane(profile);
       this.buildTensionCracks(profile);
       this.buildSlidingLandmass(profile);
       this.buildRollingBouldersAndDebris(profile);
+      this.buildLowerValleyDebrisDeposit(profile);
+      this.buildMountainValleyRiver(profile);
       this.buildDustClouds(profile);
       this.buildLandslideForestTrees(profile);
       this.buildLandslideSettlements(profile);
@@ -2642,11 +2664,200 @@ class Terrain3DVisualizer {
   }
 
   /* -------------------------------------------------------------
+     CINEMATIC ATMOSPHERIC SKY DOME & MOUNTAIN ENVIRONMENT
+     ------------------------------------------------------------- */
+  buildAtmosphericSkyDome(profile) {
+    if (this.skyDomeMesh) this.scene.remove(this.skyDomeMesh);
+
+    // Large inverted sky hemisphere
+    const skyGeom = new THREE.SphereGeometry(380, 32, 20);
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    const grad = ctx.createLinearGradient(0, 0, 0, 512);
+    if (profile.mode === 'landslide') {
+      // Natural Northeast Himalayan mountain sky: deep blue zenith to misty ridge horizon
+      grad.addColorStop(0.0, '#0c1b33');
+      grad.addColorStop(0.35, '#1e3a5f');
+      grad.addColorStop(0.65, '#47698c');
+      grad.addColorStop(0.85, '#7895b2');
+      grad.addColorStop(1.0, '#9eb5cc');
+    } else {
+      // River basin sky
+      grad.addColorStop(0.0, '#081c2f');
+      grad.addColorStop(0.4, '#0f385c');
+      grad.addColorStop(0.7, '#1f5582');
+      grad.addColorStop(1.0, '#648ba8');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Soft fluffy cloud bands on horizon
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    for (let i = 0; i < 18; i++) {
+      const cx = (i * 32) % 512;
+      const cy = 340 + Math.sin(i * 1.5) * 35;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 45 + Math.cos(i) * 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const skyTex = new THREE.CanvasTexture(canvas);
+    const skyMat = new THREE.MeshBasicMaterial({
+      map: skyTex,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+
+    this.skyDomeMesh = new THREE.Mesh(skyGeom, skyMat);
+    this.skyDomeMesh.userData = { canvas, ctx, texture: skyTex };
+    this.scene.add(this.skyDomeMesh);
+
+    // Set background & atmospheric fog
+    this.scene.background = new THREE.Color(profile.mode === 'landslide' ? 0x1e293b : 0x0a1020);
+    this.scene.fog = new THREE.FogExp2(profile.mode === 'landslide' ? 0x243447 : 0x0c1b33, 0.0055);
+  }
+
+  /* -------------------------------------------------------------
+     DRIFTING VOLUMETRIC MOUNTAIN VALLEY MIST & CLOUD BILLOWS
+     ------------------------------------------------------------- */
+  buildDriftingMountainMist(profile) {
+    this.mountainMistParticles = [];
+    if (!this.mountainMistGroup) this.mountainMistGroup = new THREE.Group();
+
+    // Radial gradient mist puff texture
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    const radGrad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    radGrad.addColorStop(0.0, 'rgba(235, 245, 255, 0.38)');
+    radGrad.addColorStop(0.4, 'rgba(215, 230, 245, 0.22)');
+    radGrad.addColorStop(0.75, 'rgba(200, 220, 240, 0.08)');
+    radGrad.addColorStop(1.0, 'rgba(200, 220, 240, 0.0)');
+    ctx.fillStyle = radGrad;
+    ctx.fillRect(0, 0, 128, 128);
+    const mistTexture = new THREE.CanvasTexture(canvas);
+
+    // Generate 22 misty cloud planes lazily drifting across mountain valleys and saddles
+    for (let i = 0; i < 22; i++) {
+      const planeW = 24 + Math.random() * 28;
+      const planeH = 12 + Math.random() * 16;
+      const geom = new THREE.PlaneGeometry(planeW, planeH);
+      const mat = new THREE.MeshBasicMaterial({
+        map: mistTexture,
+        transparent: true,
+        opacity: 0.28 + Math.random() * 0.18,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.rotateX(-Math.PI * 0.45);
+
+      const px = (Math.random() - 0.5) * 85;
+      const pz = 5 + Math.random() * 40; // in lower valley & mid slopes
+      const py = this.getElevationAt(px, pz, profile) + 3.5 + Math.random() * 8.0;
+
+      mesh.position.set(px, py, pz);
+      this.mountainMistGroup.add(mesh);
+
+      this.mountainMistParticles.push({
+        mesh: mesh,
+        baseY: py,
+        vx: 0.12 + Math.random() * 0.22,
+        vz: (Math.random() - 0.5) * 0.08,
+        wobbleFreq: 0.4 + Math.random() * 0.5
+      });
+    }
+  }
+
+  /* -------------------------------------------------------------
+     DYNAMIC LOWER VALLEY DEBRIS ACCUMULATION & MUD INUNDATION CONE
+     ------------------------------------------------------------- */
+  buildLowerValleyDebrisDeposit(profile) {
+    // Sculpted viscoplastic alluvial mudflow deposit at the base of the mountain
+    const h = 6.5;
+    const geom = new THREE.ConeGeometry(24, h, 36);
+    geom.rotateX(-Math.PI / 2);
+    geom.scale(1.35, 0.35, 1.6);
+
+    const pos = geom.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const px = pos.getX(i);
+      const py = pos.getY(i);
+      const pz = pos.getZ(i);
+      // Add natural lobes and mud ripples
+      const ripple = Math.sin(px * 0.35 + pz * 0.2) * 0.6 + Math.cos(pz * 0.4) * 0.4;
+      pos.setY(i, py + ripple);
+    }
+    geom.computeVertexNormals();
+
+    const mat = new THREE.MeshStandardMaterial({
+      color: 0x5a3118,
+      roughness: 0.45,
+      metalness: 0.18,
+      transparent: true,
+      opacity: 0.95
+    });
+
+    this.lowerValleyDebrisMesh = new THREE.Mesh(geom, mat);
+    const valleyY = this.getElevationAt(0, 26, profile);
+    this.lowerValleyDebrisMesh.position.set(0, valleyY + 0.1, 26);
+    // Initially scaled flat (Hour 0)
+    this.lowerValleyDebrisMesh.scale.set(1.0, 0.02, 1.0);
+    this.lowerValleyDebrisMesh.castShadow = true;
+    this.lowerValleyDebrisMesh.receiveShadow = true;
+    this.scene.add(this.lowerValleyDebrisMesh);
+
+    // Add jagged splintered timber and boulder debris scattered in the runout zone
+    if (!this.debrisSplinterRubbleGroup) this.debrisSplinterRubbleGroup = new THREE.Group();
+    for (let i = 0; i < 20; i++) {
+      const rubbleMesh = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.8 + Math.random() * 1.4, 0),
+        new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.92 })
+      );
+      const rx = (Math.random() - 0.5) * 36;
+      const rz = 20 + Math.random() * 20;
+      const ry = this.getElevationAt(rx, rz, profile) + 0.6;
+      rubbleMesh.position.set(rx, ry, rz);
+      rubbleMesh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+      rubbleMesh.castShadow = true;
+      rubbleMesh.visible = false; // Becomes visible as slide progresses
+      this.debrisSplinterRubbleGroup.add(rubbleMesh);
+    }
+  }
+
+  /* -------------------------------------------------------------
+     NATURAL MOUNTAIN VALLEY BROOK / TORRENT
+     ------------------------------------------------------------- */
+  buildMountainValleyRiver(profile) {
+    const pts = [];
+    for (let z = -20; z <= 48; z += 4) {
+      const rx = Math.sin(z * 0.08) * 6 - 8;
+      const ry = this.getElevationAt(rx, z, profile) + 0.12;
+      pts.push(new THREE.Vector3(rx, ry, z));
+    }
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const riverGeom = new THREE.TubeGeometry(curve, 48, 1.6, 8, false);
+    const riverMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.15,
+      metalness: 0.35,
+      transparent: true,
+      opacity: 0.78
+    });
+    this.riverStreamMesh = new THREE.Mesh(riverGeom, riverMat);
+    this.scene.add(this.riverStreamMesh);
+  }
+
+  /* -------------------------------------------------------------
      LANDSLIDE REAL-TIME SLOPE & SLIP SURFACE SCENE BUILDERS
      ------------------------------------------------------------- */
   buildLandslideSlopeTerrain(profile) {
-    const size = 110;
-    const segments = 130;
+    const size = 115;
+    const segments = 140;
     const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
     geometry.rotateX(-Math.PI / 2);
 
@@ -2676,25 +2887,27 @@ class Terrain3DVisualizer {
         }
       } else {
         // High-Fidelity Northeast Mountain Geological Stratigraphy
+        const strata = Math.sin(elevation * 2.2) * 0.04;
         if (scarDist < 16 && z < 14) {
           // Exposed sheared wet shale & slickensided clay slip surface
           if (sat > 80 || rain > 45) {
-            color.setRGB(0.48, 0.20, 0.12); // Deep muddy saturated slip scar
+            color.setRGB(0.42 + strata, 0.18 + strata, 0.10); // Deep saturated muddy slickenside
           } else {
-            color.setRGB(0.68, 0.28, 0.18); // Dry exposed sheared clay
+            color.setRGB(0.65 + strata, 0.26 + strata, 0.16); // Dry exposed sheared clay
           }
-        } else if (elevation > 14) {
-          // Rocky high crest & jointed sandstone outcrop
-          color.setRGB(0.58, 0.52, 0.44);
+        } else if (elevation > 13) {
+          // Rocky high crest & jointed sandstone/granite outcrop
+          color.setRGB(0.55 + strata, 0.50 + strata, 0.44);
         } else if (z > 24) {
           // Remote valley alluvial flat & agricultural terraces
-          color.setRGB(0.24, 0.46, 0.22);
-        } else if (Math.abs(x) < 8 && z >= 10 && z <= 30) {
+          color.setRGB(0.22, 0.44 + strata, 0.20);
+        } else if (Math.abs(x) < 9 && z >= 8 && z <= 32) {
           // Main erosion gully / debris chute
-          color.setRGB(0.38, 0.28, 0.18);
+          color.setRGB(0.36 + strata, 0.24 + strata, 0.15);
         } else {
-          // Sub-tropical lush hillside forest colluvium
-          color.setRGB(0.14, 0.50, 0.22);
+          // Sub-tropical lush hillside forest colluvium with diverse mossy green tones
+          const foliageVariation = Math.sin(x * 0.4 + z * 0.3) * 0.04;
+          color.setRGB(0.12 + foliageVariation, 0.46 + foliageVariation, 0.20 + strata);
         }
       }
 
@@ -2708,8 +2921,8 @@ class Terrain3DVisualizer {
     const isWet = sat > 75 || rain > 40;
     const mat = new THREE.MeshStandardMaterial({
       vertexColors: true,
-      roughness: isWet ? 0.42 : 0.88,
-      metalness: isWet ? 0.22 : 0.05
+      roughness: isWet ? 0.38 : 0.86,
+      metalness: isWet ? 0.24 : 0.05
     });
 
     this.terrainMesh = new THREE.Mesh(geometry, mat);
@@ -3018,7 +3231,7 @@ class Terrain3DVisualizer {
   }
 
   /* -------------------------------------------------------------
-     SLOPE FOREST COVER (Trees That React Dynamically to Slide)
+     SLOPE FOREST COVER (Multi-Tier Flora with Drunken Trees Physics)
      ------------------------------------------------------------- */
   buildLandslideForestTrees(profile) {
     this.slopeTreesNodes = [];
@@ -3026,14 +3239,15 @@ class Terrain3DVisualizer {
 
     const treePositions = [
       // Stable high crest forest
-      { x: -34, z: -26 }, { x: -28, z: -22 }, { x: -22, z: -28 }, { x: 26, z: -26 }, { x: 32, z: -20 }, { x: 20, z: -24 },
-      // Slide zone trees (unstable on failure)
-      { x: -16, z: -10 }, { x: -8, z: -8 }, { x: 4, z: -10 }, { x: 14, z: -8 },
-      { x: -12, z: 2 }, { x: -4, z: 4 }, { x: 8, z: 2 }, { x: 16, z: 4 },
-      { x: -10, z: 12 }, { x: 2, z: 14 }, { x: 12, z: 12 },
+      { x: -36, z: -28, type: 'pine' }, { x: -30, z: -24, type: 'pine' }, { x: -24, z: -28, type: 'hardwood' }, 
+      { x: 26, z: -28, type: 'pine' }, { x: 34, z: -22, type: 'hardwood' }, { x: 22, z: -24, type: 'pine' },
+      // Direct slide zone trees (unstable "drunken forest" that tilts on failure)
+      { x: -18, z: -10, type: 'pine' }, { x: -8, z: -8, type: 'pine' }, { x: 4, z: -10, type: 'hardwood' }, { x: 14, z: -8, type: 'pine' },
+      { x: -14, z: 2, type: 'pine' }, { x: -4, z: 4, type: 'hardwood' }, { x: 8, z: 2, type: 'pine' }, { x: 16, z: 4, type: 'pine' },
+      { x: -10, z: 12, type: 'pine' }, { x: 2, z: 14, type: 'hardwood' }, { x: 12, z: 12, type: 'pine' },
       // Lateral ridges and valley fringes
-      { x: -32, z: 10 }, { x: -36, z: 24 }, { x: 34, z: 12 }, { x: 36, z: 26 },
-      { x: -26, z: 32 }, { x: 28, z: 34 }
+      { x: -34, z: 10, type: 'hardwood' }, { x: -38, z: 24, type: 'pine' }, { x: 34, z: 12, type: 'hardwood' }, { x: 38, z: 26, type: 'pine' },
+      { x: -28, z: 32, type: 'bamboo' }, { x: 28, z: 34, type: 'bamboo' }, { x: -4, z: 36, type: 'hardwood' }
     ];
 
     treePositions.forEach(pos => {
@@ -3041,22 +3255,55 @@ class Terrain3DVisualizer {
       const treeGroup = new THREE.Group();
 
       const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.95 });
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, 3.2, 8), trunkMat);
-      trunk.position.y = 1.6;
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.35, 3.4, 8), trunkMat);
+      trunk.position.y = 1.7;
       trunk.castShadow = true;
       treeGroup.add(trunk);
 
-      // Tiered Evergreen Pine Cones
-      const folMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.8 });
-      const cone1 = new THREE.Mesh(new THREE.ConeGeometry(1.8, 3.2, 7), folMat);
-      cone1.position.y = 3.6;
-      cone1.castShadow = true;
-      treeGroup.add(cone1);
+      if (pos.type === 'hardwood') {
+        // Lush Subtropical Mountain Hardwood (Oak / Rhododendron)
+        const crownMat = new THREE.MeshStandardMaterial({ color: 0x1b4332, roughness: 0.75 });
+        const crown1 = new THREE.Mesh(new THREE.DodecahedronGeometry(2.4, 1), crownMat);
+        crown1.position.y = 4.4;
+        crown1.castShadow = true;
+        treeGroup.add(crown1);
 
-      const cone2 = new THREE.Mesh(new THREE.ConeGeometry(1.3, 2.6, 7), folMat);
-      cone2.position.y = 5.2;
-      cone2.castShadow = true;
-      treeGroup.add(cone2);
+        const crown2 = new THREE.Mesh(new THREE.DodecahedronGeometry(1.6, 1), new THREE.MeshStandardMaterial({ color: 0x2d6a4f, roughness: 0.8 }));
+        crown2.position.set(0.6, 5.2, -0.4);
+        crown2.castShadow = true;
+        treeGroup.add(crown2);
+      } else if (pos.type === 'bamboo') {
+        // Mountain Bamboo clump
+        const culmMat = new THREE.MeshStandardMaterial({ color: 0x4d7c0f, roughness: 0.7 });
+        [-0.4, 0, 0.4].forEach(bx => {
+          const culm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 5.0, 6), culmMat);
+          culm.position.set(bx, 2.5, (Math.random() - 0.5) * 0.4);
+          culm.rotation.z = (bx * 0.1);
+          treeGroup.add(culm);
+        });
+        const foliage = new THREE.Mesh(new THREE.SphereGeometry(1.6, 8, 8), new THREE.MeshStandardMaterial({ color: 0x65a30d, roughness: 0.8 }));
+        foliage.position.y = 5.0;
+        treeGroup.add(foliage);
+      } else {
+        // Himalayan Pine (Triple-Tier Needles)
+        const folMat1 = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.8 });
+        const folMat2 = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.8 });
+
+        const cone1 = new THREE.Mesh(new THREE.ConeGeometry(2.2, 3.4, 8), folMat1);
+        cone1.position.y = 3.6;
+        cone1.castShadow = true;
+        treeGroup.add(cone1);
+
+        const cone2 = new THREE.Mesh(new THREE.ConeGeometry(1.6, 2.8, 8), folMat2);
+        cone2.position.y = 5.2;
+        cone2.castShadow = true;
+        treeGroup.add(cone2);
+
+        const cone3 = new THREE.Mesh(new THREE.ConeGeometry(1.0, 2.0, 7), folMat1);
+        cone3.position.y = 6.6;
+        cone3.castShadow = true;
+        treeGroup.add(cone3);
+      }
 
       treeGroup.position.set(pos.x, y, pos.z);
       this.treesGroup.add(treeGroup);
@@ -3068,9 +3315,25 @@ class Terrain3DVisualizer {
         inSlideZone: inSlideZone,
         origY: y,
         origZ: pos.z,
-        origX: pos.x
+        origX: pos.x,
+        treeType: pos.type
       });
     });
+
+    // Add fallen splintered logs in the erosion chute
+    for (let i = 0; i < 6; i++) {
+      const log = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.25, 0.3, 4.8, 6),
+        new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.95 })
+      );
+      const lx = (Math.random() - 0.5) * 16;
+      const lz = -4 + Math.random() * 24;
+      const ly = this.getElevationAt(lx, lz, profile) + 0.3;
+      log.position.set(lx, ly, lz);
+      log.rotation.set(Math.PI * 0.45, Math.random() * 3, Math.random() * 0.5);
+      log.castShadow = true;
+      this.treesGroup.add(log);
+    }
 
     this.scene.add(this.treesGroup);
   }
@@ -3081,6 +3344,7 @@ class Terrain3DVisualizer {
   createStiltChalet(seed = 0, zone = 'upper_slope') {
     const chaletGroup = new THREE.Group();
 
+    // 1. Foundation Footings & Timber Stilts
     const stiltMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.95 });
     const deckMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 });
     const wallColors = [0xfef08a, 0xfde047, 0xfef9c3, 0xd97706];
@@ -3092,7 +3356,8 @@ class Terrain3DVisualizer {
     const roofColors = [0xd97706, 0x0284c7, 0x059669, 0xb45309];
     const roofMat = new THREE.MeshStandardMaterial({
       color: roofColors[seed % roofColors.length],
-      roughness: 0.55
+      roughness: 0.45,
+      metalness: 0.35 // CGI Corrugated Metal Roof Sheen
     });
 
     // Dynamic interior window glow material
@@ -3103,62 +3368,95 @@ class Terrain3DVisualizer {
       roughness: 0.2
     });
 
-    // 1. Four to Six Vertical Structural Timber Stilts
+    // Stone footing piers at ground contact
+    const stonePiers = [];
+    const stilts = [];
     const stiltPositions = [[-1.2, -1.2], [1.2, -1.2], [-1.2, 1.2], [1.2, 1.2], [0, -1.2], [0, 1.2]];
     stiltPositions.forEach(([sx, sz]) => {
-      const stilt = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 2.4, 8), stiltMat);
-      stilt.position.set(sx, 1.2, sz);
+      // Concrete/Stone pad
+      const pad = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.4, 0.38), new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.9 }));
+      pad.position.set(sx, 0.2, sz);
+      pad.castShadow = true;
+      chaletGroup.add(pad);
+      stonePiers.push(pad);
+
+      // Vertical structural timber stilt
+      const stilt = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 2.4, 8), stiltMat);
+      stilt.position.set(sx, 1.3, sz);
       stilt.castShadow = true;
       chaletGroup.add(stilt);
+      stilts.push(stilt);
     });
 
     // 2. Diagonal Cross-Bracing Timber Struts
     const braceMat = new THREE.MeshStandardMaterial({ color: 0x573919, roughness: 0.9 });
     const brace1 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.8, 6), braceMat);
-    brace1.position.set(0, 1.2, 1.2);
+    brace1.position.set(0, 1.3, 1.2);
     brace1.rotation.z = Math.PI / 4;
     chaletGroup.add(brace1);
 
     const brace2 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.8, 6), braceMat);
-    brace2.position.set(0, 1.2, -1.2);
+    brace2.position.set(0, 1.3, -1.2);
     brace2.rotation.z = -Math.PI / 4;
     chaletGroup.add(brace2);
 
-    // 3. Cantilevered Timber Deck Platform
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.22, 3.2), deckMat);
-    deck.position.y = 2.4;
+    // 3. Cantilevered Timber Deck Platform with Veranda
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.22, 3.4), deckMat);
+    deck.position.y = 2.5;
     deck.castShadow = true;
     deck.receiveShadow = true;
     chaletGroup.add(deck);
 
+    // Veranda balustrade railing
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x573919, roughness: 0.85 });
+    const railFront = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.45, 0.08), railMat);
+    railFront.position.set(0, 2.85, 1.66);
+    chaletGroup.add(railFront);
+
     // 4. Woven Bamboo / Timber Slat Wall Box
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.9, 2.6), wallMat);
-    wall.position.y = 3.45;
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(2.8, 2.0, 2.8), wallMat);
+    wall.position.y = 3.6;
     wall.castShadow = true;
     wall.receiveShadow = true;
     chaletGroup.add(wall);
 
     // 5. Windows with Glowing Warm Evening Light
-    [-0.7, 0.7].forEach(wx => {
-      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), windowMat);
-      win.position.set(wx, 3.5, 1.32);
+    [-0.75, 0.75].forEach(wx => {
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.55), windowMat);
+      win.position.set(wx, 3.7, 1.42);
       chaletGroup.add(win);
     });
 
     // Front Wooden Door
-    const door = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.2), new THREE.MeshStandardMaterial({ color: 0x451a03 }));
-    door.position.set(0, 3.0, 1.32);
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 1.3), new THREE.MeshStandardMaterial({ color: 0x451a03 }));
+    door.position.set(0, 3.15, 1.42);
     chaletGroup.add(door);
 
-    // 6. Slanted Corrugated Tin / Gable Roof with Extended Overhangs
-    const roof = new THREE.Mesh(new THREE.ConeGeometry(2.3, 1.6, 4), roofMat);
-    roof.rotateY(Math.PI / 4);
-    roof.position.y = 5.2;
-    roof.castShadow = true;
-    chaletGroup.add(roof);
+    // 6. Double-Pitched Corrugated Metal Roof with Ridge Cap & Eaves
+    const roofGroup = new THREE.Group();
+    const roofLeft = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.1, 3.6), roofMat);
+    roofLeft.position.set(-0.95, 5.0, 0);
+    roofLeft.rotation.z = Math.PI * 0.18;
+    roofLeft.castShadow = true;
+    roofGroup.add(roofLeft);
 
-    // 7. Foundation Ground Fissure Split (Activates on slope shear failure)
-    const fissureGeom = new THREE.RingGeometry(1.8, 2.4, 20);
+    const roofRight = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.1, 3.6), roofMat);
+    roofRight.position.set(0.95, 5.0, 0);
+    roofRight.rotation.z = -Math.PI * 0.18;
+    roofRight.castShadow = true;
+    roofGroup.add(roofRight);
+
+    // Gable triangular end caps
+    const gableGeom = new THREE.ConeGeometry(1.6, 1.2, 4);
+    gableGeom.rotateY(Math.PI / 4);
+    const gableFront = new THREE.Mesh(gableGeom, wallMat);
+    gableFront.position.set(0, 4.9, 1.38);
+    roofGroup.add(gableFront);
+
+    chaletGroup.add(roofGroup);
+
+    // 7. Ground Foundation Tension Fissure Ring (Glows on shear failure)
+    const fissureGeom = new THREE.RingGeometry(1.8, 2.5, 20);
     fissureGeom.rotateX(-Math.PI / 2);
     const fissureMat = new THREE.MeshBasicMaterial({
       color: 0xef4444,
@@ -3167,14 +3465,48 @@ class Terrain3DVisualizer {
       opacity: 0
     });
     const fissureMesh = new THREE.Mesh(fissureGeom, fissureMat);
-    fissureMesh.position.y = 0.1;
+    fissureMesh.position.y = 0.12;
     chaletGroup.add(fissureMesh);
+
+    // 8. Dynamic Valley Mud Accumulation Mound (Rises to engulf lower valley chalets)
+    const mudMoundGeom = new THREE.CylinderGeometry(2.2, 3.2, 3.6, 16);
+    const mudMoundMat = new THREE.MeshStandardMaterial({
+      color: 0x5a3118,
+      roughness: 0.42,
+      metalness: 0.15,
+      transparent: true,
+      opacity: 0.95
+    });
+    const mudMound = new THREE.Mesh(mudMoundGeom, mudMoundMat);
+    mudMound.position.y = 0.0;
+    mudMound.scale.set(1.0, 0.01, 1.0); // starts flat
+    mudMound.visible = (zone === 'lower_valley' || zone === 'roadside');
+    chaletGroup.add(mudMound);
+
+    // 9. Splintered Timber & Rubble Debris Chunks (Activate on structural collapse)
+    const rubbleGroup = new THREE.Group();
+    for (let r = 0; r < 5; r++) {
+      const plank = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.08, 1.4 + Math.random() * 0.8),
+        new THREE.MeshStandardMaterial({ color: 0x573919, roughness: 0.9 })
+      );
+      plank.position.set((Math.random() - 0.5) * 3.2, 0.15, (Math.random() - 0.5) * 3.2);
+      plank.rotation.set(0, Math.random() * Math.PI, (Math.random() - 0.5) * 0.4);
+      rubbleGroup.add(plank);
+    }
+    rubbleGroup.visible = false;
+    chaletGroup.add(rubbleGroup);
 
     chaletGroup.userData = {
       windowMat,
       fissureMesh,
+      roofGroup,
+      stilts,
+      stonePiers,
+      mudMound,
+      rubbleGroup,
       zone,
-      bHeight: 5.2
+      bHeight: 5.6
     };
 
     return chaletGroup;
@@ -3183,43 +3515,52 @@ class Terrain3DVisualizer {
   buildLandslideSettlements(profile) {
     this.landslideHouseNodes = [];
 
-    // Remote Northeast Mountain Clusters
+    // 4 Distinct Northeast Mountain Settlements across Critical Zones
     const settlements = [
-      // Upper Slope spur (directly in sliding rupture path)
-      { name: 'Durtlang Upper Spur Huts', x: -14, z: 8, huts: 3, zone: 'upper_slope' },
-      { name: 'Ridge Crest Dwellings', x: 16, z: 6, huts: 3, zone: 'upper_slope' },
-      // Remote Valley Village (runout colluvium encroachment area)
-      { name: 'Tuirial Valley Remote Hamlet', x: -10, z: 26, huts: 4, zone: 'lower_valley' },
-      { name: 'Valley Roadside Settlement', x: 12, z: 30, huts: 4, zone: 'lower_valley' }
+      // 1. Upper Slope Spur (Direct Rupture & Shear Failure Zone)
+      { name: 'Durtlang Upper Spur Huts', clusterType: 'Rupture Shear Zone', x: -14, z: 8, huts: 4, zone: 'upper_slope', mslBase: 945 },
+      // 2. Ridge Crest Dwellings (Crown Tension & Scarp Fissure Zone)
+      { name: 'Ridge Crest Dwellings', clusterType: 'Crown Tension Zone', x: 16, z: 4, huts: 3, zone: 'ridge_crest', mslBase: 980 },
+      // 3. Tuirial Valley Remote Hamlet (Debris Runout & Mud Inundation Zone)
+      { name: 'Tuirial Valley Remote Hamlet', clusterType: 'Debris Runout & Mud Inundation Zone', x: -10, z: 26, huts: 4, zone: 'lower_valley', mslBase: 835 },
+      // 4. Mountain Highway Roadside (Rockfall Cutoff & Transportation Link)
+      { name: 'Valley Roadside Settlement', clusterType: 'Rockfall Cutoff & Highway Corridor', x: 14, z: 30, huts: 4, zone: 'roadside', mslBase: 840 }
     ];
 
     settlements.forEach((stn, sIdx) => {
       stn.hutsList = [];
       const node = {
         name: stn.name,
+        clusterType: stn.clusterType,
         x: stn.x,
         z: stn.z,
         zone: stn.zone,
+        mslBase: stn.mslBase,
         hutsList: [],
         status: 'safe',
         sprite: null
       };
 
       for (let i = 0; i < stn.huts; i++) {
-        const hx = stn.x + (i % 2) * 4.4 - 2.2 + (Math.random() - 0.5) * 0.6;
-        const hz = stn.z + Math.floor(i / 2) * 4.4 - 2.2 + (Math.random() - 0.5) * 0.6;
+        const hx = stn.x + (i % 2) * 5.2 - 2.6 + (Math.random() - 0.5) * 0.8;
+        const hz = stn.z + Math.floor(i / 2) * 5.2 - 2.6 + (Math.random() - 0.5) * 0.8;
         const hy = this.getElevationAt(hx, hz, profile);
 
         const chalet = this.createStiltChalet(sIdx * 4 + i, stn.zone);
         chalet.position.set(hx, hy, hz);
-        chalet.rotation.y = ((sIdx + i) * 0.5) % (Math.PI * 2);
+        chalet.rotation.y = ((sIdx + i) * 0.6) % (Math.PI * 2);
 
         this.settlementsGroup.add(chalet);
 
         const hutData = {
           group: chalet,
+          userData: chalet.userData,
           halo: chalet.userData.fissureMesh,
           windowMat: chalet.userData.windowMat,
+          roofGroup: chalet.userData.roofGroup,
+          stilts: chalet.userData.stilts,
+          mudMound: chalet.userData.mudMound,
+          rubbleGroup: chalet.userData.rubbleGroup,
           origRotX: 0,
           origRotZ: 0,
           origY: hy,
@@ -3236,15 +3577,31 @@ class Terrain3DVisualizer {
       const avgY = this.getElevationAt(stn.x, stn.z, profile);
       const sprite = this.createDynamicLabelSprite(
         stn.name,
-        `⛰️ ${stn.huts} Timber Stilt Dwellings • Elev +${Math.round(avgY + (profile.baseElevation || 800))}m MSL`,
+        `⛰️ ${stn.huts} Timber Stilt Structures • Elev +${Math.round(stn.mslBase)}m MSL`,
         'safe',
-        '📍'
+        '🏘️'
       );
-      sprite.position.set(stn.x, avgY + 7.2, stn.z);
+      sprite.position.set(stn.x, avgY + 7.8, stn.z);
       this.settlementsGroup.add(sprite);
       node.sprite = sprite;
 
       this.landslideHouseNodes.push(node);
+    });
+
+    // Add wooden roadside utility poles with wires
+    const poleMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.95 });
+    [-28, -14, 0, 16, 30].forEach((px, pIdx) => {
+      const pz = 24 + pIdx * 2.5;
+      const py = this.getElevationAt(px, pz, profile);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 5.2, 8), poleMat);
+      pole.position.set(px, py + 2.6, pz);
+      pole.castShadow = true;
+      this.settlementsGroup.add(pole);
+
+      // Crossarm
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.12, 0.12), poleMat);
+      arm.position.set(px, py + 4.9, pz);
+      this.settlementsGroup.add(arm);
     });
   }
 
@@ -3793,91 +4150,210 @@ class Terrain3DVisualizer {
         });
       }
 
-      // 5. Update Remote Mountain Settlements & Stilt Huts Physical Damage
-      let endangeredHutsCount = 0;
-      let totalHuts = 0;
+      // 5. Update Remote Mountain Settlements & Stilt Huts Physical Damage across 3-4 Hours
+      let simHour = 0;
+      if (this.currentSimStage !== undefined) {
+        simHour = this.currentSimStage;
+      } else {
+        simHour = Math.max(0, Math.min(4, Math.round((t + 2.0) / 1.5)));
+      }
+
+      const villageDetails = [];
+      let totalHutsCount = 0;
+      let impactedHutsCount = 0;
 
       if (this.landslideHouseNodes) {
-        this.landslideHouseNodes.forEach(stn => {
-          let stnEndangered = 0;
+        this.landslideHouseNodes.forEach((stn, sIdx) => {
+          let stnImpacted = 0;
+          let avgIntegrity = 100;
+          let avgTilt = 0;
+          let debrisDepth = 0;
+          let clusterStatus = 'safe';
+
+          if (stn.zone === 'upper_slope') {
+            // 1. DIRECT SHEAR RUPTURE ZONE (Durtlang Upper Spur)
+            if (simHour === 0) {
+              avgIntegrity = 100; avgTilt = 0.0; debrisDepth = 0.0; clusterStatus = 'safe';
+            } else if (simHour === 1) {
+              avgIntegrity = 94; avgTilt = 0.8; debrisDepth = 0.2; clusterStatus = 'threatened';
+            } else if (simHour === 2) {
+              avgIntegrity = 72; avgTilt = 4.8; debrisDepth = 0.6; clusterStatus = 'threatened';
+            } else if (simHour === 3) {
+              avgIntegrity = 22; avgTilt = 22.5; debrisDepth = 1.8; clusterStatus = 'sheared';
+            } else {
+              avgIntegrity = 8; avgTilt = 26.8; debrisDepth = 2.4; clusterStatus = 'destroyed';
+            }
+          } else if (stn.zone === 'ridge_crest') {
+            // 2. CROWN TENSION ZONE (Ridge Crest Dwellings)
+            if (simHour === 0) {
+              avgIntegrity = 100; avgTilt = 0.0; debrisDepth = 0.0; clusterStatus = 'safe';
+            } else if (simHour === 1) {
+              avgIntegrity = 98; avgTilt = 0.4; debrisDepth = 0.1; clusterStatus = 'safe';
+            } else if (simHour === 2) {
+              avgIntegrity = 82; avgTilt = 2.8; debrisDepth = 0.3; clusterStatus = 'threatened';
+            } else if (simHour === 3) {
+              avgIntegrity = 42; avgTilt = 12.0; debrisDepth = 0.8; clusterStatus = 'threatened';
+            } else {
+              avgIntegrity = 24; avgTilt = 18.2; debrisDepth = 1.2; clusterStatus = 'sheared';
+            }
+          } else if (stn.zone === 'lower_valley') {
+            // 3. DEBRIS RUNOUT & MUD INUNDATION ZONE (Tuirial Valley Remote Hamlet)
+            if (simHour === 0) {
+              avgIntegrity = 100; avgTilt = 0.0; debrisDepth = 0.0; clusterStatus = 'safe';
+            } else if (simHour === 1) {
+              avgIntegrity = 96; avgTilt = 0.2; debrisDepth = 0.2; clusterStatus = 'safe';
+            } else if (simHour === 2) {
+              avgIntegrity = 80; avgTilt = 1.5; debrisDepth = 0.5; clusterStatus = 'threatened';
+            } else if (simHour === 3) {
+              avgIntegrity = 45; avgTilt = 8.5; debrisDepth = 1.8; clusterStatus = 'inundated';
+            } else {
+              avgIntegrity = 10; avgTilt = 14.2; debrisDepth = 3.4; clusterStatus = 'buried';
+            }
+          } else if (stn.zone === 'roadside') {
+            // 4. ROCKFALL CUTOFF ZONE (Valley Roadside Settlement)
+            if (simHour === 0) {
+              avgIntegrity = 100; avgTilt = 0.0; debrisDepth = 0.0; clusterStatus = 'safe';
+            } else if (simHour === 1) {
+              avgIntegrity = 95; avgTilt = 0.2; debrisDepth = 0.1; clusterStatus = 'safe';
+            } else if (simHour === 2) {
+              avgIntegrity = 78; avgTilt = 2.0; debrisDepth = 0.6; clusterStatus = 'threatened';
+            } else if (simHour === 3) {
+              avgIntegrity = 35; avgTilt = 11.0; debrisDepth = 2.4; clusterStatus = 'sheared';
+            } else {
+              avgIntegrity = 12; avgTilt = 16.5; debrisDepth = 4.2; clusterStatus = 'buried';
+            }
+          }
+
           if (stn.hutsList) {
-            stn.hutsList.forEach(hut => {
-              totalHuts++;
-              if (hut.zone === 'upper_slope') {
-                if (this.targetSlideDisplacement > 3.5) {
-                  endangeredHutsCount++;
-                  stnEndangered++;
-                  hut.group.rotation.x = -0.36;
-                  hut.group.rotation.z = 0.14;
-                  if (hut.windowMat) {
-                    hut.windowMat.emissive.setHex(0xef4444);
-                    hut.windowMat.emissiveIntensity = 1.0;
-                  }
-                  if (hut.halo) hut.halo.material.opacity = 0.95;
-                } else if (this.targetSlideDisplacement > 1.0) {
-                  hut.group.rotation.x = -0.14;
-                  hut.group.rotation.z = 0.05;
-                  if (hut.windowMat) {
-                    hut.windowMat.emissive.setHex(0xf59e0b);
-                    hut.windowMat.emissiveIntensity = 0.85;
-                  }
-                  if (hut.halo) hut.halo.material.opacity = 0.55;
+            stn.hutsList.forEach((hut) => {
+              totalHutsCount++;
+              if (avgIntegrity < 60) {
+                impactedHutsCount++;
+                stnImpacted++;
+              }
+
+              // Apply 3D physical transformation
+              const radTiltX = (-avgTilt * Math.PI) / 180;
+              const radTiltZ = ((avgTilt * 0.3) * Math.PI) / 180;
+              hut.group.rotation.x = radTiltX;
+              hut.group.rotation.z = radTiltZ;
+
+              // Roof dislodgement at severe damage
+              if (hut.roofGroup) {
+                if (simHour >= 3 && (stn.zone === 'upper_slope' || stn.zone === 'roadside')) {
+                  hut.roofGroup.rotation.z = 0.28;
+                  hut.roofGroup.position.x = 0.3;
                 } else {
-                  hut.group.rotation.x = 0;
-                  hut.group.rotation.z = 0;
-                  if (hut.windowMat) {
-                    hut.windowMat.emissive.setHex(0xfbbf24);
-                    hut.windowMat.emissiveIntensity = 0.75;
-                  }
-                  if (hut.halo) hut.halo.material.opacity = 0;
+                  hut.roofGroup.rotation.z = 0;
+                  hut.roofGroup.position.x = 0;
                 }
-              } else if (hut.zone === 'lower_valley') {
-                if (this.targetSlideDisplacement > 9.0) {
-                  endangeredHutsCount++;
-                  stnEndangered++;
-                  hut.group.rotation.z = 0.24;
-                  if (hut.windowMat) {
-                    hut.windowMat.emissive.setHex(0xef4444);
-                    hut.windowMat.emissiveIntensity = 1.0;
+              }
+
+              // Buckled stilts
+              if (hut.stilts && hut.stilts.length > 0) {
+                hut.stilts.forEach((st, idx) => {
+                  if (simHour >= 3 && idx % 2 === 0) {
+                    st.rotation.z = 0.25;
+                  } else {
+                    st.rotation.z = 0;
                   }
-                  if (hut.halo) hut.halo.material.opacity = 0.95;
-                } else if (this.targetSlideDisplacement > 3.5) {
-                  if (hut.windowMat) {
-                    hut.windowMat.emissive.setHex(0xf59e0b);
-                  }
-                  if (hut.halo) hut.halo.material.opacity = 0.45;
+                });
+              }
+
+              // Mud mound rising around base
+              if (hut.mudMound) {
+                if (debrisDepth > 0.1) {
+                  hut.mudMound.visible = true;
+                  const mScaleY = Math.min(2.5, debrisDepth / 1.5);
+                  hut.mudMound.scale.set(1.0 + mScaleY * 0.3, mScaleY, 1.0 + mScaleY * 0.3);
+                  hut.mudMound.position.y = (mScaleY * 1.8) * 0.5;
                 } else {
-                  hut.group.rotation.z = 0;
-                  if (hut.windowMat) {
-                    hut.windowMat.emissive.setHex(0xfbbf24);
-                  }
-                  if (hut.halo) hut.halo.material.opacity = 0;
+                  hut.mudMound.scale.set(1.0, 0.01, 1.0);
+                  hut.mudMound.visible = false;
                 }
+              }
+
+              // Rubble chunks visible
+              if (hut.rubbleGroup) {
+                hut.rubbleGroup.visible = simHour >= 3;
+              }
+
+              // Window lantern lights
+              if (hut.windowMat) {
+                if (simHour >= 3) {
+                  hut.windowMat.emissive.setHex(0xef4444);
+                  hut.windowMat.emissiveIntensity = 1.0 + Math.sin(this.timelineClock * 8) * 0.4;
+                } else if (simHour === 2) {
+                  hut.windowMat.emissive.setHex(0xf59e0b);
+                  hut.windowMat.emissiveIntensity = 0.85;
+                } else {
+                  hut.windowMat.emissive.setHex(0xfbbf24);
+                  hut.windowMat.emissiveIntensity = 0.75;
+                }
+              }
+
+              // Tension fissure halo
+              if (hut.halo) {
+                hut.halo.material.opacity = simHour >= 3 ? 0.95 : (simHour === 2 ? 0.55 : 0);
               }
             });
           }
 
-          // Dynamic Landslide Village Billboard Tag Update
+          // Dynamic Village 3D Billboard Status Update
           if (stn.sprite && stn.sprite.userData) {
-            if (stnEndangered > 0) {
-              stn.status = 'critical';
-              stn.sprite.userData.statusType = 'critical';
-              stn.sprite.userData.subtitle = `🚨 Shear Failure / Debris Encroached (${this.targetSlideDisplacement.toFixed(1)}m Slip)`;
-            } else if (this.targetSlideDisplacement > 1.0) {
-              stn.status = 'warning';
-              stn.sprite.userData.statusType = 'warning';
-              stn.sprite.userData.subtitle = `⚠️ Micro-Displacement Warning (FoS ${this.calculatedFoS})`;
+            stn.status = clusterStatus;
+            stn.sprite.userData.statusType = clusterStatus;
+            if (clusterStatus === 'destroyed' || clusterStatus === 'buried') {
+              stn.sprite.userData.subtitle = `🔴 BURIED/ENGULFED • +${debrisDepth.toFixed(1)}m Mud (${stn.hutsList.length}/${stn.hutsList.length} Structures Destr.)`;
+            } else if (clusterStatus === 'sheared' || clusterStatus === 'inundated') {
+              stn.sprite.userData.subtitle = `🚨 SEVERELY DAMAGED • ${avgTilt.toFixed(1)}° Severe Tilt (FoS ${this.calculatedFoS})`;
+            } else if (clusterStatus === 'threatened') {
+              stn.sprite.userData.subtitle = `⚠️ FOUNDATION STRAIN • ${avgTilt.toFixed(1)}° Creep Tilt (Integrity ${avgIntegrity}%)`;
             } else {
-              stn.status = 'safe';
-              stn.sprite.userData.statusType = 'safe';
-              stn.sprite.userData.subtitle = `🟢 Slope Equilibrium (FoS ${this.calculatedFoS})`;
+              stn.sprite.userData.subtitle = `🟢 STABLE EQUILIBRIUM • FoS ${this.calculatedFoS} (Integrity 100%)`;
             }
             this.redrawLabelSprite(stn.sprite.userData);
           }
+
+          villageDetails.push({
+            index: sIdx,
+            name: stn.name,
+            clusterType: stn.clusterType,
+            zone: stn.zone,
+            x: stn.x,
+            z: stn.z,
+            elevationMSL: stn.mslBase,
+            totalHouses: stn.hutsList.length,
+            damagedHouses: stnImpacted,
+            structuralIntegrity: avgIntegrity,
+            foundationTilt: avgTilt.toFixed(1),
+            debrisDepthM: debrisDepth.toFixed(1),
+            status: clusterStatus
+          });
         });
       }
 
-      const isRoadBlocked = this.targetSlideDisplacement > 4.2;
+      const isRoadBlocked = simHour >= 3 || this.targetSlideDisplacement > 4.2;
+      if (this.lowlandRoadMesh && this.lowlandRoadMat) {
+        this.lowlandRoadMat.color.setHex(isRoadBlocked ? 0xdc2626 : 0x1e293b);
+      }
+
+      // Update valley debris deposit scale based on simHour
+      if (this.lowerValleyDebrisMesh) {
+        if (simHour >= 1) {
+          this.lowerValleyDebrisMesh.visible = true;
+          const vScaleY = simHour === 1 ? 0.15 : (simHour === 2 ? 0.40 : (simHour === 3 ? 0.85 : 1.35));
+          this.lowerValleyDebrisMesh.scale.set(1.0 + vScaleY * 0.35, vScaleY, 1.0 + vScaleY * 0.4);
+        } else {
+          this.lowerValleyDebrisMesh.scale.set(1.0, 0.02, 1.0);
+        }
+      }
+
+      if (this.debrisSplinterRubbleGroup) {
+        this.debrisSplinterRubbleGroup.children.forEach(r => {
+          r.visible = simHour >= 3;
+        });
+      }
 
       // 6. Debris Fan Mound Visibility & Scale
       if (this.debrisFanMesh) {
@@ -3893,8 +4369,9 @@ class Terrain3DVisualizer {
         factorOfSafety: this.calculatedFoS,
         porePressure: this.porePressureVal,
         slidingDisplacementMeters: this.targetSlideDisplacement.toFixed(1),
-        floodedHousesCount: endangeredHutsCount,
-        totalHouses: totalHuts,
+        floodedHousesCount: impactedHutsCount,
+        totalHouses: totalHutsCount,
+        villageDetails: villageDetails,
         isLowlandRoadCutoff: isRoadBlocked,
         rainfall: rain,
         saturation: sat,
@@ -4297,6 +4774,27 @@ class Terrain3DVisualizer {
       });
     }
 
+    // 1e-2. Drifting Volumetric Mountain Valley Mist Animation
+    if (this.mountainMistParticles && this.mountainMistParticles.length > 0 && this.options.mode !== 'flood') {
+      this.mountainMistParticles.forEach(m => {
+        m.mesh.position.x += m.vx * delta * 5.0;
+        m.mesh.position.z += m.vz * delta * 5.0;
+        m.mesh.position.y = m.baseY + Math.sin(elapsedTime * m.wobbleFreq) * 0.9;
+        if (m.mesh.position.x > 55) {
+          m.mesh.position.x = -55;
+        }
+      });
+    }
+
+    // 1e-3. Subtropical Canopy Gentle Wind Oscillation
+    if (this.landslideTreeNodes && this.landslideTreeNodes.length > 0 && this.options.mode !== 'flood') {
+      this.landslideTreeNodes.forEach((t, idx) => {
+        if (t.mesh && !t.mesh.userData.severed) {
+          t.mesh.rotation.z = Math.sin(elapsedTime * 1.6 + idx * 0.4) * 0.035;
+        }
+      });
+    }
+
     // 1f. Darcy Groundwater Seepage Pulse Animation
     if (this.seepageStreamlinesGroup && this.options.mode !== 'flood' && this.options.showSeepage) {
       const pulse = 0.5 + Math.sin(elapsedTime * 3.5) * 0.35;
@@ -4537,6 +5035,18 @@ class Terrain3DVisualizer {
     } else if (preset === 'shelter') {
       this.camera.position.set(-32, 28, 5);
       this.controls.target.set(0, 0, 0);
+    } else if (preset === 'action') {
+      // Cinematic low-angle looking up the scarp avalanche chute
+      this.camera.position.set(24, 18, 48);
+      this.controls.target.set(0, 8, 4);
+    } else if (preset === 'village') {
+      // High-resolution framing of hillside timber chalets
+      this.camera.position.set(-22, 16, 18);
+      this.controls.target.set(-6, 8, -4);
+    } else if (preset === 'scarp') {
+      // Overhead dramatics of the crown tension fissure & slip failure surface
+      this.camera.position.set(12, 38, -32);
+      this.controls.target.set(0, 16, -8);
     }
     this.controls.update();
   }
@@ -4576,40 +5086,60 @@ class Terrain3DVisualizer {
       sat = 38.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 0.38 : 2.2) : 2.2;
       tHour = 0.0;
-      leadTime = 'T+0.0h • Safe 4.0h Evacuation Buffer Remaining (98.2% AI Accuracy)';
-      alertMsg = '🟢 Baseflow stable. 4-Hour AI Risk Forecasting initialized (98.2% Accuracy).';
+      leadTime = isFlood 
+        ? 'T+0.0h • Safe 4.0h Evacuation Buffer Remaining (98.2% AI Accuracy)'
+        : 'T+0.0h • Stable 4.0h Safe Window (FoS 1.62 • Subsurface Intact)';
+      alertMsg = isFlood 
+        ? '🟢 Baseflow stable. 4-Hour AI Risk Forecasting initialized (98.2% Accuracy).'
+        : '🟢 T+0h STABLE SLOPE: Factor of Safety FoS 1.62. Slope regolith stable, all hillside settlements secure.';
     } else if (stage === 1) {
       // Hour 1 (+1h: Infiltration & Hydrodynamic Runoff Rise)
       rain = 58.0;
       sat = 68.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 0.65 : 3.40) : 3.40;
       tHour = 1.0;
-      leadTime = 'T+1.0h • 3.0h Safe Window Remaining (Inflow Surge Advancing)';
-      alertMsg = '🟡 T+1h Inflow Surge: Heavy precipitation infiltrating upper catchment; stream stage rising rapidly.';
+      leadTime = isFlood 
+        ? 'T+1.0h • 3.0h Safe Window Remaining (Inflow Surge Advancing)'
+        : 'T+1.0h • 3.0h Warning Window (Subsurface Infiltration & Saturation)';
+      alertMsg = isFlood 
+        ? '🟡 T+1h Inflow Surge: Heavy precipitation infiltrating upper catchment; stream stage rising rapidly.'
+        : '🟡 T+1h MONSOON INFILTRATION: Heavy 58mm/h rainfall penetrating soil. Hairline crown tension fissures detected; FoS drops to 1.34.';
     } else if (stage === 2) {
       // Hour 2 (+2h: Saturated Catchment Surge & Warning Threshold)
       rain = 98.0;
       sat = 86.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 0.88 : 4.60) : 4.60;
       tHour = 2.0;
-      leadTime = 'T+2.0h • 2.0h Evacuation Window (Orange Warning Threshold)';
-      alertMsg = '🟠 T+2h Surge Watch: Catchment saturated (86%). Pre-evacuation issued for low-lying riparian sectors.';
+      leadTime = isFlood 
+        ? 'T+2.0h • 2.0h Evacuation Window (Orange Warning Threshold)'
+        : 'T+2.0h • 2.0h Evacuation Window (Orange Slip Warning • Cracks 0.8m)';
+      alertMsg = isFlood 
+        ? '🟠 T+2h Surge Watch: Catchment saturated (86%). Pre-evacuation issued for low-lying riparian sectors.'
+        : '🟠 T+2h TENSION CRACK OPENING: Slip plane pore pressure reaches 48 kPa. Crown cracks expand to 0.8m. Stilt foundations tilting (4.8°). FoS 1.08.';
     } else if (stage === 3) {
       // Hour 3 (+3h: Critical Danger & Overtopping / Slope Shear Trigger)
       rain = 145.0;
       sat = 95.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 1.12 : 5.80) : 5.80;
       tHour = 3.0;
-      leadTime = 'T+3.0h • 🚨 CRITICAL EVACUATION ALARM (<1.0h Buffer to Peak)';
-      alertMsg = '🚨 T+3h CRITICAL OVERTOPPING: Flood stage breaches danger mark! Immediate siren blast & emergency evacuation.';
+      leadTime = isFlood 
+        ? 'T+3.0h • 🚨 CRITICAL EVACUATION ALARM (<1.0h Buffer to Peak)'
+        : 'T+3.0h • 🚨 CRITICAL EVACUATION ALARM (<1.0h to Complete Rupture)';
+      alertMsg = isFlood 
+        ? '🚨 T+3h CRITICAL OVERTOPPING: Flood stage breaches danger mark! Immediate siren blast & emergency evacuation.'
+        : '🚨 T+3h BISHOP ROTATIONAL SLIP RUPTURE: Shear failure along slip plane! Upper Spur severed (22.5° tilt). Highway cut by rockfall. Evacuate immediately!';
     } else if (stage === 4) {
       // Hour 4 (+4h: Peak Inundation / Catastrophic Deluge)
       rain = 185.0;
       sat = 99.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 1.42 : 7.20) : 7.20;
       tHour = 4.0;
-      leadTime = 'T+4.0h • 🔴 PEAK INUNDATION & DELUGE HORIZON';
-      alertMsg = '🔴 T+4h PEAK DELUGE: Maximum inundation and landslide runout reached. 98.2% AI prediction validated.';
+      leadTime = isFlood 
+        ? 'T+4.0h • 🔴 PEAK INUNDATION & DELUGE HORIZON'
+        : 'T+4.0h • 🔴 CATASTROPHIC DEBRIS AVALANCHE & RUNOUT HORIZON';
+      alertMsg = isFlood 
+        ? '🔴 T+4h PEAK DELUGE: Maximum inundation and landslide runout reached. 98.2% AI prediction validated.'
+        : '🔴 T+4h DEBRIS RUNOUT PEAK: 3.4m viscoplastic mudflow inundates Tuirial Valley chalets. Upper settlements sheared. High-ground sanctuary 100% secure.';
     }
 
     this.options.rainfall = rain;
@@ -4624,9 +5154,14 @@ class Terrain3DVisualizer {
     // Responsive camera position for dramatic visual vantage
     if (this.camera && this.controls) {
       if (stage === 3 || stage === 4) {
-        // Dramatic dynamic low-angle vantage towards flood surge or slide plane
-        this.camera.position.set(45, 26, 55);
-        this.controls.target.set(0, 3, 0);
+        if (isFlood) {
+          this.camera.position.set(45, 26, 55);
+          this.controls.target.set(0, 3, 0);
+        } else {
+          // Action vantage on scarp slide & severed chalets
+          this.camera.position.set(24, 20, 48);
+          this.controls.target.set(0, 9, 2);
+        }
       } else if (stage === 2) {
         this.camera.position.set(58, 36, 68);
         this.controls.target.set(0, 2, 0);
@@ -4697,18 +5232,32 @@ class Terrain3DVisualizer {
   }
 
   flyToVillage(villageIndex) {
-    if (!this.settlementNodes || !this.settlementNodes[villageIndex]) return;
-    const target = this.settlementNodes[villageIndex];
+    let tx = 0, tz = 0;
+    let found = false;
+
+    if (this.settlementNodes && this.settlementNodes[villageIndex]) {
+      const target = this.settlementNodes[villageIndex];
+      tx = target.x;
+      tz = target.z;
+      found = true;
+    } else if (this.statsPayload && this.statsPayload.villageDetails && this.statsPayload.villageDetails[villageIndex]) {
+      const v = this.statsPayload.villageDetails[villageIndex];
+      if (this.landslideHouseNodes && this.landslideHouseNodes[villageIndex]) {
+        tx = this.landslideHouseNodes[villageIndex].baseX;
+        tz = this.landslideHouseNodes[villageIndex].baseZ;
+        found = true;
+      }
+    }
+
+    if (!found) return;
     const profile = this.getCurrentProfile();
-    const tx = target.x;
-    const tz = target.z;
     const ty = this.getElevationAt(tx, tz, profile);
 
     if (this.camera && this.controls) {
       const startCam = this.camera.position.clone();
-      const endCam = new THREE.Vector3(tx + 16, ty + 14, tz + 20);
+      const endCam = new THREE.Vector3(tx + 14, ty + 12, tz + 16);
       const startTarget = this.controls.target.clone();
-      const endTarget = new THREE.Vector3(tx, ty + 1.5, tz);
+      const endTarget = new THREE.Vector3(tx, ty + 2.0, tz);
 
       let step = 0;
       const totalSteps = 30;

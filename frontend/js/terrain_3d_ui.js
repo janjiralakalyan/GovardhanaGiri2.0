@@ -128,13 +128,16 @@ class Terrain3DComponent {
               </select>
             </div>
 
-            <!-- Camera Controls & Layer Toggles -->
+              <!-- Camera Controls & Layer Toggles -->
             <div class="terrain-3d-controls-strip">
               <button class="t3d-btn t3d-btn-fullscreen-toggle" id="${this.mountId}-btn-complete-screen" title="Toggle 100% Complete Screen 3D Decision Support View">⛶ Complete Screen</button>
               <button class="t3d-btn" id="${this.mountId}-btn-dem-modal" title="Import Custom GeoTIFF / DEM Heightmap or LiDAR">📁 Ingest DEM</button>
               <button class="t3d-btn active" data-cam="iso" title="Isometric Aerial View">📐 Orbit</button>
               <button class="t3d-btn" data-cam="top" title="Top-Down 2D DEM Map">🗺️ 2D</button>
               <button class="t3d-btn" data-cam="cross-section" title="Geological Cross-Section">✂️ Slice</button>
+              <button class="t3d-btn" data-cam="action" title="Cinematic Action Vantage (Avalanche Chute)">🎬 Action</button>
+              <button class="t3d-btn" data-cam="village" title="Settlements & Timber Chalets Close-Up">🏘️ Villages</button>
+              <button class="t3d-btn" data-cam="scarp" title="Crown Tension Fissure & Slip Plane">⛰️ Scarp</button>
               <button class="t3d-btn" id="${this.mountId}-btn-drone" title="Autonomous Drone Aerial Patrol Flight">🚁 Drone</button>
               <button class="t3d-btn" id="${this.mountId}-btn-heatmap" title="Toggle 3D Hazard Risk Heatmap Overlay">🔥 Heatmap</button>
               <button class="t3d-btn active" id="${this.mountId}-btn-runoff" title="Toggle Hydrological Runoff Streamlines">💧 Runoff</button>
@@ -363,10 +366,10 @@ class Terrain3DComponent {
           </div>
         </div>
 
-        <!-- Left Floating Villages Flood Impact Dock (Flood Mode) -->
-        <div class="t3d-villages-card" id="${this.mountId}-villages-card" style="${isFlood ? 'display:flex;' : 'display:none;'}">
+        <!-- Left Floating Settlements / Villages Impact Dock -->
+        <div class="t3d-villages-card" id="${this.mountId}-villages-card" style="display:flex;">
           <div class="t3d-villages-header">
-            <h5><span>🏘️ RIPARIAN VILLAGES IMPACT</span> <span style="font-size:9.5px; color:#38bdf8;">LIVE TELEMETRY</span></h5>
+            <h5><span>🏘️ ${isFlood ? 'RIPARIAN VILLAGES IMPACT' : 'SETTLEMENT CLUSTERS IMPACT'}</span> <span style="font-size:9.5px; color:#38bdf8;">${isFlood ? 'LIVE FLOOD STAGE' : 'DEBRIS & STRUCTURAL TILT'}</span></h5>
             <button class="t3d-factors-close" id="${this.mountId}-villages-close" title="Toggle Dock">─</button>
           </div>
           <div class="t3d-villages-list" id="${this.mountId}-villages-list">
@@ -1010,36 +1013,78 @@ class Terrain3DComponent {
         badgeShelter.innerHTML = `<span>🛡️ Safe Sanctuary:</span> <strong style="color:#34d399;">100% PROTECTED</strong>`;
       }
 
-      // 🏘️ Update Riparian Villages Live Flood Impact Telemetry Dock
+      // 🏘️ Update Live Settlements & Villages Impact Telemetry Dock
       const vList = document.getElementById(`${this.mountId}-villages-list`);
       const vCard = document.getElementById(`${this.mountId}-villages-card`);
       if (vCard) {
-        vCard.style.display = data.mode === 'flood' ? 'flex' : 'none';
+        vCard.style.display = 'flex';
       }
       if (vList && data.villageDetails && data.villageDetails.length > 0) {
         vList.innerHTML = data.villageDetails.map((v) => {
-          const isCrit = v.status === 'inundated';
-          const isWarn = v.status === 'threatened';
-          const statusClass = isCrit ? 'status-inundated' : (isWarn ? 'status-threatened' : 'status-safe');
-          const tagClass = isCrit ? 'inundated' : (isWarn ? 'threatened' : 'safe');
-          const tagText = isCrit ? '🚨 INUNDATED' : (isWarn ? '⚠️ WARNING' : '🟢 SAFE');
-          const depthClass = isCrit ? 'crit' : (isWarn ? 'warn' : 'safe');
-          const depthText = isCrit 
-            ? `+${(v.maxSubDepth * 1.5).toFixed(1)}m Inundated (${v.floodedHouses}/${v.totalHouses} Homes)` 
-            : (isWarn ? `Buffer ${Math.abs(v.clearanceM).toFixed(1)}m (Threat)` : `Buffer +${Math.abs(v.clearanceM).toFixed(1)}m Safe`);
+          if (data.mode === 'landslide') {
+            const isSheared = v.status === 'sheared';
+            const isBuried = v.status === 'buried';
+            const isCutoff = v.status === 'cutoff';
+            const isStrained = v.status === 'strained';
 
-          return `
-            <div class="t3d-village-item ${statusClass}" data-vidx="${v.index}" title="Click to fly 3D camera over ${v.name}">
-              <div class="t3d-village-top-row">
-                <span class="t3d-village-name">🏘️ ${v.name}</span>
-                <span class="t3d-village-status-tag ${tagClass}">${tagText}</span>
+            let statusClass = 'status-safe';
+            let tagClass = 'safe';
+            let tagText = '🟢 STABLE';
+            if (isSheared) { statusClass = 'status-sheared'; tagClass = 'sheared'; tagText = '⚡ SEVERED'; }
+            else if (isBuried) { statusClass = 'status-buried'; tagClass = 'buried'; tagText = '🚨 BURIED'; }
+            else if (isCutoff) { statusClass = 'status-cutoff'; tagClass = 'cutoff'; tagText = '⚠️ CUT OFF'; }
+            else if (isStrained) { statusClass = 'status-strained'; tagClass = 'strained'; tagText = '⚠️ STRAINED'; }
+
+            const integrity = v.integrityPct !== undefined ? v.integrityPct : 100;
+            const integrityColor = integrity > 70 ? '#34d399' : (integrity > 30 ? '#f59e0b' : '#ef4444');
+
+            return `
+              <div class="t3d-village-item ${statusClass}" data-vidx="${v.index}" title="Click to fly 3D camera to ${v.name}">
+                <div class="t3d-village-top-row">
+                  <span class="t3d-village-name">⛰️ ${v.name}</span>
+                  <span class="t3d-village-status-tag ${tagClass}">${tagText}</span>
+                </div>
+                <div class="t3d-village-metrics-row">
+                  <span>Tilt: <strong style="color:${parseFloat(v.avgTiltDeg) > 10 ? '#ef4444' : '#f8fafc'};">${v.avgTiltDeg}°</strong></span>
+                  <span>Debris: <strong style="color:${parseFloat(v.debrisDepthM) > 1.0 ? '#ef4444' : '#f8fafc'};">+${v.debrisDepthM}m</strong></span>
+                  <span>MSL: <strong>+${v.elevationMSL}m</strong></span>
+                </div>
+                <div class="t3d-village-impact-bar-wrap">
+                  <div class="t3d-village-impact-bar-label">
+                    <span>Structural Integrity</span>
+                    <strong style="color:${integrityColor};">${integrity}%</strong>
+                  </div>
+                  <div class="t3d-village-bar-track">
+                    <div class="t3d-village-bar-fill" style="width:${integrity}%; background:${integrityColor};"></div>
+                  </div>
+                </div>
               </div>
-              <div class="t3d-village-meta">
-                <span>MSL: +${v.elevationMSL}m</span>
-                <span class="t3d-village-depth-val ${depthClass}">${depthText}</span>
+            `;
+          } else {
+            // Flood mode
+            const isCrit = v.status === 'inundated';
+            const isWarn = v.status === 'threatened';
+            const statusClass = isCrit ? 'status-inundated' : (isWarn ? 'status-threatened' : 'status-safe');
+            const tagClass = isCrit ? 'inundated' : (isWarn ? 'threatened' : 'safe');
+            const tagText = isCrit ? '🚨 INUNDATED' : (isWarn ? '⚠️ WARNING' : '🟢 SAFE');
+            const depthClass = isCrit ? 'crit' : (isWarn ? 'warn' : 'safe');
+            const depthText = isCrit 
+              ? `+${(v.maxSubDepth * 1.5).toFixed(1)}m Inundated (${v.floodedHouses}/${v.totalHouses} Homes)` 
+              : (isWarn ? `Buffer ${Math.abs(v.clearanceM).toFixed(1)}m (Threat)` : `Buffer +${Math.abs(v.clearanceM).toFixed(1)}m Safe`);
+
+            return `
+              <div class="t3d-village-item ${statusClass}" data-vidx="${v.index}" title="Click to fly 3D camera over ${v.name}">
+                <div class="t3d-village-top-row">
+                  <span class="t3d-village-name">🏘️ ${v.name}</span>
+                  <span class="t3d-village-status-tag ${tagClass}">${tagText}</span>
+                </div>
+                <div class="t3d-village-meta">
+                  <span>MSL: +${v.elevationMSL}m</span>
+                  <span class="t3d-village-depth-val ${depthClass}">${depthText}</span>
+                </div>
               </div>
-            </div>
-          `;
+            `;
+          }
         }).join('');
 
         // Wire click-to-fly
