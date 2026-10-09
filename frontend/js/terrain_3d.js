@@ -3529,7 +3529,6 @@ class Terrain3DVisualizer {
       const gateOpenPct = Math.min(100, Math.max(8, Math.round((rain / 110) * 75 + (dynamicStage / (profile.dangerWaterLevel || 6.0)) * 45)));
       const outflowCusecs = Math.round(Math.min(inflowCusecs * 0.96, Math.max(14000, (gateOpenPct / 100) * inflowCusecs)));
       const isDamOvertopping = targetWaterY > 4.6;
-
       // Check Bridge Overtopping
       const bridgeDeckY = profile.bridgeElev !== undefined ? profile.bridgeElev : 0.2;
       const isBridgeSubmerged = targetWaterY > bridgeDeckY;
@@ -3727,13 +3726,7 @@ class Terrain3DVisualizer {
       this.isAlarmTriggered = isWarningSlide || isCriticalSlide;
       this.alarmLevel = isCriticalSlide ? 'CRITICAL' : (isWarningSlide ? 'WARNING' : 'NORMAL');
 
-      if (typeof window !== 'undefined' && window.disasterAudio) {
-        if (this.alarmLevel === 'CRITICAL') {
-          window.disasterAudio.toggleSiren(true);
-        } else {
-          window.disasterAudio.toggleSiren(false);
-        }
-      }
+      // Siren only triggered on explicit user button click
 
       // 1. Update Bishop Slip Failure Plane Visuals
       if (this.slipPlaneMesh) {

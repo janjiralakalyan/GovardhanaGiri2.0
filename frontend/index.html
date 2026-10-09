@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/static/css/dashboard.css">
   <link rel="stylesheet" href="/static/css/terrain_3d.css">
   <link rel="stylesheet" href="/static/css/copilot.css">
+  <link rel="stylesheet" href="/static/css/jury_simulation.css?v=2.2">
 </head>
 <body>
 
@@ -31,6 +32,10 @@
     </div>
 
     <div class="header-status-strip">
+      <button class="btn-simulation-launch" id="btn-jury-simulation" title="Launch 5-Second Jury Risk Simulation Prototype">
+        <span class="sim-pulse-ring"></span>
+        ⚡ Simulation
+      </button>
       <a href="/nelens" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background:rgba(30,58,138,0.7); border:1px solid #3b82f6; color:#93c5fd; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700;">
         ⛰️ Switch to NE-LENS (Landslides)
       </a>
@@ -617,5 +622,6 @@
   <script src="/static/js/map.js"></script>
   <script src="/static/js/app.js"></script>
   <script src="/static/js/copilot.js"></script>
+  <script src="/static/js/jury_simulation.js?v=2.2"></script>
 </body>
 </html>

@@ -66,6 +66,15 @@ class DisasterAudioEngine {
     setTimeout(() => this.playBeep(1318.51, 0.25), 140);
   }
 
+  playAlertSound(tier = 'Critical') {
+    if (!this.enabled || this.isMuted) return;
+    if (tier === 'Critical') {
+      this.playCriticalChime();
+    } else {
+      this.playBeep(660, 0.2);
+    }
+  }
+
   playThunder() {
     if (!this.enabled || this.isMuted) return;
     try {
@@ -152,11 +161,15 @@ class DisasterAudioEngine {
     }
   }
 
-  toggleSiren(play = true) {
+  toggleSiren(play = true, maxDuration = 8) {
     if ((!this.enabled || this.isMuted) && play) return;
     try {
       this.init();
       if (!this.ctx) return;
+      if (this.sirenAutoStopTimer) {
+        clearTimeout(this.sirenAutoStopTimer);
+        this.sirenAutoStopTimer = null;
+      }
       if (play && !this.isPlayingSiren) {
         // Create emergency wailing siren using frequency modulation
         this.sirenOsc = this.ctx.createOscillator();
@@ -183,14 +196,29 @@ class DisasterAudioEngine {
         this.sirenOsc.start();
         this.sirenModulator.start();
         this.isPlayingSiren = true;
+
+        // Auto-stop after maxDuration seconds so siren never runs endlessly
+        if (maxDuration > 0) {
+          this.sirenAutoStopTimer = setTimeout(() => {
+            this.toggleSiren(false);
+            const btn = document.getElementById('btn-toggle-siren');
+            if (btn) {
+              btn.classList.remove('active');
+              btn.innerHTML = '🔈 Test Warning Siren';
+            }
+            if (window.app) window.app.isSirenActive = false;
+          }, maxDuration * 1000);
+        }
       } else if (!play && this.isPlayingSiren) {
         if (this.sirenOsc) {
           try { this.sirenOsc.stop(); } catch(e){}
-          this.sirenOsc.disconnect();
+          try { this.sirenOsc.disconnect(); } catch(e){}
+          this.sirenOsc = null;
         }
         if (this.sirenModulator) {
           try { this.sirenModulator.stop(); } catch(e){}
-          this.sirenModulator.disconnect();
+          try { this.sirenModulator.disconnect(); } catch(e){}
+          this.sirenModulator = null;
         }
         this.isPlayingSiren = false;
       }
