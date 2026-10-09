@@ -130,6 +130,7 @@ class Terrain3DComponent {
 
             <!-- Camera Controls & Layer Toggles -->
             <div class="terrain-3d-controls-strip">
+              <button class="t3d-btn t3d-btn-fullscreen-toggle" id="${this.mountId}-btn-complete-screen" title="Toggle 100% Complete Screen 3D Decision Support View">⛶ Complete Screen</button>
               <button class="t3d-btn" id="${this.mountId}-btn-dem-modal" title="Import Custom GeoTIFF / DEM Heightmap or LiDAR">📁 Ingest DEM</button>
               <button class="t3d-btn active" data-cam="iso" title="Isometric Aerial View">📐 Orbit</button>
               <button class="t3d-btn" data-cam="top" title="Top-Down 2D DEM Map">🗺️ 2D</button>
@@ -210,23 +211,24 @@ class Terrain3DComponent {
             </div>
           </div>
 
-          <!-- Row 3: 3D Danger Simulation & 3 Animation Stages (+10m, +20m, +30m) -->
+          <!-- Row 3: 3D Danger Simulation & 4-Hour Risk Evolution Stages (Hour 0 to Hour 4) -->
           <div class="t3d-hud-row-sim">
-            <button class="t3d-sim-master-btn" id="${this.mountId}-btn-run-sim" title="Run Automated 30-Minute Danger Simulation Sequence with Early Siren Warning">
+            <button class="t3d-sim-master-btn" id="${this.mountId}-btn-run-sim" title="Run Automated 4-Hour Risk Progression Simulation with Early Warning Sirens">
               <span class="sim-pulse-dot"></span>
-              <span class="sim-btn-text" id="${this.mountId}-sim-btn-text">⚡ RUN 30-MIN DANGER SIMULATION</span>
+              <span class="sim-btn-text" id="${this.mountId}-sim-btn-text">⚡ RUN 4-HOUR DANGER SIMULATION</span>
             </button>
 
             <div class="t3d-sim-stages-group">
-              <span class="t3d-sim-stages-lbl">⏱️ 3D ANIMATION STAGES:</span>
-              <button class="t3d-stage-btn active" data-stage="0" title="T+0m Baseline Normal Equilibrium">T+0m (Base)</button>
-              <button class="t3d-stage-btn" data-stage="10" title="T+10 min Inflow Surge & Water Level Rise">⏱️ +10m (Surge)</button>
-              <button class="t3d-stage-btn stage-alarm" data-stage="20" title="T+20 min 🚨 ALARM TRIGGERED (10-min Advance Notice Before 30m Peak!)">🚨 +20m (ALARM TRIGGERED)</button>
-              <button class="t3d-stage-btn stage-crit" data-stage="30" title="T+30 min 🔴 Peak Crest Overtopping & Inundation">🔴 +30m (Overtopping)</button>
+              <span class="t3d-sim-stages-lbl">⏱️ 4-HOUR RISK PROGRESSION:</span>
+              <button class="t3d-stage-btn active" data-stage="0" title="Hour 0 (Now): Baseline Equilibrium">T+0h (Now)</button>
+              <button class="t3d-stage-btn" data-stage="1" title="Hour 1 (+1h): Precipitation Inflow & Runoff Rise">⏱️ +1h (Inflow)</button>
+              <button class="t3d-stage-btn" data-stage="2" title="Hour 2 (+2h): Saturated Catchment Surge Watch">⏱️ +2h (Surge)</button>
+              <button class="t3d-stage-btn stage-alarm" data-stage="3" title="Hour 3 (+3h): 🚨 Critical Danger Breach & Shear Slip">🚨 +3h (Breach)</button>
+              <button class="t3d-stage-btn stage-crit" data-stage="4" title="Hour 4 (+4h): 🔴 Peak Inundation & Catastrophic Deluge">🔴 +4h (Peak)</button>
             </div>
 
             <button class="t3d-btn" id="${this.mountId}-btn-toggle-factors" title="Toggle Factors Alteration Matrix Table">
-              📊 Factors Matrix
+              📊 4-Hour Factors Matrix
             </button>
           </div>
         </div>
@@ -237,8 +239,8 @@ class Terrain3DComponent {
             <div style="display:flex; align-items:center; gap:8px;">
               <span style="font-size:16px;">📊</span>
               <div>
-                <h5 style="margin:0; font-size:12px; font-weight:800; color:#f8fafc;">DYNAMIC FACTORS ALTERATION MATRIX</h5>
-                <div style="font-size:9.5px; color:#94a3b8;">How Environmental & Hydrodynamic Factors Alter Over Time (Alarm Armed Before 30m)</div>
+                <h5 style="margin:0; font-size:12px; font-weight:800; color:#f8fafc;">4-HOUR DYNAMIC RISK ALTERATION MATRIX</h5>
+                <div style="font-size:9.5px; color:#94a3b8;">How Hydrodynamic, Pore Pressure & Inundation Factors Evolve Over The Next 4 Hours</div>
               </div>
             </div>
             <button class="t3d-factors-close" id="${this.mountId}-factors-close">✕</button>
@@ -249,10 +251,11 @@ class Terrain3DComponent {
               <thead>
                 <tr>
                   <th>Parameters / Factors</th>
-                  <th class="stage-col stage-col-0">T+0m (Base)</th>
-                  <th class="stage-col stage-col-10">T+10m (Surge)</th>
-                  <th class="stage-col stage-col-20 highlight-alarm">🚨 T+20m (ALARM)</th>
-                  <th class="stage-col stage-col-30 highlight-crit">🔴 T+30m (Peak)</th>
+                  <th class="stage-col stage-col-0">T+0h (Now)</th>
+                  <th class="stage-col stage-col-1">T+1h (Inflow)</th>
+                  <th class="stage-col stage-col-2">T+2h (Surge)</th>
+                  <th class="stage-col stage-col-3 highlight-alarm">🚨 T+3h (Breach)</th>
+                  <th class="stage-col stage-col-4 highlight-crit">🔴 T+4h (Peak)</th>
                   <th class="live-col">Current Live</th>
                 </tr>
               </thead>
@@ -349,11 +352,25 @@ class Terrain3DComponent {
             <div class="t3d-infra-badge safe" id="${this.mountId}-badge-houses">
               <span>🏘️ Settlements:</span> <strong>0/16 Safe</strong>
             </div>
+            <div class="t3d-infra-badge safe" id="${this.mountId}-badge-shelter" style="border-color:#10b981; background:rgba(16,185,129,0.15);">
+              <span>🛡️ Safe Sanctuary:</span> <strong style="color:#34d399;">100% PROTECTED</strong>
+            </div>
           </div>
 
           <!-- Dynamic Causality List -->
           <div class="t3d-causality-list" id="${this.mountId}-causality-list">
             <!-- Populated dynamically via renderCausalityNarrative -->
+          </div>
+        </div>
+
+        <!-- Left Floating Villages Flood Impact Dock (Flood Mode) -->
+        <div class="t3d-villages-card" id="${this.mountId}-villages-card" style="${isFlood ? 'display:flex;' : 'display:none;'}">
+          <div class="t3d-villages-header">
+            <h5><span>🏘️ RIPARIAN VILLAGES IMPACT</span> <span style="font-size:9.5px; color:#38bdf8;">LIVE TELEMETRY</span></h5>
+            <button class="t3d-factors-close" id="${this.mountId}-villages-close" title="Toggle Dock">─</button>
+          </div>
+          <div class="t3d-villages-list" id="${this.mountId}-villages-list">
+            <!-- Populated dynamically via terrain3d-update -->
           </div>
         </div>
 
@@ -568,6 +585,27 @@ class Terrain3DComponent {
           const active = this.visualizer.toggleRunoff();
           this.isRunoffActive = active;
           runoffBtn.classList.toggle('active', active);
+        }
+      });
+    }
+
+    // 6a-1. Complete Screen Mode Toggle
+    const compScreenBtn = document.getElementById(`${this.mountId}-btn-complete-screen`);
+    if (compScreenBtn) {
+      compScreenBtn.addEventListener('click', () => {
+        this.toggleCompleteScreen();
+      });
+    }
+
+    // 6a-2. Villages Dock Toggle
+    const vCloseBtn = document.getElementById(`${this.mountId}-villages-close`);
+    if (vCloseBtn) {
+      vCloseBtn.addEventListener('click', () => {
+        const vList = document.getElementById(`${this.mountId}-villages-list`);
+        if (vList) {
+          const isHidden = vList.style.display === 'none';
+          vList.style.display = isHidden ? 'flex' : 'none';
+          vCloseBtn.textContent = isHidden ? '─' : '+';
         }
       });
     }
@@ -966,6 +1004,55 @@ class Terrain3DComponent {
         }
       }
 
+      const badgeShelter = document.getElementById(`${this.mountId}-badge-shelter`);
+      if (badgeShelter) {
+        badgeShelter.className = 't3d-infra-badge safe';
+        badgeShelter.innerHTML = `<span>🛡️ Safe Sanctuary:</span> <strong style="color:#34d399;">100% PROTECTED</strong>`;
+      }
+
+      // 🏘️ Update Riparian Villages Live Flood Impact Telemetry Dock
+      const vList = document.getElementById(`${this.mountId}-villages-list`);
+      const vCard = document.getElementById(`${this.mountId}-villages-card`);
+      if (vCard) {
+        vCard.style.display = data.mode === 'flood' ? 'flex' : 'none';
+      }
+      if (vList && data.villageDetails && data.villageDetails.length > 0) {
+        vList.innerHTML = data.villageDetails.map((v) => {
+          const isCrit = v.status === 'inundated';
+          const isWarn = v.status === 'threatened';
+          const statusClass = isCrit ? 'status-inundated' : (isWarn ? 'status-threatened' : 'status-safe');
+          const tagClass = isCrit ? 'inundated' : (isWarn ? 'threatened' : 'safe');
+          const tagText = isCrit ? '🚨 INUNDATED' : (isWarn ? '⚠️ WARNING' : '🟢 SAFE');
+          const depthClass = isCrit ? 'crit' : (isWarn ? 'warn' : 'safe');
+          const depthText = isCrit 
+            ? `+${(v.maxSubDepth * 1.5).toFixed(1)}m Inundated (${v.floodedHouses}/${v.totalHouses} Homes)` 
+            : (isWarn ? `Buffer ${Math.abs(v.clearanceM).toFixed(1)}m (Threat)` : `Buffer +${Math.abs(v.clearanceM).toFixed(1)}m Safe`);
+
+          return `
+            <div class="t3d-village-item ${statusClass}" data-vidx="${v.index}" title="Click to fly 3D camera over ${v.name}">
+              <div class="t3d-village-top-row">
+                <span class="t3d-village-name">🏘️ ${v.name}</span>
+                <span class="t3d-village-status-tag ${tagClass}">${tagText}</span>
+              </div>
+              <div class="t3d-village-meta">
+                <span>MSL: +${v.elevationMSL}m</span>
+                <span class="t3d-village-depth-val ${depthClass}">${depthText}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Wire click-to-fly
+        vList.querySelectorAll('.t3d-village-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const vidx = parseInt(el.getAttribute('data-vidx'));
+            if (this.visualizer && typeof this.visualizer.flyToVillage === 'function') {
+              this.visualizer.flyToVillage(vidx);
+            }
+          });
+        });
+      }
+
       // Update FoS & Pore Pressure pill values
       const valFos = document.getElementById(`${this.mountId}-val-fos`);
       const valPore = document.getElementById(`${this.mountId}-val-pore`);
@@ -1053,18 +1140,18 @@ class Terrain3DComponent {
             () => {
               isSimRunning = false;
               btnRunSim.classList.remove('sim-running');
-              if (simBtnText) simBtnText.textContent = '⚡ RUN 30-MIN DANGER SIMULATION';
+              if (simBtnText) simBtnText.textContent = '⚡ RUN 4-HOUR DANGER SIMULATION';
             }
           );
         } else {
           this.visualizer.stopDangerSimulation();
           btnRunSim.classList.remove('sim-running');
-          if (simBtnText) simBtnText.textContent = '⚡ RUN 30-MIN DANGER SIMULATION';
+          if (simBtnText) simBtnText.textContent = '⚡ RUN 4-HOUR DANGER SIMULATION';
         }
       });
     }
 
-    // Direct 3D Animation Stage buttons (T+0m, +10m, +20m, +30m)
+    // Direct 3D Animation Stage buttons (Hour 0 to Hour 4)
     stageBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const stage = parseInt(btn.getAttribute('data-stage'));
@@ -1075,7 +1162,7 @@ class Terrain3DComponent {
           this.visualizer.stopDangerSimulation();
           isSimRunning = false;
           if (btnRunSim) btnRunSim.classList.remove('sim-running');
-          if (simBtnText) simBtnText.textContent = '⚡ RUN 30-MIN DANGER SIMULATION';
+          if (simBtnText) simBtnText.textContent = '⚡ RUN 4-HOUR DANGER SIMULATION';
           this.visualizer.setSimulationTimeStage(stage);
           this.highlightMatrixColumn(stage);
         }
@@ -1153,74 +1240,83 @@ class Terrain3DComponent {
       tbody.innerHTML = `
         <tr>
           <td><strong>🌧️ Rainfall Intensity</strong></td>
-          <td data-stage-col="0">15 mm/h</td>
-          <td data-stage-col="10">68 mm/h</td>
-          <td data-stage-col="20" class="warn-val">120 mm/h</td>
-          <td data-stage-col="30" class="crit-val">175 mm/h</td>
+          <td data-stage-col="0">18 mm/h</td>
+          <td data-stage-col="1">58 mm/h</td>
+          <td data-stage-col="2">98 mm/h</td>
+          <td data-stage-col="3" class="warn-val">145 mm/h</td>
+          <td data-stage-col="4" class="crit-val">185 mm/h</td>
           <td class="live-val"><strong>${rain} mm/h</strong></td>
         </tr>
         <tr>
           <td><strong>💧 Soil Moisture Saturation</strong></td>
-          <td data-stage-col="0">35%</td>
-          <td data-stage-col="10">72%</td>
-          <td data-stage-col="20" class="warn-val">91%</td>
-          <td data-stage-col="30" class="crit-val">99%</td>
+          <td data-stage-col="0">38%</td>
+          <td data-stage-col="1">68%</td>
+          <td data-stage-col="2">86%</td>
+          <td data-stage-col="3" class="warn-val">95%</td>
+          <td data-stage-col="4" class="crit-val">99%</td>
           <td class="live-val"><strong>${sat}%</strong></td>
         </tr>
         <tr>
           <td><strong>🌊 River Stage / Forebay Head</strong></td>
           <td data-stage-col="0">2.2 m</td>
-          <td data-stage-col="10">3.85 m</td>
-          <td data-stage-col="20" class="warn-val">5.25 m (Danger)</td>
-          <td data-stage-col="30" class="crit-val">6.90 m (Overtopped)</td>
+          <td data-stage-col="1">3.40 m</td>
+          <td data-stage-col="2">4.60 m</td>
+          <td data-stage-col="3" class="warn-val">5.80 m (Danger)</td>
+          <td data-stage-col="4" class="crit-val">7.20 m (Overtopped)</td>
           <td class="live-val"><strong style="color:${parseFloat(stage) >= parseFloat(dangerLvl) ? '#ef4444' : '#38bdf8'};">${stage} m</strong></td>
         </tr>
         <tr>
-          <td><strong>⚡ Dam Inflow Hydrodynamics</strong></td>
+          <td><strong>⚡ Catchment Inflow Surge</strong></td>
           <td data-stage-col="0">0.35 Lk Cusecs</td>
-          <td data-stage-col="10">1.45 Lk Cusecs</td>
-          <td data-stage-col="20" class="warn-val">2.80 Lk Cusecs</td>
-          <td data-stage-col="30" class="crit-val">3.95 Lk Cusecs</td>
+          <td data-stage-col="1">1.25 Lk Cusecs</td>
+          <td data-stage-col="2">2.40 Lk Cusecs</td>
+          <td data-stage-col="3" class="warn-val">3.65 Lk Cusecs</td>
+          <td data-stage-col="4" class="crit-val">4.50 Lk Cusecs</td>
           <td class="live-val"><strong style="color:#38bdf8;">${inflow} Lk Cusecs</strong></td>
         </tr>
         <tr>
           <td><strong>🌊 Spillway Discharge Outflow</strong></td>
-          <td data-stage-col="0">0.25 Lk Cusecs</td>
-          <td data-stage-col="10">0.95 Lk Cusecs</td>
-          <td data-stage-col="20" class="warn-val">2.20 Lk Cusecs</td>
-          <td data-stage-col="30" class="crit-val">3.80 Lk Cusecs</td>
+          <td data-stage-col="0">0.20 Lk Cusecs</td>
+          <td data-stage-col="1">0.80 Lk Cusecs</td>
+          <td data-stage-col="2">1.80 Lk Cusecs</td>
+          <td data-stage-col="3" class="warn-val">3.10 Lk Cusecs</td>
+          <td data-stage-col="4" class="crit-val">4.20 Lk Cusecs</td>
           <td class="live-val"><strong style="color:#f59e0b;">${outflow} Lk Cusecs</strong></td>
         </tr>
         <tr>
           <td><strong>⚙️ Radial Gates Aperture</strong></td>
           <td data-stage-col="0">10% Open</td>
-          <td data-stage-col="10">35% Open</td>
-          <td data-stage-col="20" class="warn-val">80% Open</td>
-          <td data-stage-col="30" class="crit-val">100% Fully Hoisted</td>
+          <td data-stage-col="1">30% Open</td>
+          <td data-stage-col="2">60% Open</td>
+          <td data-stage-col="3" class="warn-val">85% Open</td>
+          <td data-stage-col="4" class="crit-val">100% Fully Hoisted</td>
           <td class="live-val"><strong>${gates}% Open</strong></td>
         </tr>
         <tr class="alarm-row">
-          <td><strong>🚨 System Siren Alarm</strong></td>
-          <td data-stage-col="0"><span class="pill-green">🟢 NORMAL (98% AI Precision)</span></td>
-          <td data-stage-col="10"><span class="pill-yellow">🟡 ADVISORY (3.2h Buffer)</span></td>
-          <td data-stage-col="20"><span class="pill-red pulse-alarm">🚨 ALARM ARMED (3.5h Ahead!)</span></td>
-          <td data-stage-col="30"><span class="pill-crit">🔴 OVERTOPPING DELUGE</span></td>
+          <td><strong>🚨 Siren Warning Status</strong></td>
+          <td data-stage-col="0"><span class="pill-green">🟢 NORMAL (Hour 0)</span></td>
+          <td data-stage-col="1"><span class="pill-yellow">🟡 INFLOW WATCH (+1h)</span></td>
+          <td data-stage-col="2"><span class="pill-yellow">🟠 SURGE WARNING (+2h)</span></td>
+          <td data-stage-col="3"><span class="pill-red pulse-alarm">🚨 ALARM TRIGGERED (+3h)</span></td>
+          <td data-stage-col="4"><span class="pill-crit">🔴 PEAK OVERTOPPING (+4h)</span></td>
           <td class="live-val"><span class="${data && data.alarmLevel === 'CRITICAL' ? 'pill-red' : (data && data.alarmLevel === 'WARNING' ? 'pill-yellow' : 'pill-green')}">${alarmStatus}</span></td>
         </tr>
         <tr class="lead-time-row">
-          <td><strong>⏱️ Predictive Lead Time</strong></td>
-          <td data-stage-col="0">3.5–4.0 Hours Safe Buffer</td>
-          <td data-stage-col="10">3.2 Hours Advance Buffer</td>
-          <td data-stage-col="20" class="highlight-lead"><strong>🚨 PREDICTED 3.5H IN ADVANCE</strong></td>
-          <td data-stage-col="30" class="crit-lead">T+3.5h Peak Deluge Impact</td>
+          <td><strong>⏱️ Evacuation Window Remaining</strong></td>
+          <td data-stage-col="0">4.0 Hours Safe Buffer</td>
+          <td data-stage-col="1">3.0 Hours Buffer</td>
+          <td data-stage-col="2">2.0 Hours Remaining</td>
+          <td data-stage-col="3" class="highlight-lead"><strong>🚨 <1.0h Critical Window</strong></td>
+          <td data-stage-col="4" class="crit-lead">Peak Submergence Horizon</td>
           <td class="live-val"><strong style="color:#38bdf8;">3.5h Lead Time</strong></td>
         </tr>
         <tr style="background: rgba(56, 189, 248, 0.08);">
           <td><strong>🎯 AI Prediction Confidence</strong></td>
           <td data-stage-col="0"><span style="color:#38bdf8; font-weight:700;">98.2% Accuracy</span></td>
-          <td data-stage-col="10"><span style="color:#38bdf8; font-weight:700;">98.2% Confidence</span></td>
-          <td data-stage-col="20"><strong style="color:#4ade80;">98.4% Confidence</strong></td>
-          <td data-stage-col="30"><strong style="color:#f59e0b;">98.2% Precision</strong></td>
+          <td data-stage-col="1"><span style="color:#38bdf8; font-weight:700;">98.2% Confidence</span></td>
+          <td data-stage-col="2"><strong style="color:#4ade80;">98.4% Confidence</strong></td>
+          <td data-stage-col="3"><strong style="color:#f59e0b;">98.4% Confidence</strong></td>
+          <td data-stage-col="4"><strong style="color:#ef4444;">98.2% Precision</strong></td>
           <td class="live-val"><strong style="color:#4ade80;">98.2% Confident</strong></td>
         </tr>
       `;
@@ -1233,66 +1329,74 @@ class Terrain3DComponent {
       tbody.innerHTML = `
         <tr>
           <td><strong>🌧️ Rainfall Surcharge</strong></td>
-          <td data-stage-col="0">12 mm/h</td>
-          <td data-stage-col="10">65 mm/h</td>
-          <td data-stage-col="20" class="warn-val">125 mm/h</td>
-          <td data-stage-col="30" class="crit-val">180 mm/h</td>
+          <td data-stage-col="0">15 mm/h</td>
+          <td data-stage-col="1">55 mm/h</td>
+          <td data-stage-col="2">95 mm/h</td>
+          <td data-stage-col="3" class="warn-val">140 mm/h</td>
+          <td data-stage-col="4" class="crit-val">180 mm/h</td>
           <td class="live-val"><strong>${rain} mm/h</strong></td>
         </tr>
         <tr>
           <td><strong>💧 Soil Moisture Saturation</strong></td>
-          <td data-stage-col="0">35%</td>
-          <td data-stage-col="10">72%</td>
-          <td data-stage-col="20" class="warn-val">92%</td>
-          <td data-stage-col="30" class="crit-val">99%</td>
+          <td data-stage-col="0">38%</td>
+          <td data-stage-col="1">68%</td>
+          <td data-stage-col="2">86%</td>
+          <td data-stage-col="3" class="warn-val">95%</td>
+          <td data-stage-col="4" class="crit-val">99%</td>
           <td class="live-val"><strong>${sat}%</strong></td>
         </tr>
         <tr>
           <td><strong>⛰️ Bishop Factor of Safety (FoS)</strong></td>
-          <td data-stage-col="0">1.85 (STABLE)</td>
-          <td data-stage-col="10">1.25 (MARGINAL)</td>
-          <td data-stage-col="20" class="warn-val">0.88 (🚨 FAILURE THRESHOLD)</td>
-          <td data-stage-col="30" class="crit-val">0.42 (🔴 COLLAPSED)</td>
+          <td data-stage-col="0">1.82 (STABLE)</td>
+          <td data-stage-col="1">1.38 (MARGINAL)</td>
+          <td data-stage-col="2">1.08 (WARNING)</td>
+          <td data-stage-col="3" class="warn-val">0.82 (🚨 SLIP INITIATED)</td>
+          <td data-stage-col="4" class="crit-val">0.45 (🔴 CATASTROPHIC RUNOUT)</td>
           <td class="live-val"><strong style="color:${parseFloat(fos) < 1.0 ? '#ef4444' : '#10b981'};">${fos}</strong></td>
         </tr>
         <tr>
           <td><strong>🌊 Pore Water Pressure (u)</strong></td>
           <td data-stage-col="0">14.2 kPa</td>
-          <td data-stage-col="10">28.5 kPa</td>
-          <td data-stage-col="20" class="warn-val">44.0 kPa</td>
-          <td data-stage-col="30" class="crit-val">62.5 kPa</td>
+          <td data-stage-col="1">26.5 kPa</td>
+          <td data-stage-col="2">39.0 kPa</td>
+          <td data-stage-col="3" class="warn-val">52.0 kPa</td>
+          <td data-stage-col="4" class="crit-val">68.5 kPa</td>
           <td class="live-val"><strong style="color:#38bdf8;">${pore} kPa</strong></td>
         </tr>
         <tr>
           <td><strong>📐 Cumulative Slide Displacement</strong></td>
           <td data-stage-col="0">0.2 m</td>
-          <td data-stage-col="10">1.8 m</td>
-          <td data-stage-col="20" class="warn-val">6.5 m (Tension Fissures)</td>
-          <td data-stage-col="30" class="crit-val">14.5 m (Debris Avalanche)</td>
+          <td data-stage-col="1">1.2 m</td>
+          <td data-stage-col="2">3.8 m (Tension Cracks)</td>
+          <td data-stage-col="3" class="warn-val">8.5 m (Shear Slip)</td>
+          <td data-stage-col="4" class="crit-val">16.8 m (Debris Fan)</td>
           <td class="live-val"><strong>${disp} m</strong></td>
         </tr>
         <tr class="alarm-row">
-          <td><strong>🚨 Slope Stability Early Warning</strong></td>
-          <td data-stage-col="0"><span class="pill-green">🟢 STABLE EQUILIBRIUM (98% Precision)</span></td>
-          <td data-stage-col="10"><span class="pill-yellow">🟡 CREEP ADVISORY (3.2h Ahead)</span></td>
-          <td data-stage-col="20"><span class="pill-red pulse-alarm">🚨 ALARM ARMED (3.5h Advance Notice!)</span></td>
-          <td data-stage-col="30"><span class="pill-crit">🔴 MASS SHEAR SLIP</span></td>
+          <td><strong>🚨 Geotechnical Alarm Status</strong></td>
+          <td data-stage-col="0"><span class="pill-green">🟢 STABLE (Hour 0)</span></td>
+          <td data-stage-col="1"><span class="pill-yellow">🟡 INFILTRATION (+1h)</span></td>
+          <td data-stage-col="2"><span class="pill-yellow">🟠 TENSION CRACK (+2h)</span></td>
+          <td data-stage-col="3"><span class="pill-red pulse-alarm">🚨 SHEAR COLLAPSE (+3h)</span></td>
+          <td data-stage-col="4"><span class="pill-crit">🔴 RUNOUT DELUGE (+4h)</span></td>
           <td class="live-val"><span class="${data && data.alarmLevel === 'CRITICAL' ? 'pill-red' : (data && data.alarmLevel === 'WARNING' ? 'pill-yellow' : 'pill-green')}">${alarmStatus}</span></td>
         </tr>
         <tr class="lead-time-row">
-          <td><strong>⏱️ Predictive Lead Time</strong></td>
-          <td data-stage-col="0">3.5–4.0 Hours Safe Buffer</td>
-          <td data-stage-col="10">3.2 Hours Advance Buffer</td>
-          <td data-stage-col="20" class="highlight-lead"><strong>🚨 PREDICTED 3.5H IN ADVANCE</strong></td>
-          <td data-stage-col="30" class="crit-lead">T+3.5h Highway Buried Horizon</td>
+          <td><strong>⏱️ Evacuation Window Remaining</strong></td>
+          <td data-stage-col="0">4.0 Hours Safe Buffer</td>
+          <td data-stage-col="1">3.0 Hours Buffer</td>
+          <td data-stage-col="2">2.0 Hours Remaining</td>
+          <td data-stage-col="3" class="highlight-lead"><strong>🚨 <1.0h Critical Window</strong></td>
+          <td data-stage-col="4" class="crit-lead">Peak Landslide Horizon</td>
           <td class="live-val"><strong style="color:#38bdf8;">3.5h Lead Time</strong></td>
         </tr>
         <tr style="background: rgba(217, 119, 6, 0.08);">
           <td><strong>🎯 AI Prediction Accuracy</strong></td>
           <td data-stage-col="0"><span style="color:#f59e0b; font-weight:700;">98.2% Accuracy</span></td>
-          <td data-stage-col="10"><span style="color:#f59e0b; font-weight:700;">98.2% Confidence</span></td>
-          <td data-stage-col="20"><strong style="color:#4ade80;">98.4% Confidence</strong></td>
-          <td data-stage-col="30"><strong style="color:#ef4444;">98.2% Precision</strong></td>
+          <td data-stage-col="1"><span style="color:#f59e0b; font-weight:700;">98.2% Confidence</span></td>
+          <td data-stage-col="2"><strong style="color:#4ade80;">98.4% Confidence</strong></td>
+          <td data-stage-col="3"><strong style="color:#f59e0b;">98.4% Confidence</strong></td>
+          <td data-stage-col="4"><strong style="color:#ef4444;">98.2% Precision</strong></td>
           <td class="live-val"><strong style="color:#4ade80;">98.2% Accuracy</strong></td>
         </tr>
       `;
@@ -1689,6 +1793,38 @@ class Terrain3DComponent {
     if (lblStage) lblStage.textContent = `${stage.toFixed(1)} m`;
     if (lblSlope) lblSlope.textContent = `${slope}°`;
   }
+
+  toggleCompleteScreen() {
+    const container = document.getElementById(this.mountId);
+    if (!container) return;
+    const wrapper = container.querySelector('.terrain-3d-wrapper') || container;
+    const isFull = wrapper.classList.toggle('complete-screen-mode');
+    
+    const btn = document.getElementById(`${this.mountId}-btn-complete-screen`);
+    if (btn) {
+      btn.classList.toggle('active', isFull);
+      btn.textContent = isFull ? '⛶ Exit Complete Screen (Esc)' : '⛶ Complete Screen';
+    }
+
+    // Trigger multi-tick resize passes for Three.js viewport
+    [30, 80, 180, 400, 800].forEach(delay => {
+      setTimeout(() => {
+        if (this.visualizer && typeof this.visualizer.onWindowResize === 'function') {
+          this.visualizer.onWindowResize();
+        }
+      }, delay);
+    });
+
+    if (isFull) {
+      const escHandler = (e) => {
+        if (e.key === 'Escape' && wrapper.classList.contains('complete-screen-mode')) {
+          this.toggleCompleteScreen();
+          window.removeEventListener('keydown', escHandler);
+        }
+      };
+      window.addEventListener('keydown', escHandler);
+    }
+  }
 }
 
 /**
@@ -1719,11 +1855,12 @@ window.openTerrain3DModal = function(mode = 'flood', initialData = {}) {
     : '⛰️ 3D Slope Geotechnical Slip-Surface & Hazard Progression Simulator (NE-LENS)';
 
   modalBackdrop.innerHTML = `
-    <div class="t3d-modal-window">
+    <div class="t3d-modal-window" id="t3d-active-modal-window">
       <div class="t3d-modal-header">
         <h3>${title}</h3>
         <div style="display:flex; gap:10px; align-items:center;">
-          <span style="font-size:11px; color:#94a3b8; font-family:'JetBrains Mono',monospace;">Dynamic 3D Multi-Area Spatial DEM</span>
+          <span style="font-size:11px; color:#94a3b8; font-family:'JetBrains Mono',monospace;">Dynamic 3D Spatial DEM</span>
+          <button id="btn-toggle-modal-complete-screen" class="t3d-btn" style="background:#0284c7; color:#fff; padding:6px 12px; font-weight:700; border-radius:6px; cursor:pointer;">⛶ Complete Screen</button>
           <button id="btn-close-t3d-modal" class="t3d-btn" style="background:#dc2626; color:#fff; padding:6px 14px; font-weight:700; border-radius:6px; cursor:pointer;">✕ CLOSE</button>
         </div>
       </div>
@@ -1742,6 +1879,23 @@ window.openTerrain3DModal = function(mode = 'flood', initialData = {}) {
     slopeAngle: initialData.slopeAngle || 34.0,
     riskEvolutionPhase: initialData.riskEvolutionPhase || 2
   });
+
+  // Modal Complete Screen toggle button
+  const modalCompleteBtn = document.getElementById('btn-toggle-modal-complete-screen');
+  const modalWin = document.getElementById('t3d-active-modal-window');
+  if (modalCompleteBtn && modalWin) {
+    modalCompleteBtn.addEventListener('click', () => {
+      const isFull = modalWin.classList.toggle('complete-screen-mode');
+      modalCompleteBtn.textContent = isFull ? '⛶ Restore Window' : '⛶ Complete Screen';
+      [30, 100, 250, 600].forEach(d => {
+        setTimeout(() => {
+          if (comp.visualizer && typeof comp.visualizer.onWindowResize === 'function') {
+            comp.visualizer.onWindowResize();
+          }
+        }, d);
+      });
+    });
+  }
 
   // Multiple resize passes to ensure Three.js canvas fills the container completely
   [80, 200, 450, 900].forEach(delay => {

@@ -142,8 +142,31 @@ class GovardhanaGiriApp {
 
     if (open3dBtn) open3dBtn.addEventListener('click', () => handleOpen3D(false));
     if (open3dDssBtn) open3dDssBtn.addEventListener('click', () => handleOpen3D(false));
-    if (expand3dBtn) expand3dBtn.addEventListener('click', () => handleOpen3D(false));
+    if (expand3dBtn) {
+      expand3dBtn.addEventListener('click', () => {
+        if (this.terrain3D && typeof this.terrain3D.toggleCompleteScreen === 'function') {
+          this.terrain3D.toggleCompleteScreen();
+        } else {
+          handleOpen3D(false);
+        }
+      });
+    }
     if (quickLaunch3dBtn) quickLaunch3dBtn.addEventListener('click', () => handleOpen3D(true));
+
+    // Master 4-Hour AI Risk Progression Analyse Buttons
+    const btnAnalyseMain = document.getElementById('btn-analyse-main');
+    if (btnAnalyseMain) {
+      btnAnalyseMain.addEventListener('click', () => {
+        this.triggerAnalysePoint();
+      });
+    }
+
+    const btnMapAnalyse = document.getElementById('btn-map-analyse');
+    if (btnMapAnalyse) {
+      btnMapAnalyse.addEventListener('click', () => {
+        this.triggerAnalysePoint();
+      });
+    }
 
     // Reset Map to State Overview (Fit All 10 Stations)
     const fitBtn = document.getElementById('btn-fit-all');
@@ -512,6 +535,55 @@ class GovardhanaGiriApp {
     }
   }
 
+  triggerAnalysePoint(targetStationId = null) {
+    // 1. Pick requested station, or currently active station, or highest risk station
+    let targetId = targetStationId || this.selectedStationId;
+    if (!targetStationId) {
+      // Find critical or high station, or default to Medaram / Bhadrachalam
+      const crit = this.stations.find(s => s.prediction && s.prediction.risk_level === 'Critical');
+      const high = this.stations.find(s => s.prediction && s.prediction.risk_level === 'High');
+      targetId = (crit && crit.id) || (high && high.id) || targetId || 'TEL-STN-03';
+    }
+
+    const stn = this.stations.find(s => s.id === targetId) || this.stations[0];
+    if (!stn) return;
+
+    this.selectedStationId = stn.id;
+
+    // 2. Scroll to map and zoom in deeply into the station with smooth flyTo
+    const mapEl = document.getElementById('flood-map');
+    if (mapEl) {
+      mapEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    this.selectStation(stn.id, false);
+    if (this.mapEngine) {
+      this.mapEngine.flyToStation(stn.lat, stn.lon, 13, 1.6, stn.id);
+    }
+
+    // 3. Display Step 1 Zoom-in & Risk Assessment toast
+    const riskLevel = (stn.prediction && stn.prediction.risk_level) || 'Moderate';
+    const leadHours = (stn.prediction && stn.prediction.lead_time_hours) ? stn.prediction.lead_time_hours.toFixed(1) : '3.5';
+    this.showToast(`🎯 Step 1/2: Zooming into ${stn.village_area} (${riskLevel} Risk • ${leadHours}h Lead Time)`, "warning");
+
+    // 4. After map zoom-in completes (2.2s delay), trigger and launch the 3D Terrain DEM
+    if (this.analyseTimer) clearTimeout(this.analyseTimer);
+    this.analyseTimer = setTimeout(() => {
+      this.showToast(`⚡ Step 2/2: Launching 3D Decision Support DEM for ${stn.village_area} — Simulating 4-Hour Flood Progression...`, "danger");
+
+      if (typeof window.openTerrain3DModal === 'function') {
+        window.openTerrain3DModal('flood', {
+          stationId: stn.id,
+          rainfall: (stn.telemetry && stn.telemetry.Rainfall_Intensity) || 68.0,
+          saturation: (stn.telemetry && stn.telemetry.Soil_Saturation) || 82.0,
+          waterLevel: (stn.telemetry && stn.telemetry.Water_Level) || 4.2,
+          riskEvolutionPhase: riskLevel === 'Critical' ? 4 : (riskLevel === 'High' ? 3 : 2),
+          autoRunSimulation: true
+        });
+      }
+    }, 2200);
+  }
+
   trigger3DFromMap(stnId) {
     this.selectStation(stnId, true);
     const stns = this.stations || [];
@@ -530,9 +602,9 @@ class GovardhanaGiriApp {
   showToast(message, type = "info") {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
-    toast.className = `toast ${type === 'danger' ? 'toast-danger' : ''}`;
+    toast.className = `toast ${type === 'danger' ? 'toast-danger' : (type === 'warning' ? 'toast-warning' : '')}`;
     toast.innerHTML = `
-      <span>${type === 'danger' ? '🚨' : (type === 'error' ? '❌' : 'ℹ️')}</span>
+      <span>${type === 'danger' ? '🚨' : (type === 'warning' ? '⚡' : (type === 'error' ? '❌' : 'ℹ️'))}</span>
       <span>${message}</span>
     `;
     container.appendChild(toast);

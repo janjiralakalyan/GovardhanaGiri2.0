@@ -1125,3 +1125,43 @@ body {
 .dark-tiles {
   filter: invert(100%) hue-rotate(180deg) brightness(78%) contrast(95%);
 }
+
+/* Master Analyse Button */
+.btn-analyse-master {
+  background: linear-gradient(135deg, #d97706 0%, #dc2626 100%);
+  color: #ffffff;
+  border: 1px solid #fca5a5;
+  padding: 7px 15px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 0 16px rgba(220, 38, 38, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.25s ease;
+  animation: analyseGlowPulse 2.5s infinite alternate;
+}
+
+.btn-analyse-master:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 0 24px rgba(220, 38, 38, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border-color: #ffffff;
+}
+
+.btn-analyse-master:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+@keyframes analyseGlowPulse {
+  0% {
+    box-shadow: 0 0 12px rgba(217, 119, 6, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 22px rgba(220, 38, 38, 0.65), 0 0 35px rgba(217, 119, 6, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+}
+

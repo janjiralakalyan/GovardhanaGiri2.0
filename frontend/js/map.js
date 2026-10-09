@@ -321,11 +321,19 @@ class FloodMapEngine {
     console.log("[MapEngine] View reset to all 10 Telangana stations.");
   }
 
-  flyToStation(lat, lon, zoom = 11) {
+  flyToStation(lat, lon, zoom = 11, duration = 1.4, stationId = null) {
     if (this.map) {
       this.map.flyTo([lat, lon], zoom, {
-        duration: 1.2
+        duration: duration,
+        easeLinearity: 0.25
       });
+      if (stationId && this.markers[stationId]) {
+        setTimeout(() => {
+          if (this.markers[stationId]) {
+            this.markers[stationId].openPopup();
+          }
+        }, Math.round(duration * 500));
+      }
     }
   }
 

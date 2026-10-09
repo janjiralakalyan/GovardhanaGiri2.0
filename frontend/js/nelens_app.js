@@ -79,6 +79,18 @@ class NeLensDashboardApp {
     }
 
 
+    // Master 4-Hour AI Risk Progression Analyse Buttons
+    const handleAnalyseLaunch = () => {
+      const loc = this.currentLocation || (this.locations && this.locations[0]) || {};
+      this.triggerAnalyseLocation(loc.id || 'AIZAWL-01');
+    };
+
+    const btnAnalyseHeader = document.getElementById('btn-nelens-analyse-main');
+    if (btnAnalyseHeader) btnAnalyseHeader.addEventListener('click', handleAnalyseLaunch);
+
+    const btnHeroAnalyse = document.getElementById('btn-hero-analyse');
+    if (btnHeroAnalyse) btnHeroAnalyse.addEventListener('click', handleAnalyseLaunch);
+
     // 3D Landslide Fullscreen Modal Buttons (Header, Hero Card, Drivers Card)
     const handle3DLaunch = () => {
       const loc = this.currentLocation || (this.locations && this.locations[0]) || {};
@@ -187,6 +199,44 @@ class NeLensDashboardApp {
 
     // 9. Update Field Reports
     this.updateFieldReports(loc);
+  }
+
+  triggerAnalyseLocation(locId = null) {
+    const locs = this.locations || [];
+    let targetLocId = locId;
+    if (!targetLocId) {
+      const crit = locs.find(l => l.risk_level === 'CRITICAL');
+      const high = locs.find(l => l.risk_level === 'HIGH');
+      targetLocId = (crit && crit.id) || (high && high.id) || (this.currentLocation && this.currentLocation.id) || (locs[0] && locs[0].id) || 'AIZAWL-01';
+    }
+
+    const loc = locs.find(l => l.id === targetLocId) || this.currentLocation || locs[0];
+    if (!loc) return;
+
+    // 1. Scroll to map if needed
+    const mapEl = document.getElementById('nelens-map');
+    if (mapEl) {
+      mapEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // 2. Select location and zoom in deeply on GIS terrain map
+    this.selectLocation(loc.id, false);
+    if (this.mapEngine && this.mapEngine.map) {
+      this.mapEngine.map.flyTo([loc.lat, loc.lon], 13.5, {
+        duration: 1.6,
+        easeLinearity: 0.25
+      });
+    }
+
+    // 3. Show Step 1 Analysis toast
+    this.showToast(`🎯 Step 1/2: Zooming into ${loc.district}, ${loc.state} (${loc.risk_level} Risk • ${loc.risk_score}/100)`, "warning");
+
+    // 4. After zoom-in finishes (2.2s), launch 3D Landslide DEM with automatic 4-Hour risk simulation
+    if (this.analyseTimer) clearTimeout(this.analyseTimer);
+    this.analyseTimer = setTimeout(() => {
+      this.showToast(`⚡ Step 2/2: Launching 3D Landslide Slope DEM — Simulating 4-Hour Geotechnical Failure Progression...`, "danger");
+      this.openLandslide3DModal(loc.id, true);
+    }, 2200);
   }
 
   trigger3DFromMap(locId) {
@@ -527,8 +577,9 @@ class NeLensDashboardApp {
     toast.style.fontSize = '13px';
     toast.style.fontWeight = '700';
     toast.style.color = '#ffffff';
-    toast.style.backgroundColor = type === 'danger' ? '#dc2626' : (type === 'error' ? '#ef4444' : '#0284c7');
+    toast.style.backgroundColor = type === 'danger' ? '#dc2626' : (type === 'warning' ? '#d97706' : (type === 'error' ? '#ef4444' : '#0284c7'));
     toast.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.4)';
+    toast.style.border = type === 'warning' ? '1px solid #f59e0b' : '1px solid rgba(255,255,255,0.2)';
     toast.textContent = message;
 
     document.body.appendChild(toast);

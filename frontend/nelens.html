@@ -45,6 +45,11 @@
         🌊 Telangana Floods
       </a>
 
+      <!-- Master Analyse 4-Hour Risk Button -->
+      <button class="btn-analyse-master" id="btn-nelens-analyse-main" title="Trigger Location & Run 4-Hour Landslide Progression in 3D">
+        ⚡ Analyse (4H Risk)
+      </button>
+
       <!-- Launch Landslide 3D DEM Modal -->
       <button class="t3d-btn" id="btn-nelens-3d-modal" style="background:linear-gradient(135deg, #d97706, #b45309); color:#fff; border-color:#f59e0b; font-weight:700; display:inline-flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(217,119,6,0.35);">
         🌐 3D Landslide DEM
@@ -142,9 +147,14 @@
         <div class="risk-trend-tag" id="hero-trend-tag">
           Risk trend ↑ Increasing
         </div>
-        <button id="btn-hero-launch-3d" style="background:linear-gradient(135deg, #d97706, #b45309); border:1px solid #f59e0b; color:#ffffff; font-size:12px; font-weight:800; padding:8px 14px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 14px rgba(217,119,6,0.4); white-space:nowrap;">
-          <span style="font-size:14px;">⚡</span> <span>Launch 3D Danger Simulation</span>
-        </button>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="btn-analyse-master" id="btn-hero-analyse" title="Run 4-Hour Landslide Risk Analysis & 3D Progression">
+            ⚡ Analyse (4H Risk)
+          </button>
+          <button id="btn-hero-launch-3d" style="background:linear-gradient(135deg, #d97706, #b45309); border:1px solid #f59e0b; color:#ffffff; font-size:12px; font-weight:800; padding:8px 14px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 14px rgba(217,119,6,0.4); white-space:nowrap;">
+            <span style="font-size:14px;">🌐</span> <span>3D Terrain</span>
+          </button>
+        </div>
       </div>
     </section>
 
