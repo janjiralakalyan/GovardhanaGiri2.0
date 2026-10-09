@@ -10,23 +10,37 @@ class DisasterAudioEngine {
     this.sirenOsc = null;
     this.sirenGain = null;
     this.sirenModulator = null;
+    this.waterNoiseNode = null;
+    this.waterGain = null;
     this.enabled = true;
+    this.isMuted = false;
   }
 
   init() {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AudioCtx();
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
     }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
+  }
+
+  setMuted(muted) {
+    this.isMuted = !!muted;
+    if (this.isMuted) {
+      this.toggleSiren(false);
+      this.setWaterTorrent(0);
     }
   }
 
   playBeep(freq = 880, duration = 0.15) {
-    if (!this.enabled) return;
+    if (!this.enabled || this.isMuted) return;
     try {
       this.init();
+      if (!this.ctx) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
@@ -47,15 +61,102 @@ class DisasterAudioEngine {
   }
 
   playCriticalChime() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.isMuted) return;
     this.playBeep(987.77, 0.12);
     setTimeout(() => this.playBeep(1318.51, 0.25), 140);
   }
 
-  toggleSiren(play = true) {
-    if (!this.enabled && play) return;
+  playThunder() {
+    if (!this.enabled || this.isMuted) return;
     try {
       this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const bufferSize = this.ctx.sampleRate * 2.0;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let lastOut = 0.0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        lastOut = (lastOut + (0.04 * white)) / 1.04;
+        data[i] = lastOut * 3.5;
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(180, now);
+      filter.frequency.exponentialRampToValueAtTime(45, now + 1.8);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.28, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      noise.start(now);
+    } catch (e) {
+      console.warn("Thunder synth error:", e);
+    }
+  }
+
+  setWaterTorrent(intensity = 0) {
+    if (!this.enabled || this.isMuted || intensity <= 0.02) {
+      if (this.waterGain && this.ctx) {
+        this.waterGain.gain.setValueAtTime(0, this.ctx.currentTime);
+      }
+      return;
+    }
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+
+      if (!this.waterNoiseNode) {
+        const bufferSize = this.ctx.sampleRate * 2.0;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99 * b0 + white * 0.05;
+          b1 = 0.95 * b1 + white * 0.1;
+          b2 = 0.85 * b2 + white * 0.2;
+          data[i] = (b0 + b1 + b2) * 0.4;
+        }
+        this.waterNoiseNode = this.ctx.createBufferSource();
+        this.waterNoiseNode.buffer = buffer;
+        this.waterNoiseNode.loop = true;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 420;
+        filter.Q.value = 1.2;
+
+        this.waterGain = this.ctx.createGain();
+        this.waterGain.gain.setValueAtTime(0.001, now);
+
+        this.waterNoiseNode.connect(filter);
+        filter.connect(this.waterGain);
+        this.waterGain.connect(this.ctx.destination);
+        this.waterNoiseNode.start(now);
+      }
+
+      const targetGain = Math.min(0.18, intensity * 0.14);
+      this.waterGain.gain.linearRampToValueAtTime(targetGain, now + 0.1);
+    } catch (e) {
+      console.warn("Water synth error:", e);
+    }
+  }
+
+  toggleSiren(play = true) {
+    if ((!this.enabled || this.isMuted) && play) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
       if (play && !this.isPlayingSiren) {
         // Create emergency wailing siren using frequency modulation
         this.sirenOsc = this.ctx.createOscillator();
@@ -64,17 +165,17 @@ class DisasterAudioEngine {
         const modGain = this.ctx.createGain();
 
         this.sirenOsc.type = 'sawtooth';
-        this.sirenOsc.frequency.setValueAtTime(650, this.ctx.currentTime);
+        this.sirenOsc.frequency.setValueAtTime(700, this.ctx.currentTime);
 
-        // LFO for wailing effect (0.8 Hz)
+        // LFO for wailing effect (1.2 Hz)
         this.sirenModulator.type = 'sine';
-        this.sirenModulator.frequency.setValueAtTime(0.8, this.ctx.currentTime);
-        modGain.gain.setValueAtTime(250, this.ctx.currentTime); // modulate ±250 Hz
+        this.sirenModulator.frequency.setValueAtTime(1.2, this.ctx.currentTime);
+        modGain.gain.setValueAtTime(320, this.ctx.currentTime); // modulate ±320 Hz
 
         this.sirenModulator.connect(modGain);
         modGain.connect(this.sirenOsc.frequency);
 
-        this.sirenGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        this.sirenGain.gain.setValueAtTime(0.09, this.ctx.currentTime);
 
         this.sirenOsc.connect(this.sirenGain);
         this.sirenGain.connect(this.ctx.destination);
@@ -84,11 +185,11 @@ class DisasterAudioEngine {
         this.isPlayingSiren = true;
       } else if (!play && this.isPlayingSiren) {
         if (this.sirenOsc) {
-          this.sirenOsc.stop();
+          try { this.sirenOsc.stop(); } catch(e){}
           this.sirenOsc.disconnect();
         }
         if (this.sirenModulator) {
-          this.sirenModulator.stop();
+          try { this.sirenModulator.stop(); } catch(e){}
           this.sirenModulator.disconnect();
         }
         this.isPlayingSiren = false;

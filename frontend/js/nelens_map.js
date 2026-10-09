@@ -97,14 +97,14 @@ class NeLensMapEngine {
             <span style="font-size:11px; font-weight:800; padding:2px 7px; border-radius:4px; background:${riskCol}; color:#fff;">${loc.risk_level}</span>
           </div>
 
-          <div style="font-size:11px; color:#334155; line-height:1.55; margin-bottom:8px;">
+          <div style="font-size:11px; color:#334155; line-height:1.55;">
             <div>🌧️ 24h Rain: <b>${loc.risk_drivers.rainfall_24h.value} mm</b> | Slope: <b>${loc.risk_drivers.slope.value}°</b></div>
             <div>💧 Soil Saturation: <b>${loc.risk_drivers.soil_moisture.value}%</b> | Radius: <b>${loc.affected_radius_km} km</b></div>
             <div>👥 Population at Risk: <b>${loc.exposure.population_affected.toLocaleString()}</b></div>
           </div>
 
-          <button onclick="window.app.trigger3DFromMap('${loc.id}')" style="width:100%; background:linear-gradient(135deg, #0284c7, #0369a1); border:1px solid #38bdf8; color:#ffffff; font-size:11.5px; font-weight:700; padding:7px 10px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 10px rgba(2,132,199,0.4);">
-            <span>⛰️</span> <span>Visualize 3D Slope DEM</span>
+          <button onclick="window.app.trigger3DFromMap('${loc.id}')" style="width:100%; margin-top:8px; background:linear-gradient(135deg, #d97706, #b45309); border:1px solid #f59e0b; color:#ffffff; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 10px rgba(217,119,6,0.35);">
+            <span>⛰️</span> <span>Visualize 3D Landslide DEM</span>
           </button>
         </div>
       `;

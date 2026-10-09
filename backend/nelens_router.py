@@ -49,6 +49,7 @@ class NewFieldReport(BaseModel):
 
 @router.get("/overview")
 def get_overview():
+    load_nelens_data()
     locations = NELENS_STATE.get("locations", [])
     critical_count = sum(1 for l in locations if l.get("risk_level") == "CRITICAL")
     high_count = sum(1 for l in locations if l.get("risk_level") == "HIGH")
