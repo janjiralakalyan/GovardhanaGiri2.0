@@ -114,6 +114,8 @@ def calculate_ndma_resource_matrix(station: Dict[str, Any], risk_level: str) -> 
 async def call_groq_agent(prompt: str, system_msg: str, temperature: float = 0.2, timeout_s: float = 18.0, api_key: Optional[str] = None) -> Optional[str]:
     """Invokes Worker Agent via Groq Cloud API."""
     key = api_key or GROQ_API_KEY_WORKER1
+    if not key or not key.strip():
+        return None
     headers = {
         "Authorization": f"Bearer {key}",
         "Content-Type": "application/json"
@@ -142,6 +144,8 @@ async def call_groq_agent(prompt: str, system_msg: str, temperature: float = 0.2
 
 async def call_cohere_commander(prompt: str, system_msg: str, temperature: float = 0.3, timeout_s: float = 25.0) -> Optional[str]:
     """Invokes Supreme Commander Agent via Cohere API."""
+    if not COHERE_API_KEY or not COHERE_API_KEY.strip():
+        return None
     headers = {
         "Authorization": f"Bearer {COHERE_API_KEY}",
         "Content-Type": "application/json"

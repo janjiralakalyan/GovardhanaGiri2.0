@@ -162,7 +162,8 @@ def reset_station(station_id: str):
 
 @app.post("/api/stations/{station_id}/telemetry")
 def update_telemetry(station_id: str, update: TelemetryUpdate):
-    filtered_update = {k: v for k, v in update.model_dump().items() if v is not None}
+    raw_update = update.model_dump() if hasattr(update, "model_dump") else update.dict()
+    filtered_update = {k: v for k, v in raw_update.items() if v is not None}
     stn = update_station_telemetry(station_id, filtered_update)
     if not stn:
         raise HTTPException(status_code=404, detail="Station not found")
