@@ -389,6 +389,7 @@
         </div>
 
         <div class="copilot-header-actions">
+          <button class="btn-copilot-keys" id="btn-open-keys-modal" title="Configure Groq/Cohere API Keys">⚙️ API Keys</button>
           <select id="copilot-station-picker" class="copilot-station-select" aria-label="Select Incident Station">
             <!-- Populated via JS -->
           </select>
@@ -432,7 +433,7 @@
               ⚡ Generate NDMA Action Plan (IAP)
             </button>
             <button class="btn-print-iap" id="btn-print-iap">
-              🖨️ Print / Export IAP
+              🖨️ Print / Export NDMA IAP (PDF)
             </button>
           </div>
 
@@ -482,6 +483,25 @@
                 <button class="btn-broadcast-action" id="btn-dispatch-broadcast" style="background:#dc2626; color:#fff; border-color:#ef4444;">
                   🚨 Dispatch
                 </button>
+              </div>
+            </div>
+
+            <!-- Speech Audio Controls Toolbar -->
+            <div class="audio-controls-toolbar">
+              <button class="btn-audio-ctrl" id="btn-speech-pause" title="Pause Speech">⏸️ Pause</button>
+              <button class="btn-audio-ctrl" id="btn-speech-stop" title="Stop Speech">⏹️ Stop</button>
+              <div class="audio-ctrl-item">
+                <span>🔊 Volume:</span>
+                <input type="range" id="speech-vol-slider" min="0" max="1" step="0.1" value="1.0" class="ctrl-slider">
+              </div>
+              <div class="audio-ctrl-item">
+                <span>⚡ Rate:</span>
+                <select id="speech-rate-select" class="ctrl-select">
+                  <option value="0.75">0.75x</option>
+                  <option value="1.0" selected>1.0x</option>
+                  <option value="1.25">1.25x</option>
+                  <option value="1.5">1.5x</option>
+                </select>
               </div>
             </div>
 
@@ -553,6 +573,33 @@
 
       </div>
 
+  <!-- API Key Settings Modal -->
+  <div class="keys-modal-overlay" id="copilot-keys-modal">
+    <div class="keys-modal-container">
+      <div class="keys-modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>🔑</span>
+          <h3 style="margin:0; font-size:16px; color:#f8fafc;">Configure AI LLM API Keys</h3>
+        </div>
+        <button class="btn-close-modal" id="btn-close-keys-modal">✕</button>
+      </div>
+      <div class="keys-modal-body">
+        <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:14px;">
+          Enter your custom LLM API keys below to enable live multi-agent deliberation. Keys are saved locally in your browser.
+        </p>
+        <div class="key-field-group">
+          <label for="groq-api-key-input" class="key-label">Groq API Key (Worker 1 & 2):</label>
+          <input type="password" id="groq-api-key-input" placeholder="gsk_..." class="key-input">
+        </div>
+        <div class="key-field-group" style="margin-top:12px;">
+          <label for="cohere-api-key-input" class="key-label">Cohere API Key (Supreme Commander):</label>
+          <input type="password" id="cohere-api-key-input" placeholder="Cohere Key..." class="key-input">
+        </div>
+      </div>
+      <div class="keys-modal-footer">
+        <button class="btn-save-keys" id="btn-save-keys">💾 Save Key Settings</button>
+        <button class="btn-clear-keys" id="btn-clear-keys">🗑️ Clear Saved Keys</button>
+      </div>
     </div>
   </div>
 

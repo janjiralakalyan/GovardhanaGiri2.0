@@ -4,8 +4,10 @@
  * Coordinates:
  * - 3-Agent Deliberation Pipeline (Groq Worker 1 + Groq Worker 2 + Cohere Commander)
  * - NDMA-Compliant IAP Generation & Resource Metric Cards
- * - Multi-Lingual Emergency Public Broadcasts (English, Telugu, Hindi) with Speech Synthesizer
- * - Interactive Commander Query Chat with Quick Prompts
+ * - Multi-Lingual Emergency Public Broadcasts (English, Telugu, Hindi) with Speech Controls
+ * - API Keys Modal & Local Key Management
+ * - Professional PDF / Print Export (NDMA Form 201/204)
+ * - Interactive Commander Query Chat with Telemetry Cards
  */
 
 const CopilotApp = {
@@ -13,13 +15,43 @@ const CopilotApp = {
   activeLang: "english",
   currentIAP: null,
   stationsList: [],
+  speechUtterance: null,
+  apiKeys: { groq: "", cohere: "" },
 
   init() {
+    this.loadSavedKeys();
     this.bindDOM();
     this.loadStationsDropdown();
     this.loadQuickPrompts();
     this.bindEvents();
+    this.bindAudioControls();
+    this.bindKeysModal();
     console.log("[CopilotApp] AI Multi-Agent Incident Commander initialized.");
+  },
+
+  loadSavedKeys() {
+    try {
+      const saved = localStorage.getItem("gg2_api_keys");
+      if (saved) {
+        this.apiKeys = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.warn("[CopilotApp] Error parsing saved API keys:", e);
+    }
+  },
+
+  saveKeys(groqKey, cohereKey) {
+    this.apiKeys = { groq: groqKey.trim(), cohere: cohereKey.trim() };
+    localStorage.setItem("gg2_api_keys", JSON.stringify(this.apiKeys));
+    this.showToast("🔑 API key settings saved locally!");
+  },
+
+  clearKeys() {
+    this.apiKeys = { groq: "", cohere: "" };
+    localStorage.removeItem("gg2_api_keys");
+    if (this.groqKeyInput) this.groqKeyInput.value = "";
+    if (this.cohereKeyInput) this.cohereKeyInput.value = "";
+    this.showToast("🗑️ Saved API keys cleared.");
   },
 
   bindDOM() {
@@ -48,16 +80,26 @@ const CopilotApp = {
     this.w2Analysis = document.getElementById("copilot-w2-text");
     this.cmdAnalysis = document.getElementById("copilot-cmd-text");
 
-    // Agent status dots
-    this.dotW1 = document.getElementById("dot-agent-w1");
-    this.dotW2 = document.getElementById("dot-agent-w2");
-    this.dotCmd = document.getElementById("dot-agent-cmd");
-
     // Broadcasts
     this.broadcastText = document.getElementById("copilot-broadcast-text");
     this.btnCopyBroadcast = document.getElementById("btn-copy-broadcast");
     this.btnPlayBroadcast = document.getElementById("btn-play-broadcast");
     this.btnDispatchBroadcast = document.getElementById("btn-dispatch-broadcast");
+
+    // Speech Audio Toolbar
+    this.btnSpeechPause = document.getElementById("btn-speech-pause");
+    this.btnSpeechStop = document.getElementById("btn-speech-stop");
+    this.speechVolSlider = document.getElementById("speech-vol-slider");
+    this.speechRateSelect = document.getElementById("speech-rate-select");
+
+    // API Keys Modal elements
+    this.btnOpenKeysModal = document.getElementById("btn-open-keys-modal");
+    this.keysModal = document.getElementById("copilot-keys-modal");
+    this.btnCloseKeysModal = document.getElementById("btn-close-keys-modal");
+    this.btnSaveKeys = document.getElementById("btn-save-keys");
+    this.btnClearKeys = document.getElementById("btn-clear-keys");
+    this.groqKeyInput = document.getElementById("groq-api-key-input");
+    this.cohereKeyInput = document.getElementById("cohere-api-key-input");
 
     // Chat
     this.chatContainer = document.getElementById("copilot-chat-msgs");
@@ -144,6 +186,83 @@ const CopilotApp = {
     }
   },
 
+  bindAudioControls() {
+    if (this.btnSpeechPause) {
+      this.btnSpeechPause.addEventListener("click", () => {
+        if (!('speechSynthesis' in window)) return;
+        if (window.speechSynthesis.speaking) {
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+            this.btnSpeechPause.textContent = "⏸️ Pause";
+            this.showToast("▶️ Audio playback resumed.");
+          } else {
+            window.speechSynthesis.pause();
+            this.btnSpeechPause.textContent = "▶️ Resume";
+            this.showToast("⏸️ Audio playback paused.");
+          }
+        }
+      });
+    }
+
+    if (this.btnSpeechStop) {
+      this.btnSpeechStop.addEventListener("click", () => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          if (this.btnSpeechPause) this.btnSpeechPause.textContent = "⏸️ Pause";
+          this.showToast("⏹️ Audio playback stopped.");
+        }
+      });
+    }
+
+    if (this.speechVolSlider) {
+      this.speechVolSlider.addEventListener("input", (e) => {
+        const val = parseFloat(e.target.value);
+        if (this.speechUtterance) {
+          this.speechUtterance.volume = val;
+        }
+      });
+    }
+  },
+
+  bindKeysModal() {
+    if (this.btnOpenKeysModal) {
+      this.btnOpenKeysModal.addEventListener("click", () => {
+        if (this.groqKeyInput) this.groqKeyInput.value = this.apiKeys.groq || "";
+        if (this.cohereKeyInput) this.cohereKeyInput.value = this.apiKeys.cohere || "";
+        if (this.keysModal) this.keysModal.classList.add("active");
+      });
+    }
+
+    if (this.btnCloseKeysModal) {
+      this.btnCloseKeysModal.addEventListener("click", () => {
+        if (this.keysModal) this.keysModal.classList.remove("active");
+      });
+    }
+
+    if (this.keysModal) {
+      this.keysModal.addEventListener("click", (e) => {
+        if (e.target === this.keysModal) {
+          this.keysModal.classList.remove("active");
+        }
+      });
+    }
+
+    if (this.btnSaveKeys) {
+      this.btnSaveKeys.addEventListener("click", () => {
+        const gKey = this.groqKeyInput ? this.groqKeyInput.value : "";
+        const cKey = this.cohereKeyInput ? this.cohereKeyInput.value : "";
+        this.saveKeys(gKey, cKey);
+        if (this.keysModal) this.keysModal.classList.remove("active");
+      });
+    }
+
+    if (this.btnClearKeys) {
+      this.btnClearKeys.addEventListener("click", () => {
+        this.clearKeys();
+      });
+    }
+  },
+
   openModal(stationId = null) {
     if (stationId) {
       this.currentStationId = stationId;
@@ -223,7 +342,11 @@ const CopilotApp = {
       const res = await fetch("/api/copilot/generate-iap", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ station_id: stnId })
+        body: JSON.stringify({
+          station_id: stnId,
+          groq_api_key: this.apiKeys.groq || null,
+          cohere_api_key: this.apiKeys.cohere || null
+        })
       });
       const data = await res.json();
       this.currentIAP = data;
@@ -310,8 +433,16 @@ const CopilotApp = {
     else if (lang === "hindi") utterance.lang = "hi-IN";
     else utterance.lang = "en-IN";
 
-    utterance.rate = 0.95;
+    const vol = this.speechVolSlider ? parseFloat(this.speechVolSlider.value) : 1.0;
+    const rate = this.speechRateSelect ? parseFloat(this.speechRateSelect.value) : 1.0;
+
+    utterance.volume = vol;
+    utterance.rate = rate;
     utterance.pitch = 1.0;
+
+    this.speechUtterance = utterance;
+    if (this.btnSpeechPause) this.btnSpeechPause.textContent = "⏸️ Pause";
+
     window.speechSynthesis.speak(utterance);
     this.showToast(`🔊 Broadcasting announcement in ${lang.toUpperCase()}...`);
   },
@@ -331,10 +462,15 @@ const CopilotApp = {
       const res = await fetch("/api/copilot/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query, station_id: stnId })
+        body: JSON.stringify({
+          query: query,
+          station_id: stnId,
+          groq_api_key: this.apiKeys.groq || null,
+          cohere_api_key: this.apiKeys.cohere || null
+        })
       });
       const data = await res.json();
-      this.updateMessage(loadingId, data.answer, `${data.responder} • ${data.timestamp}`);
+      this.updateMessage(loadingId, data.answer, `${data.responder} • ${data.timestamp}`, data.station_data);
     } catch (e) {
       this.updateMessage(loadingId, "⚠️ Error querying Copilot backend. Please try again.", "EOC System Error");
     }
@@ -347,7 +483,6 @@ const CopilotApp = {
     bubble.className = `chat-bubble ${role}`;
     bubble.id = msgId;
 
-    // Convert simple markdown bold/bullets
     let formatted = text
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
       .replace(/\n- /g, "<br>• ")
@@ -365,7 +500,7 @@ const CopilotApp = {
     return msgId;
   },
 
-  updateMessage(msgId, text, meta) {
+  updateMessage(msgId, text, meta, stnData = null) {
     const bubble = document.getElementById(msgId);
     if (!bubble) return;
     let formatted = text
@@ -373,8 +508,52 @@ const CopilotApp = {
       .replace(/\n- /g, "<br>• ")
       .replace(/\n/g, "<br>");
 
+    let cardHtml = "";
+    if (stnData) {
+      const tel = stnData.telemetry || {};
+      const pred = stnData.prediction || {};
+      const danger = stnData.danger_water_level || 5.0;
+      const water = tel.Water_Level || 0;
+      const risk = pred.risk_level || "Moderate";
+      const lead = pred.lead_time_hours || 3.5;
+      const shelters = stnData.shelters || [];
+
+      cardHtml = `
+        <div class="chat-telemetry-card">
+          <div class="chat-card-title">
+            📍 ${stnData.village_area} (${stnData.district})
+            <span class="summary-risk-badge ${risk.toLowerCase()}" style="margin-left:8px; font-size:10px; padding:2px 6px;">${risk.toUpperCase()} ALERT</span>
+          </div>
+          <div class="chat-metrics-grid">
+            <div class="chat-metric-pill">
+              <span class="lbl">River Water Stage</span>
+              <span class="val" style="color:${water >= danger ? '#ef4444' : '#38bdf8'};">${water}m / ${danger}m</span>
+            </div>
+            <div class="chat-metric-pill">
+              <span class="lbl">1h Rain Intensity</span>
+              <span class="val">${tel.Rainfall_1h || 0} mm/h</span>
+            </div>
+            <div class="chat-metric-pill">
+              <span class="lbl">Soil Saturation</span>
+              <span class="val">${tel.Soil_Saturation || 0}%</span>
+            </div>
+            <div class="chat-metric-pill">
+              <span class="lbl">Action Lead Time</span>
+              <span class="val" style="color:#fbbf24;">⚡ ${lead} Hours</span>
+            </div>
+          </div>
+          ${shelters.length > 0 ? `
+            <div style="font-size:10.5px; color:#cbd5e1; margin-top:8px;">
+              <strong>🏥 Primary Relief Camp:</strong> ${shelters[0].name} (Cap: ${shelters[0].capacity.toLocaleString()} evacuees • ${shelters[0].distance_km}km)
+            </div>
+          ` : ""}
+        </div>
+      `;
+    }
+
     bubble.innerHTML = `
       <div>${formatted}</div>
+      ${cardHtml}
       <div class="chat-bubble-meta">
         <span>🛡️</span>
         <span>${meta}</span>
@@ -389,51 +568,102 @@ const CopilotApp = {
       return;
     }
     const iap = this.currentIAP;
-    const sup = iap.resource_matrix ? iap.resource_matrix.supplies : {};
+    const resMatrix = iap.resource_matrix || {};
+    const sup = resMatrix.supplies || {};
+    const shelterPlan = resMatrix.shelter_allocations || [];
+
     const printWindow = window.open("", "_blank");
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>NDMA Incident Action Plan - ${iap.station_name}</title>
+        <title>NDMA FORM 201/204 - INCIDENT ACTION PLAN (${iap.station_name})</title>
         <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 30px; color: #1e293b; }
-          .header { border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px; }
-          .title { font-size: 22px; font-weight: bold; color: #0f172a; }
-          .subtitle { font-size: 14px; color: #64748b; }
-          .badge { display: inline-block; padding: 4px 10px; background: #dc2626; color: #fff; font-weight: bold; border-radius: 4px; font-size: 12px; }
-          table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-          th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; font-size: 13px; }
-          th { background: #f1f5f9; font-weight: 600; }
-          .section-title { font-size: 16px; font-weight: bold; margin-top: 20px; border-left: 4px solid #3b82f6; padding-left: 8px; }
-          pre { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; font-size: 12px; white-space: pre-wrap; }
+          @page { size: A4; margin: 20mm; }
+          body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 25px; color: #0f172a; line-height: 1.5; background: #fff; }
+          .official-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px double #0f172a; padding-bottom: 12px; margin-bottom: 18px; }
+          .header-title-box h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; color: #0f172a; }
+          .header-title-box p { margin: 2px 0 0 0; font-size: 12px; color: #475569; font-weight: 600; }
+          .ndma-badge { background: #dc2626; color: #fff; padding: 6px 12px; font-weight: 800; font-size: 12px; border-radius: 4px; text-transform: uppercase; }
+          .meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; }
+          .meta-item { display: flex; flex-direction: column; }
+          .meta-item .lbl { color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+          .meta-item .val { font-size: 13px; font-weight: 800; color: #0f172a; }
+          .section-title { font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #2563eb; padding-left: 8px; margin-top: 22px; margin-bottom: 10px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 12px; }
+          th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
+          th { background: #f1f5f9; font-weight: 700; color: #1e293b; text-transform: uppercase; font-size: 10.5px; }
+          .pre-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px; border-radius: 6px; font-size: 11.5px; white-space: pre-wrap; line-height: 1.6; }
+          .footer-sign { margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 15px; }
         </style>
       </head>
       <body>
-        <div class="header">
-          <div class="badge">NDMA FORM 201 / 204 • GOVARDHANA GIRI 2.0</div>
-          <div class="title">INCIDENT ACTION PLAN (IAP)</div>
-          <div class="subtitle">Location: ${iap.station_name}, ${iap.mandal}, ${iap.district} | Generated: ${iap.generated_at}</div>
+        <div class="official-header">
+          <div class="header-title-box">
+            <h1>NATIONAL DISASTER MANAGEMENT AUTHORITY (NDMA)</h1>
+            <p>GovardhanaGiri 2.0 • Incident Command Form 201/204 • State Disaster Operations</p>
+          </div>
+          <div class="ndma-badge">FORM 201 / 204 • ${iap.risk_level} ALERT</div>
         </div>
 
-        <div class="section-title">1. Operational Status & Threat Summary</div>
+        <div class="meta-grid">
+          <div class="meta-item"><span class="lbl">Monitored Station & District</span><span class="val">${iap.station_name}, ${iap.mandal} Mandal (${iap.district} District)</span></div>
+          <div class="meta-item"><span class="lbl">Report Generation Timestamp</span><span class="val">${iap.generated_at}</span></div>
+          <div class="meta-item"><span class="lbl">AI Evacuation Lead Time</span><span class="val">⚡ ${iap.lead_time_hours} Hours (3–4h Early Warning Window)</span></div>
+          <div class="meta-item"><span class="lbl">Target Riparian Population at Risk</span><span class="val">${(resMatrix.target_vulnerable_population || iap.population).toLocaleString()} Persons</span></div>
+        </div>
+
+        <div class="section-title">1. Mandated 48-Hour Operational Resource Reserve</div>
         <table>
-          <tr><th>Hazard Risk Level</th><td><strong>${iap.risk_level}</strong></td><th>Evacuation Lead Time</th><td><strong>${iap.lead_time_hours} Hours</strong></td></tr>
-          <tr><th>Riparian Population</th><td>${iap.population.toLocaleString()}</td><th>Flood Predicted</th><td>${iap.flood_predicted ? "YES (Imminent)" : "NO (Monitoring)"}</td></tr>
+          <thead>
+            <tr><th>Resource Category</th><th>NDMA Mandated Reserve Quantity</th><th>Deployment Status & Standards</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Dry Meal Food Rations</strong></td><td>${(sup.food_packets_48h || 0).toLocaleString()} Packets</td><td>3 meals x 48h operational reserve per evacuee</td></tr>
+            <tr><td><strong>Clean Potable Drinking Water</strong></td><td>${(sup.water_liters_48h || 0).toLocaleString()} L (${sup.water_tankers_10k_L || 0} Tankers @ 10k L)</td><td>SPHERE Standard: 4 Liters / person / day</td></tr>
+            <tr><td><strong>SDRF Motorized Rescue Boats</strong></td><td>${sup.sdrf_inflatable_rescue_boats || 0} IRBs</td><td>Deployed to riverbank launch points</td></tr>
+            <tr><td><strong>Life Jackets & Safety Gear</strong></td><td>${(sup.life_jackets_distributed || 0).toLocaleString()} Units</td><td>Distributed to frontline responders & riparian wards</td></tr>
+            <tr><td><strong>Emergency Medical Triage Tents</strong></td><td>${sup.medical_triage_tents || 0} Tents (${(sup.ors_chlorine_sachets || 0).toLocaleString()} ORS/Chlorine Kits)</td><td>Equipped with water purification & triage kits</td></tr>
+            <tr><td><strong>SDRF / NDRF First Responders</strong></td><td>${sup.sdrf_ndrf_personnel || 0} Officers</td><td>Active search & rescue personnel on standby</td></tr>
+          </tbody>
         </table>
 
-        <div class="section-title">2. NDMA Mandated Resource Matrix (48-Hour Operational Reserve)</div>
+        ${shelterPlan.length > 0 ? `
+          <div class="section-title">2. Designated Safe Relief Camps & Occupancy Plan</div>
+          <table>
+            <thead>
+              <tr><th>Shelter Facility Name</th><th>Elevation</th><th>Distance</th><th>Max Capacity</th><th>Allocated Evacuees</th><th>Contact Phone</th></tr>
+            </thead>
+            <tbody>
+              ${shelterPlan.map(s => `
+                <tr>
+                  <td><strong>${s.name}</strong></td>
+                  <td>${s.elevation_m} m</td>
+                  <td>${s.distance_km} km</td>
+                  <td>${s.capacity.toLocaleString()}</td>
+                  <td>${s.allocated_evacuees.toLocaleString()} (${s.occupancy_rate_pct}%)</td>
+                  <td>${s.contact}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        ` : ""}
+
+        <div class="section-title">3. Multi-Agent Incident Action Plan Synthesis & Directives</div>
+        <div class="pre-box">${iap.deliberation ? iap.deliberation.commander_synthesis.full_iap : ""}</div>
+
+        <div class="section-title">4. Authenticated Multi-Lingual Emergency Public Broadcast</div>
         <table>
-          <tr><th>Food Packets (3 meals x 48h)</th><td>${(sup.food_packets_48h || 0).toLocaleString()} Packets</td></tr>
-          <tr><th>Clean Potable Water</th><td>${(sup.water_liters_48h || 0).toLocaleString()} Liters (${sup.water_tankers_10k_L || 0} Tankers @ 10k L)</td></tr>
-          <tr><th>SDRF Inflatable Rescue Boats</th><td>${sup.sdrf_inflatable_rescue_boats || 0} Motorized IRBs</td></tr>
-          <tr><th>Life Jackets</th><td>${(sup.life_jackets_distributed || 0).toLocaleString()} Units</td></tr>
-          <tr><th>Medical Triage Tents</th><td>${sup.medical_triage_tents || 0} Tents (${(sup.ors_chlorine_sachets || 0).toLocaleString()} ORS/Chlorine Sachets)</td></tr>
-          <tr><th>First Responders</th><td>${sup.sdrf_ndrf_personnel || 0} SDRF / NDRF Personnel</td></tr>
+          <tr><th>English Broadcast</th><td>${iap.broadcasts.english}</td></tr>
+          <tr><th>Telugu Broadcast (తెలుగు)</th><td>${iap.broadcasts.telugu}</td></tr>
+          <tr><th>Hindi Broadcast (हिन्दी)</th><td>${iap.broadcasts.hindi}</td></tr>
         </table>
 
-        <div class="section-title">3. Multi-Agent Deliberation & Command Directive</div>
-        <pre>${iap.deliberation ? iap.deliberation.commander_synthesis.full_iap : ""}</pre>
+        <div class="footer-sign">
+          <div><strong>Issued By:</strong> GovardhanaGiri 2.0 AI Incident Commander</div>
+          <div><strong>Authority:</strong> State Disaster Management Authority (SDMA)</div>
+          <div><strong>Helpline:</strong> 1077 / 112</div>
+        </div>
 
         <script>window.print();</script>
       </body>

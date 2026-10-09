@@ -228,11 +228,11 @@ def generate_fallback_deliberation(station: Dict[str, Any], pred: Dict[str, Any]
         f"**1. Immediate Executive Orders:**\n"
         f"- Mobilize {supplies['sdrf_ndrf_personnel']} SDRF/NDRF personnel and deploy {supplies['sdrf_inflatable_rescue_boats']} motorized rescue craft to riparian ghat points.\n"
         f"- Barricade vulnerable causeways and low-lying bridge approaches immediately.\n"
-        f"- Activate primary safe shelters: {resources['shelter_allocations'][0]['name'] if resources['shelter_allocations'] else 'Designated High Ground Camp'}.\n\n"
+        f"- Activate primary safe shelters.\n\n"
         f"**2. Multi-Lingual Public Broadcasts:**\n\n"
         f"**[ENGLISH BROADCAST]**\n{english_msg}\n\n"
-        f"**[TELUGU BROADCAST (తెలుగు అత్యవసర ప్రకటన)]**\n{telugu_msg}\n\n"
-        f"**[HINDI BROADCAST (हिन्दी आपातकालीन उद्घोषणा)]**\n{hindi_msg}"
+        f"**[TELUGU BROADCAST]**\n{telugu_msg}\n\n"
+        f"**[HINDI BROADCAST]**\n{hindi_msg}"
     )
 
     return {
@@ -247,7 +247,12 @@ def generate_fallback_deliberation(station: Dict[str, Any], pred: Dict[str, Any]
     }
 
 
-async def generate_incident_action_plan(station_id: str, custom_telemetry: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+async def generate_incident_action_plan(
+    station_id: str,
+    custom_telemetry: Optional[Dict[str, Any]] = None,
+    groq_api_key: Optional[str] = None,
+    cohere_api_key: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Executes the 3-Agent Collaborative Pipeline:
       Worker 1 (Groq) -> Hazard Assessment
@@ -261,6 +266,9 @@ async def generate_incident_action_plan(station_id: str, custom_telemetry: Optio
     
     if not station:
         raise ValueError(f"Station not found: {station_id}")
+
+    g_key = groq_api_key or GROQ_API_KEY_WORKER1
+    c_key = cohere_api_key or COHERE_API_KEY
 
     # Use live telemetry or custom simulation overrides
     active_telemetry = dict(station["telemetry"])
@@ -278,7 +286,7 @@ async def generate_incident_action_plan(station_id: str, custom_telemetry: Optio
 
     # --- Agent 1: Groq Hazard Analyst Prompt ---
     w1_system = "You are Worker Agent 1: Senior Hydrological & Hazard Telemetry Analyst for Telangana Disaster Management Authority."
-    w1_prompt = f"""Analyze the real-time hydro-meteorological telemetry for the following monitored hotspot:
+    w1_prompt = f"""Analyze the real-time hydro-meterological telemetry for the following monitored hotspot:
 Hotspot: {station['village_area']}, Mandal: {station['mandal']}, District: {station['district']}
 Population: {station['population']:,} | River: {station['river_name']}
 Current Water Stage: {active_telemetry.get('Water_Level')} m (Danger Mark: {station.get('danger_water_level')} m)
@@ -294,7 +302,7 @@ Provide a rigorous technical evaluation in 3 structured points:
 
     # --- Step 1: Run Worker Agent 1 ---
     t0 = time.time()
-    w1_response = await call_groq_agent(w1_prompt, w1_system, temperature=0.2, api_key=GROQ_API_KEY_WORKER1)
+    w1_response = await call_groq_agent(w1_prompt, w1_system, temperature=0.2, api_key=g_key)
     w1_latency = round(time.time() - t0, 2)
 
     if not w1_response:
@@ -322,7 +330,7 @@ Task: Validate these logistical requirements, specify priority evacuation sector
 
     # --- Step 2: Run Worker Agent 2 ---
     t0 = time.time()
-    w2_response = await call_groq_agent(w2_prompt, w2_system, temperature=0.2, api_key=GROQ_API_KEY_WORKER2)
+    w2_response = await call_groq_agent(w2_prompt, w2_system, temperature=0.2, api_key=g_key)
     w2_latency = round(time.time() - t0, 2)
 
     if not w2_response:
@@ -424,18 +432,30 @@ Generate the complete Incident Action Plan conforming to the following structure
     }
 
 
-async def answer_commander_query(query: str, station_id: Optional[str] = None) -> Dict[str, Any]:
+async def answer_commander_query(
+    query: str,
+    station_id: Optional[str] = None,
+    groq_api_key: Optional[str] = None,
+    cohere_api_key: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Interactive Copilot conversational query endpoint.
     Answers commander queries with hyper-local context using the multi-agent system.
     """
-    # Load all stations for statewide or localized context
     stations = get_all_stations()
     current_stn = None
     if station_id:
         current_stn = get_station_by_id(station_id)
     if not current_stn and stations:
         current_stn = stations[0]
+
+    g_key = groq_api_key or GROQ_API_KEY_WORKER1
+    c_key = cohere_api_key or COHERE_API_KEY
+
+    # Predict hazard for current station
+    pred = None
+    if current_stn:
+        pred = ai_bridge.predict_station_telemetry(current_stn["telemetry"])
 
     stn_context = json.dumps([{
         "id": s["id"],
@@ -455,7 +475,7 @@ async def answer_commander_query(query: str, station_id: Optional[str] = None) -
     w1_prompt = f"""Monitored Telangana Stations Data:\n{stn_context}\n\nCommander Query: {query}\n\nExtract relevant station facts, water levels, rainfall, or hazard metrics concisely."""
     
     t0 = time.time()
-    w1_analysis = await call_groq_agent(w1_prompt, w1_system, temperature=0.1, timeout_s=12.0, api_key=GROQ_API_KEY_WORKER1)
+    w1_analysis = await call_groq_agent(w1_prompt, w1_system, temperature=0.1, timeout_s=12.0, api_key=g_key)
     
     # 2. Cohere Supreme Commander Final Answer
     commander_system = (
@@ -469,19 +489,35 @@ async def answer_commander_query(query: str, station_id: Optional[str] = None) -
 
     if not commander_answer:
         # Fallback intelligent rule
+        danger_str = f"{current_stn['telemetry']['Water_Level']}m (Danger: {current_stn['danger_water_level']}m)" if current_stn else "Normal"
+        rain_str = f"{current_stn['telemetry']['Rainfall_1h']} mm/h" if current_stn else "0 mm/h"
+        stn_name = current_stn['village_area'] if current_stn else "Telangana Basin"
+        shelter_name = current_stn['shelters'][0]['name'] if (current_stn and current_stn.get('shelters')) else "Designated District Shelter"
+        shelter_cap = current_stn['shelters'][0]['capacity'] if (current_stn and current_stn.get('shelters')) else 1500
+
         commander_answer = (
-            f"**Operational Advisory for {current_stn['village_area']}:**\n"
-            f"Based on live telemetry (Water Level: {current_stn['telemetry']['Water_Level']}m vs Danger: {current_stn['danger_water_level']}m, "
-            f"Rainfall: {current_stn['telemetry']['Rainfall_1h']} mm/h), immediate priority is securing low-lying riparian wards.\n"
-            f"- **Primary High-Ground Shelter:** {current_stn['shelters'][0]['name']} (Capacity: {current_stn['shelters'][0]['capacity']})\n"
-            f"- **Action Order:** Dispatch SDRF inflatable rescue boats and establish traffic barricades along bridge approaches."
+            f"**Operational Command Directive for {stn_name}:**\n\n"
+            f"• **Live Hydrometric Stage:** River Level at {danger_str} | Rainfall Rate: {rain_str}\n"
+            f"• **Primary Action Order:** Secure low-lying riparian colonies and establish police checkpoints on flood causeways.\n"
+            f"• **Designated Primary Shelter:** {shelter_name} (Capacity: {shelter_cap:,} evacuees)\n"
+            f"• **Resource Deployment:** Deploy SDRF motorized rescue craft to riverside ghats and mobilize medical triage kits."
         )
+
+    # Enrich station data for rich card rendering in UI
+    enriched_stn = None
+    if current_stn:
+        enriched_stn = {
+            **current_stn,
+            "prediction": pred
+        }
 
     return {
         "query": query,
         "station_id": current_stn["id"] if current_stn else None,
+        "station_name": current_stn["village_area"] if current_stn else None,
         "answer": commander_answer,
         "worker_telemetry_insights": w1_analysis or "Real-time state telemetry ingested.",
-        "responder": "Supreme Incident Commander (Cohere Multi-Agent System)",
-        "timestamp": time.strftime("%H:%M:%S IST")
+        "responder": "Supreme Incident Commander Copilot",
+        "timestamp": time.strftime("%H:%M:%S IST"),
+        "station_data": enriched_stn
     }

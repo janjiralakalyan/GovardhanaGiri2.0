@@ -23,11 +23,15 @@ router = APIRouter(prefix="/api/copilot", tags=["AI Incident Commander Copilot"]
 class IAPRequest(BaseModel):
     station_id: str
     custom_telemetry: Optional[Dict[str, Any]] = None
+    groq_api_key: Optional[str] = None
+    cohere_api_key: Optional[str] = None
 
 
 class QueryRequest(BaseModel):
     query: str
     station_id: Optional[str] = None
+    groq_api_key: Optional[str] = None
+    cohere_api_key: Optional[str] = None
 
 
 @router.post("/generate-iap")
@@ -39,7 +43,12 @@ async def api_generate_iap(req: IAPRequest):
     Commander (Cohere) -> Supreme NDMA IAP Synthesis & Multi-Lingual Broadcasts
     """
     try:
-        iap = await generate_incident_action_plan(req.station_id, req.custom_telemetry)
+        iap = await generate_incident_action_plan(
+            req.station_id,
+            req.custom_telemetry,
+            groq_api_key=req.groq_api_key,
+            cohere_api_key=req.cohere_api_key
+        )
         return iap
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate IAP: {str(e)}")
@@ -53,7 +62,12 @@ async def api_query_copilot(req: QueryRequest):
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     try:
-        ans = await answer_commander_query(req.query, req.station_id)
+        ans = await answer_commander_query(
+            req.query,
+            req.station_id,
+            groq_api_key=req.groq_api_key,
+            cohere_api_key=req.cohere_api_key
+        )
         return ans
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Copilot query failed: {str(e)}")
