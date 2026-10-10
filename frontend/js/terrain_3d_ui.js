@@ -1352,16 +1352,16 @@ class Terrain3DComponent {
           <td data-stage-col="2">2.0 Hours Remaining</td>
           <td data-stage-col="3" class="highlight-lead"><strong>🚨 <1.0h Critical Window</strong></td>
           <td data-stage-col="4" class="crit-lead">Peak Submergence Horizon</td>
-          <td class="live-val"><strong style="color:#38bdf8;">3.5h Lead Time</strong></td>
+          <td class="live-val"><strong style="color:#38bdf8;">${(data && data.leadTimeHours) ? data.leadTimeHours.toFixed(1) + 'h Lead Time' : '6.4h Lead Time'}</strong></td>
         </tr>
         <tr style="background: rgba(56, 189, 248, 0.08);">
           <td><strong>🎯 AI Prediction Confidence</strong></td>
-          <td data-stage-col="0"><span style="color:#38bdf8; font-weight:700;">98.2% Accuracy</span></td>
+          <td data-stage-col="0"><span style="color:#38bdf8; font-weight:700;">98.2% Confidence</span></td>
           <td data-stage-col="1"><span style="color:#38bdf8; font-weight:700;">98.2% Confidence</span></td>
           <td data-stage-col="2"><strong style="color:#4ade80;">98.4% Confidence</strong></td>
           <td data-stage-col="3"><strong style="color:#f59e0b;">98.4% Confidence</strong></td>
-          <td data-stage-col="4"><strong style="color:#ef4444;">98.2% Precision</strong></td>
-          <td class="live-val"><strong style="color:#4ade80;">98.2% Confident</strong></td>
+          <td data-stage-col="4"><strong style="color:#ef4444;">98.2% Confidence</strong></td>
+          <td class="live-val"><strong style="color:#4ade80;">98.2% Confidence</strong></td>
         </tr>
       `;
     } else {
@@ -1432,16 +1432,16 @@ class Terrain3DComponent {
           <td data-stage-col="2">2.0 Hours Remaining</td>
           <td data-stage-col="3" class="highlight-lead"><strong>🚨 <1.0h Critical Window</strong></td>
           <td data-stage-col="4" class="crit-lead">Peak Landslide Horizon</td>
-          <td class="live-val"><strong style="color:#38bdf8;">3.5h Lead Time</strong></td>
+          <td class="live-val"><strong style="color:#38bdf8;">${(data && data.leadTimeHours) ? data.leadTimeHours.toFixed(1) + 'h Lead Time' : '6.4h Lead Time'}</strong></td>
         </tr>
         <tr style="background: rgba(217, 119, 6, 0.08);">
-          <td><strong>🎯 AI Prediction Accuracy</strong></td>
-          <td data-stage-col="0"><span style="color:#f59e0b; font-weight:700;">98.2% Accuracy</span></td>
+          <td><strong>🎯 AI Prediction Confidence</strong></td>
+          <td data-stage-col="0"><span style="color:#f59e0b; font-weight:700;">98.2% Confidence</span></td>
           <td data-stage-col="1"><span style="color:#f59e0b; font-weight:700;">98.2% Confidence</span></td>
           <td data-stage-col="2"><strong style="color:#4ade80;">98.4% Confidence</strong></td>
           <td data-stage-col="3"><strong style="color:#f59e0b;">98.4% Confidence</strong></td>
-          <td data-stage-col="4"><strong style="color:#ef4444;">98.2% Precision</strong></td>
-          <td class="live-val"><strong style="color:#4ade80;">98.2% Accuracy</strong></td>
+          <td data-stage-col="4"><strong style="color:#ef4444;">98.2% Confidence</strong></td>
+          <td class="live-val"><strong style="color:#4ade80;">98.2% Confidence</strong></td>
         </tr>
       `;
     }

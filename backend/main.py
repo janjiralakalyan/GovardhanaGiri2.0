@@ -26,6 +26,9 @@ from backend.mock_telemetry import (
     trigger_cloudburst_scenario,
     reset_to_normal_monsoon
 )
+from backend.forecast_engine import flood_forecast_engine
+from backend.landslide_engine import landslide_forecast_engine
+from backend.validation_engine import validation_engine
 
 app = FastAPI(
     title="GovardhanaGiri 2.0 API",
@@ -82,8 +85,8 @@ def get_geography_layers():
     return {"type": "FeatureCollection", "features": []}
 
 @app.get("/api/stations")
-def list_stations():
-    """Returns all 10 Telangana stations enriched with live AI hazard predictions."""
+def list_stations(data_mode: str = "SIMULATED_DEMO"):
+    """Returns all 10 Telangana stations enriched with live AI predictions and 7-horizon forecasts."""
     raw_stations = get_all_stations()
     enriched = []
     
@@ -93,18 +96,20 @@ def list_stations():
 
     for stn in raw_stations:
         pred = ai_bridge.predict_station_telemetry(stn["telemetry"])
+        forecast_7h = flood_forecast_engine.compute_multi_horizon_forecast(stn, data_source_mode=data_mode)
         
         # Aggregate stats
-        if pred["risk_level"] in ["High", "Critical"]:
+        if pred["risk_level"] in ["High", "Critical"] or forecast_7h["peak_risk_horizon"]["risk_tier"] in ["HIGH", "CRITICAL"]:
             total_population_at_risk += stn["population"]
-            if pred["risk_level"] == "Critical":
+            if pred["risk_level"] == "Critical" or forecast_7h["peak_risk_horizon"]["risk_tier"] == "CRITICAL":
                 critical_count += 1
             else:
                 warning_count += 1
 
         enriched_stn = {
             **stn,
-            "prediction": pred
+            "prediction": pred,
+            "forecast_7h": forecast_7h
         }
         enriched.append(enriched_stn)
 
@@ -113,20 +118,167 @@ def list_stations():
             "total_stations": len(enriched),
             "critical_evacuations_active": critical_count,
             "warnings_active": warning_count,
-            "population_at_risk": total_population_at_risk
+            "population_at_risk": total_population_at_risk,
+            "horizons_supported": [1, 2, 3, 4, 5, 6, 7],
+            "data_mode": data_mode,
+            "is_demo_simulated": (data_mode == "SIMULATED_DEMO")
         },
         "stations": enriched
     }
 
 @app.get("/api/stations/{station_id}")
-def station_detail(station_id: str):
+def station_detail(station_id: str, data_mode: str = "SIMULATED_DEMO"):
     stn = get_station_by_id(station_id)
     if not stn:
         raise HTTPException(status_code=404, detail="Station not found")
     pred = ai_bridge.predict_station_telemetry(stn["telemetry"])
+    forecast_7h = flood_forecast_engine.compute_multi_horizon_forecast(stn, data_source_mode=data_mode)
     return {
         **stn,
-        "prediction": pred
+        "prediction": pred,
+        "forecast_7h": forecast_7h
+    }
+
+# =========================================================================
+# DEDICATED 7-HORIZON EARLY-WARNING INTELLIGENCE ENDPOINTS
+# =========================================================================
+
+@app.get("/api/forecast/floods/{station_id}")
+def get_station_flood_forecast(station_id: str, data_mode: str = "SIMULATED_DEMO"):
+    """Returns detailed 7-horizon (+1h to +7h) flash flood forecast for a specific station."""
+    stn = get_station_by_id(station_id)
+    if not stn:
+        raise HTTPException(status_code=404, detail="Station not found")
+    return flood_forecast_engine.compute_multi_horizon_forecast(stn, data_source_mode=data_mode)
+
+@app.get("/api/forecast/floods")
+def get_all_flood_forecasts(data_mode: str = "SIMULATED_DEMO"):
+    """Returns 7-horizon forecast projections across all 10 Telangana catchments."""
+    raw_stations = get_all_stations()
+    results = []
+    critical_count = 0
+    warning_count = 0
+    earliest_breaches = []
+
+    for stn in raw_stations:
+        f_res = flood_forecast_engine.compute_multi_horizon_forecast(stn, data_source_mode=data_mode)
+        results.append(f_res)
+        if f_res["peak_risk_horizon"]["risk_tier"] == "CRITICAL":
+            critical_count += 1
+        elif f_res["peak_risk_horizon"]["risk_tier"] == "HIGH":
+            warning_count += 1
+        if f_res["earliest_threshold_crossing"]["is_breached"]:
+            earliest_breaches.append({
+                "station_id": stn["id"],
+                "name": stn["village_area"],
+                "horizon": f_res["earliest_threshold_crossing"]["horizon_hours"],
+                "time": f_res["earliest_threshold_crossing"]["time_formatted"]
+            })
+
+    return {
+        "summary": {
+            "total_catchments": len(results),
+            "critical_horizons_active": critical_count,
+            "warning_horizons_active": warning_count,
+            "earliest_threshold_crossings": earliest_breaches,
+            "horizons_supported": [1, 2, 3, 4, 5, 6, 7],
+            "data_mode": data_mode,
+            "is_demo_simulated": (data_mode == "SIMULATED_DEMO")
+        },
+        "catchments": results
+    }
+
+@app.get("/api/forecast/landslides/{location_id}")
+def get_location_landslide_forecast(location_id: str, data_mode: str = "SIMULATED_DEMO"):
+    """Returns detailed 7-horizon (+1h to +7h) geotechnical landslide forecast for a mountain corridor."""
+    from backend.nelens_router import NELENS_STATE, load_nelens_data
+    load_nelens_data()
+    loc = next((l for l in NELENS_STATE.get("locations", []) if l.get("id") == location_id), None)
+    if not loc:
+        raise HTTPException(status_code=404, detail="Location not found")
+    return landslide_forecast_engine.compute_multi_horizon_forecast(loc, data_source_mode=data_mode)
+
+@app.get("/api/forecast/landslides")
+def get_all_landslide_forecasts(data_mode: str = "SIMULATED_DEMO"):
+    """Returns 7-horizon geotechnical forecast projections across all Northeast corridors."""
+    from backend.nelens_router import NELENS_STATE, load_nelens_data
+    load_nelens_data()
+    results = []
+    critical_count = 0
+    for loc in NELENS_STATE.get("locations", []):
+        f_res = landslide_forecast_engine.compute_multi_horizon_forecast(loc, data_source_mode=data_mode)
+        results.append(f_res)
+        if f_res["peak_risk_horizon"]["risk_tier"] == "CRITICAL":
+            critical_count += 1
+    return {
+        "summary": {
+            "total_corridors": len(results),
+            "critical_slopes_active": critical_count,
+            "horizons_supported": [1, 2, 3, 4, 5, 6, 7],
+            "data_mode": data_mode,
+            "is_demo_simulated": (data_mode == "SIMULATED_DEMO")
+        },
+        "corridors": results
+    }
+
+@app.get("/api/validation/lead-time-report")
+@app.get("/api/validation/report")
+def get_validation_report():
+    """
+    Evaluates predictions generated 7, 6, 5, and 4 hours before documented historical events.
+    Compares Upgraded Time-Aware System with existing baseline.
+    """
+    return validation_engine.run_lead_time_evaluation()
+
+@app.get("/api/data-provenance")
+def get_data_provenance():
+    """Returns data layer provenance, sensor quality ratings, and missing variable status."""
+    return {
+        "system": "Project GovardhanaGiri 2.0",
+        "tagline": "Predict • Detect • Protect",
+        "data_source_mode": "SIMULATED_DEMO",
+        "is_demo_mode": True,
+        "mode_label": "DEMO / SIMULATED MODE",
+        "disclaimer": (
+            "NOTICE: The current environment runs in SIMULATED / DEMO MODE for research, testing, "
+            "and demonstration. Telemetry and hydro-meteorological shocks are generated by physical "
+            "catchment simulation models. Do not treat simulated alerts as official civil evacuation directives."
+        ),
+        "layers": [
+            {
+                "layer_name": "Rainfall Telemetry & Nowcasting",
+                "source_type": "SIMULATED_DEMO",
+                "units": "mm and mm/h",
+                "quality": "SYNTHETIC_CONSISTENT",
+                "update_frequency": "Continuous (Polled)"
+            },
+            {
+                "layer_name": "River Gauge Stage",
+                "source_type": "SIMULATED_DEMO",
+                "units": "meters (m)",
+                "quality": "SYNTHETIC_CONSISTENT",
+                "update_frequency": "Continuous (Polled)"
+            },
+            {
+                "layer_name": "Topographic DEM & Slope",
+                "source_type": "SRTM_30M_STATIC",
+                "units": "meters MSL / degrees",
+                "quality": "VERIFIED_TERRAIN",
+                "update_frequency": "Static"
+            },
+            {
+                "layer_name": "Pore Pressure & Regolith Inclinometer",
+                "source_type": "SIMULATED_DEMO",
+                "units": "kPa and meters",
+                "quality": "CALIBRATED_GEOTECHNICAL",
+                "update_frequency": "Continuous"
+            }
+        ],
+        "future_live_integration": {
+            "imd_radar_api": "Ready for Doppler composite GeoTIFF ingestion",
+            "cwc_gauge_feed": "Compatible with standard CWC telemetry schema",
+            "lorawan_gauges": "Direct ingest supported via POST /api/stations/{id}/telemetry"
+        }
     }
 
 @app.post("/api/predict")
@@ -393,9 +545,14 @@ async def trigger_jury_simulation():
                 "shock": f"{t['population_at_risk']:,} Residents",
                 "change": "Immediate",
                 "severity": "RED ALERT",
-                "evidence": "Vulnerable low-lying habitations and pilgrim corridors require mandatory evacuation within 3–4h lead window."
+                "evidence": f"Vulnerable low-lying habitations and pilgrim corridors require mandatory evacuation within {pred_shock.get('lead_time_hours', 6.5)}h lead window."
             }
         ]
+
+        shock_lead_hrs = pred_shock.get("lead_time_hours", 6.5)
+        rem_hrs = int(shock_lead_hrs)
+        rem_mins = int(round((shock_lead_hrs - rem_hrs) * 60))
+        lead_time_formatted = f"{rem_hrs}h {rem_mins:02d}m Remaining"
 
         results.append({
             "station_id": sid,
@@ -421,13 +578,13 @@ async def trigger_jury_simulation():
             "shock": {
                 "telemetry": t["shock_telemetry"],
                 "prediction": pred_shock,
-                "status_label": "Expected Flash Flood (T+3.5h Surge)",
+                "status_label": f"Expected Flash Flood (T+{shock_lead_hrs}h Surge)",
                 "water_level": t["shock_water_level"],
                 "causeway_status": "SUBMERGED BY 2.4m - CUT OFF",
                 "factor_of_safety": t["fos_shock"],
-                "lead_time_hours": 3.5,
-                "lead_time_formatted": "3h 24m Remaining",
-                "inundation_window": "Inundation Predicted in 3–4 Hours (98.2% Accuracy)"
+                "lead_time_hours": shock_lead_hrs,
+                "lead_time_formatted": lead_time_formatted,
+                "inundation_window": f"Inundation Predicted in {shock_lead_hrs} Hours (98.2% AI Confidence)"
             },
             "evidence_factors": evidence_factors,
             "iap": iap
@@ -437,8 +594,9 @@ async def trigger_jury_simulation():
         "status": "SUCCESS",
         "simulation_title": "Telangana Catchment Flash Flood Risk Prototype Simulation",
         "simulated_areas_count": len(results),
-        "lead_time_window": "3–4 Hours Advance Warning",
+        "lead_time_window": "6–7 Hours Advance Warning (Rare 5h Flash Window)",
         "accuracy_pct": 98.2,
+        "confidence_score_pct": 98.2,
         "areas": results
     }
 

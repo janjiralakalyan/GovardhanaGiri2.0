@@ -5,8 +5,8 @@
  *  1. 5-Second Tactical Radar Sweep Countdown
  *  2. Dual-Hotspot Shockwave Simulation (Medaram Jampanna Vagu & Bhadrachalam Godavari)
  *  3. Dynamic Leaflet Map Flying & Zoom into Epicenter
- *  4. Inundation Warning Briefing: "Flash Floods Will Occur in 3–4 Hours" (98.2% Accuracy)
- *  5. Dual 3D WebGL Terrain Comparison: Present Situation (T+0h) vs Expected Flash Flood (T+3.5h)
+ *  4. Inundation Warning Briefing: "Flash Floods Will Occur in 6–7 Hours (Rare 5h Window)" (98.2% AI Confidence)
+ *  5. Dual 3D WebGL Terrain Comparison: Present Situation (T+0h) vs Expected Flash Flood (T+6–7h)
  *  6. Interactive Inundation Scrubber & Auto-Animation of Flood Rise Over Time
  *  7. 8-Point Hydro-Meteorological Physical Evidence Factors Matrix
  *  8. Interactive AI Copilot Incident Commander Suggestions, Directives & Options
@@ -83,7 +83,7 @@ class JurySimulationManager {
     const terminalLogs = {
       4: '<div class="terminal-line active"><span>[T-4.0s]</span> Extreme convective cell detected. Rainfall velocity surging to 118 mm/h...</div>',
       3: '<div class="terminal-line active"><span>[T-3.0s]</span> Soil saturation threshold exceeded (97.8%). Runoff potential: 100%...</div>',
-      2: '<div class="terminal-line active"><span>[T-2.0s]</span> XGBoost Multi-Hazard inference: Flash flood breach predicted in 3.5 hours...</div>',
+      2: '<div class="terminal-line active"><span>[T-2.0s]</span> XGBoost Multi-Hazard inference: Flash flood breach predicted in 6–7 hours (rare 5h flash window)...</div>',
       1: '<div class="terminal-line critical"><span>[T-1.0s]</span> Escalating emergency threat to RED ALERT. Launching 3D Decision Support Studio...</div>'
     };
 
@@ -164,8 +164,9 @@ class JurySimulationManager {
     }
 
     // Show on-screen notification badge
+    const leadTimeVal = (currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4;
     if (window.app && typeof window.app.showToast === 'function') {
-      window.app.showToast("🚨 RED ALERT: Cloudburst shock simulated! Flash flood predicted in 3–4 hours.", "error", 6000);
+      window.app.showToast(`🚨 RED ALERT: Cloudburst shock simulated! Flash flood predicted in ${leadTimeVal} hours.`, "error", 6000);
     }
 
     // Open Main 3D Dual-Viewport Studio Popup smoothly
@@ -200,7 +201,7 @@ class JurySimulationManager {
             <div class="jury-brand-badge">⚡ JURY SIMULATION DEMO</div>
             <div class="jury-title-block">
               <h2>Flash Flood Early Warning Decision Support Studio</h2>
-              <p>Prototype Simulation for Technical Jury • Inundation Predicted in 3–4 Hours • 98.2% AI Calibrated</p>
+              <p>Prototype Simulation for Technical Jury • Inundation Predicted in ${(currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4} Hours (${(currentArea.shock && currentArea.shock.lead_time_hours < 6.0) ? '5h Rapid Window' : '6–7h Early Warning Window'}) • 98.2% AI Calibrated</p>
             </div>
           </div>
 
@@ -217,12 +218,12 @@ class JurySimulationManager {
           <button class="btn-close-jury-sim" id="btn-close-jury-sim">✕ CLOSE STUDIO</button>
         </header>
 
-        <!-- Threat Banner: In 3-4 Hours Flash Floods Will Occur -->
+        <!-- Threat Banner: In 6-7 Hours Flash Floods Will Occur (Rare 5h Window) -->
         <div class="jury-sim-banner">
           <div class="banner-left">
             <span class="banner-alert-icon">🚨</span>
             <div>
-              <div class="banner-headline">⚠️ FLASH FLOOD INUNDATION PREDICTED IN 3–4 HOURS</div>
+              <div class="banner-headline">⚠️ FLASH FLOOD INUNDATION PREDICTED IN ${(currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4} HOURS</div>
               <div class="banner-sub">Location: <strong>${currentArea.name}</strong> • River: <strong>${currentArea.river}</strong> (${currentArea.mandal}, ${currentArea.district})</div>
             </div>
           </div>
@@ -234,10 +235,10 @@ class JurySimulationManager {
             </div>
             <div class="banner-pill gold">
               <span>Advance Lead Time</span>
-              <span>3.5 Hours (~210m)</span>
+              <span>${(currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4} Hours (~${Math.round(((currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4) * 60)}m)</span>
             </div>
             <div class="banner-pill cyan">
-              <span>XGBoost Accuracy</span>
+              <span>AI Confidence</span>
               <span>98.2% Calibrated</span>
             </div>
             <div class="banner-pill">
@@ -255,15 +256,15 @@ class JurySimulationManager {
             <div class="dual-3d-header">
               <div class="dual-3d-title-group">
                 <h3>🌐 Side-by-Side 3D Digital Elevation Model (DEM) & Hydrological Inundation</h3>
-                <p>Physical 3D Terrain Comparison: Present Baseflow Conditions (Left) vs Expected Inundation After 3–4 Hours (Right)</p>
+                <p>Physical 3D Terrain Comparison: Present Baseflow Conditions (Left) vs Expected Inundation After ${(currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4} Hours (Right)</p>
               </div>
 
               <!-- Interactive Timeline Scrubber & Animation Controls -->
               <div class="sim-controls-toolbar">
                 <div class="scrubber-wrap">
                   <span class="scrubber-label">⏱️ Inundation Hour:</span>
-                  <input type="range" min="0" max="4.0" step="0.2" value="3.5" class="sim-timeline-slider" id="sim-scrubber-slider">
-                  <span class="scrubber-time-badge" id="sim-scrubber-badge">T+3.5h</span>
+                  <input type="range" min="0" max="${Math.max(7.0, (currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4)}" step="0.2" value="${(currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4}" class="sim-timeline-slider" id="sim-scrubber-slider">
+                  <span class="scrubber-time-badge" id="sim-scrubber-badge">T+${((currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4).toFixed(1)}h</span>
                 </div>
                 <button class="btn-play-surge" id="btn-animate-surge">
                   <span id="btn-surge-icon">▶</span> Animate Flood Rise
@@ -302,13 +303,13 @@ class JurySimulationManager {
                 </div>
               </div>
 
-              <!-- Right: Expected Inundation Surge (T+3.5h) -->
+              <!-- Right: Expected Inundation Surge (T+6–7h) -->
               <div class="viewport-card future">
                 <div class="viewport-top-hud">
                   <div class="viewport-title-pill surge">
                     <span style="font-size:14px;">🌊</span>
                     <div>
-                      <strong style="font-size:12px; color:#ef4444;">Expected Flash Flood (T+3.5h)</strong>
+                      <strong style="font-size:12px; color:#ef4444;">Expected Flash Flood (T+${((currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4).toFixed(1)}h)</strong>
                       <div style="font-size:10px; color:#94a3b8;">Severe Cloudburst Inundation Surge</div>
                     </div>
                   </div>
@@ -413,7 +414,7 @@ class JurySimulationManager {
                   🚧 Chokepoint & Causeway Barricades
                 </button>
                 <button class="sim-copilot-chip" data-prompt="timing">
-                  ⏱️ Flood Peak Arrival Timing (3–4h Lead)
+                  ⏱️ Flood Peak Arrival Timing (6–7h Lead)
                 </button>
                 <button class="sim-copilot-chip" data-prompt="rations">
                   🍲 Shelter Supplies & Boat Dispatch
@@ -718,7 +719,8 @@ class JurySimulationManager {
     const currentArea = this.simulationData.areas[this.activeAreaIndex];
     const baseLvl = currentArea.baseline.water_level;
     const shockLvl = currentArea.shock.water_level;
-    const ratio = Math.min(1.0, Math.max(0.0, hour / 3.5));
+    const maxSurgeHour = (currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4;
+    const ratio = Math.min(1.0, Math.max(0.0, hour / maxSurgeHour));
 
     const currentLvl = baseLvl + ratio * (shockLvl - baseLvl);
     const currentRain = currentArea.baseline.telemetry.Rainfall_Intensity + ratio * (currentArea.shock.telemetry.Rainfall_Intensity - currentArea.baseline.telemetry.Rainfall_Intensity);
@@ -783,7 +785,8 @@ class JurySimulationManager {
       if (!this.isSurgePlaying) return;
       const elapsed = now - startTime;
       const progress = Math.min(1.0, elapsed / duration);
-      const hour = progress * 4.0;
+      const maxHour = (currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4;
+      const hour = progress * maxHour;
 
       if (slider) slider.value = hour.toFixed(1);
       if (badge) badge.textContent = `T+${hour.toFixed(1)}h`;
@@ -841,10 +844,13 @@ class JurySimulationManager {
       • <strong>Mandated Action:</strong> Dispatch 2 Police Flying Squads with concrete barricades and red warning blinkers. Close to all traffic immediately.<br>
       • <strong>Alternative Route:</strong> Divert vehicular transit via Upper Ridge High-Level Bypass.`;
     } else if (type === 'timing') {
+      const leadHrs = (currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4;
+      const leadMins = Math.round(leadHrs * 60);
+      const safeClose = (leadHrs * 0.6).toFixed(1);
       box.innerHTML = `<strong>⏱️ AI Recommendation — Inundation Peak Arrival Analysis:</strong><br>
-      • <strong>Catchment Lead Time:</strong> 3.5 Hours (~210 Minutes) calculated by XGBoost Multi-Hazard Engine (98.2% Accuracy).<br>
-      • <strong>Predicted Peak Arrival:</strong> T+3.5h at discharge velocity 3.8 m/s.<br>
-      • <strong>Safe Window Closes:</strong> T+2.0h when water stage breaches 4.8m embankment crest. All teams must clear lowlands before T+2.0h.`;
+      • <strong>Catchment Lead Time:</strong> ${leadHrs} Hours (~${leadMins} Minutes) calculated by XGBoost Multi-Hazard Engine (98.2% AI Confidence).<br>
+      • <strong>Predicted Peak Arrival:</strong> T+${leadHrs}h at discharge velocity 3.8 m/s.<br>
+      • <strong>Safe Window Closes:</strong> T+${safeClose}h when water stage breaches 4.8m embankment crest. All teams must clear lowlands before T+${safeClose}h.`;
     } else if (type === 'rations') {
       const supplies = currentArea.iap && currentArea.iap.resource_matrix ? currentArea.iap.resource_matrix.supplies : { food_packets_48h: 40800, water_liters_48h: 54400, sdrf_inflatable_rescue_boats: 14 };
       box.innerHTML = `<strong>🍲 AI Recommendation — NDMA Form 201/204 Logistics & Boats:</strong><br>
@@ -880,7 +886,7 @@ class JurySimulationManager {
     box.innerHTML = `<strong>🤖 Copilot Advisory for ${currentArea.name}:</strong><br>
     Based on live hydro-telemetry (Water Level: <strong>${currentArea.shock.water_level}m</strong> vs Danger: <strong>${currentArea.danger_water_level}m</strong>, Rainfall: <strong>${currentArea.shock.telemetry.Rainfall_Intensity} mm/h</strong>):<br>
     • Immediate priority: Secure low-lying riparian wards and move citizens to <strong>${currentArea.safe_shelters[0]}</strong>.<br>
-    • Mobilize motorized rescue boats and enforce barricades at choke-points before peak surge arrives in <strong>3.5 hours</strong>.`;
+    • Mobilize motorized rescue boats and enforce barricades at choke-points before peak surge arrives in <strong>${(currentArea.shock && currentArea.shock.lead_time_hours) ? currentArea.shock.lead_time_hours : 6.4} hours</strong>.`;
   }
 
   /* -------------------------------------------------------------
@@ -904,12 +910,13 @@ class JurySimulationManager {
   }
 
   getBroadcastText(area, lang) {
+    const leadHrs = (area.shock && area.shock.lead_time_hours) ? area.shock.lead_time_hours : 6.4;
     if (lang === 'telugu') {
-      return `అత్యవసర మెరుపు వరద హెచ్చరిక: ${area.river} పరీవాహక ప్రాంతంలో రానున్న 3.5 గంటల్లో తీవ్ర వరద ముంపు సంభవించనుంది. ${area.name} ప్రాంత ప్రజలు వెంటనే ఎత్తైన ప్రదేశాల్లో ఏర్పాటు చేసిన సురక్షిత పునరావాస కేంద్రాలకు చేరుకోవాలి. కాజ్‌వేలు మరియు వంతెనల పైకి రాకూడదు. అత్యవసర సహాయం కొరకు 1077 లేదా 112 కు కాల్ చేయండి.`;
+      return `అత్యవసర మెరుపు వరద హెచ్చరిక: ${area.river} పరీవాహక ప్రాంతంలో రానున్న ${leadHrs} గంటల్లో తీవ్ర వరద ముంపు సంభవించనుంది. ${area.name} ప్రాంత ప్రజలు వెంటనే ఎత్తైన ప్రదేశాల్లో ఏర్పాటు చేసిన సురక్షిత పునరావాస కేంద్రాలకు చేరుకోవాలి. కాజ్‌వేలు మరియు వంతెనల పైకి రాకూడదు. అత్యవసర సహాయం కొరకు 1077 లేదా 112 కు కాల్ చేయండి.`;
     } else if (lang === 'hindi') {
-      return `आपातकालीन फ़्लैश बाढ़ चेतावनी: ${area.river} नदी बेसिन में अगले 3.5 घंटों में अत्यधिक जलप्लावन का पूर्वानुमान है। ${area.name} के सभी निवासी तुरंत सुरक्षित राहत शिविरों में शरण लें। जलमग्न पुलों और रपटों से दूर रहें। आपातकालीन हेल्पलाइन 1077 / 112 पर संपर्क करें।`;
+      return `आपातकालीन फ़्लैश बाढ़ चेतावनी: ${area.river} नदी बेसिन में अगले ${leadHrs} घंटों में अत्यधिक जलप्लावन का पूर्वानुमान है। ${area.name} के सभी निवासी तुरंत सुरक्षित राहत शिविरों में शरण लें। जलमग्न पुलों और रपटों से दूर रहें। आपातकालीन हेल्पलाइन 1077 / 112 पर संपर्क करें।`;
     }
-    return `EMERGENCY FLASH FLOOD RED ALERT: Extreme cloudburst surge predicted in 3.5 hours along the ${area.river} catchment. All residents in ${area.name} must evacuate immediately to designated high-ground relief centers. Avoid all causeways and submerged bridge decks. Emergency Helpline: 1077 / 112.`;
+    return `EMERGENCY FLASH FLOOD RED ALERT: Extreme cloudburst surge predicted in ${leadHrs} hours along the ${area.river} catchment. All residents in ${area.name} must evacuate immediately to designated high-ground relief centers. Avoid all causeways and submerged bridge decks. Emergency Helpline: 1077 / 112.`;
   }
 
   renderFactorsCards(factors) {
@@ -943,8 +950,9 @@ class JurySimulationManager {
     return {
       status: "SUCCESS",
       simulated_areas_count: 2,
-      lead_time_window: "3–4 Hours Advance Warning",
+      lead_time_window: "6–7 Hours Advance Warning (Rare 5h Flash Window)",
       accuracy_pct: 98.2,
+      confidence_score_pct: 98.2,
       areas: [
         {
           station_id: "TEL-STN-03",
@@ -966,7 +974,9 @@ class JurySimulationManager {
           shock: {
             telemetry: { Rainfall_Intensity: 118.4, Soil_Saturation: 97.8 },
             water_level: 7.4,
-            factor_of_safety: 0.82
+            factor_of_safety: 0.82,
+            lead_time_hours: 6.7,
+            lead_time_formatted: "6h 42m Remaining"
           },
           evidence_factors: [
             { name: "Convective Rainfall Intensity", baseline: "18.5 mm/h", shock: "118.4 mm/h", change: "+540%", severity: "CRITICAL", evidence: "Severe localized convective cloudburst cell over gorge headwaters. Extreme deluge intensity." },
@@ -976,7 +986,7 @@ class JurySimulationManager {
             { name: "River Water Stage vs Danger Mark", baseline: "3.8 m", shock: "7.4 m", change: "+3.6 m", severity: "CRITICAL BREACH", evidence: "Water level breaches 4.5m Danger Level by +2.9m. Overtopping primary embankments and bridges." },
             { name: "Slope Stability (Factor of Safety)", baseline: "1.84 (Stable)", shock: "0.82 (Failure)", change: "FoS < 1.0", severity: "HIGH HAZARD", evidence: "Bishop circular slip calculation drops below critical threshold (FoS 0.82). Embankment slip imminent." },
             { name: "Groundwater Pore Pressure", baseline: "14.5 kPa", shock: "48.2 kPa", change: "+33.7 kPa", severity: "HIGH HAZARD", evidence: "Hydraulic uplift forces along gorge bedding planes. Shear resistance severely degraded." },
-            { name: "Riparian Population in Path", baseline: "0 Evacuated", shock: "6,800 Residents", change: "Immediate", severity: "RED ALERT", evidence: "Vulnerable low-lying habitations require mandatory evacuation within 3–4h lead window." }
+            { name: "Riparian Population in Path", baseline: "0 Evacuated", shock: "6,800 Residents", change: "Immediate", severity: "RED ALERT", evidence: "Vulnerable low-lying habitations require mandatory evacuation within 6–7h lead window." }
           ]
         },
         {
@@ -999,7 +1009,9 @@ class JurySimulationManager {
           shock: {
             telemetry: { Rainfall_Intensity: 105.0, Soil_Saturation: 98.2 },
             water_level: 19.4,
-            factor_of_safety: 0.88
+            factor_of_safety: 0.88,
+            lead_time_hours: 5.0,
+            lead_time_formatted: "5h 00m Remaining"
           },
           evidence_factors: [
             { name: "Convective Rainfall Intensity", baseline: "14.0 mm/h", shock: "105.0 mm/h", change: "+650%", severity: "CRITICAL", evidence: "Severe cloudburst deluge across Godavari upper catchment basin." },
@@ -1009,7 +1021,7 @@ class JurySimulationManager {
             { name: "River Water Stage vs Danger Mark", baseline: "11.2 m", shock: "19.4 m", change: "+8.2 m", severity: "CRITICAL BREACH", evidence: "Breaches 16.2m Danger Mark (71 ft level exceeded). Overtopping Vista Ghat ramps." },
             { name: "Slope Stability (Factor of Safety)", baseline: "1.95 (Stable)", shock: "0.88 (Failure)", change: "FoS < 1.0", severity: "HIGH HAZARD", evidence: "Embankment shear failure along riverfront revetment walls." },
             { name: "Groundwater Pore Pressure", baseline: "12.0 kPa", shock: "44.0 kPa", change: "+32.0 kPa", severity: "HIGH HAZARD", evidence: "High artesian pressures weakening riverside foundation piles." },
-            { name: "Riparian Population in Path", baseline: "0 Evacuated", shock: "18,500 Residents", change: "Immediate", severity: "RED ALERT", evidence: "Lowland wards require urgent evacuation to high-ground relief centers." }
+            { name: "Riparian Population in Path", baseline: "0 Evacuated", shock: "18,500 Residents", change: "Immediate", severity: "RED ALERT", evidence: "Lowland wards require urgent evacuation within rare 5h flash deluge window to high-ground relief centers." }
           ]
         }
       ]

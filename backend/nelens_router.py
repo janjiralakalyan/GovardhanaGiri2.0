@@ -47,15 +47,38 @@ class NewFieldReport(BaseModel):
     lat: Optional[float] = None
     lon: Optional[float] = None
 
+from backend.landslide_engine import landslide_forecast_engine
+
 @router.get("/overview")
-def get_overview():
+def get_overview(data_mode: str = "SIMULATED_DEMO"):
     load_nelens_data()
-    locations = NELENS_STATE.get("locations", [])
-    critical_count = sum(1 for l in locations if l.get("risk_level") == "CRITICAL")
-    high_count = sum(1 for l in locations if l.get("risk_level") == "HIGH")
-    mod_count = sum(1 for l in locations if l.get("risk_level") == "MODERATE")
-    low_count = sum(1 for l in locations if l.get("risk_level") == "LOW")
-    total_exposed_pop = sum(l.get("exposure", {}).get("population_affected", 0) for l in locations if l.get("risk_level") in ["CRITICAL", "HIGH"])
+    raw_locations = NELENS_STATE.get("locations", [])
+    locations = []
+    critical_count = 0
+    high_count = 0
+    mod_count = 0
+    low_count = 0
+    total_exposed_pop = 0
+
+    for loc in raw_locations:
+        forecast_7h = landslide_forecast_engine.compute_multi_horizon_forecast(loc, data_source_mode=data_mode)
+        peak_tier = forecast_7h["peak_risk_horizon"]["risk_tier"]
+        enriched_loc = {
+            **loc,
+            "forecast_7h": forecast_7h
+        }
+        locations.append(enriched_loc)
+
+        if peak_tier == "CRITICAL":
+            critical_count += 1
+            total_exposed_pop += loc.get("exposure", {}).get("population_affected", 0)
+        elif peak_tier == "HIGH":
+            high_count += 1
+            total_exposed_pop += loc.get("exposure", {}).get("population_affected", 0)
+        elif peak_tier == "MODERATE":
+            mod_count += 1
+        else:
+            low_count += 1
 
     # Selected default is Aizawl
     default_loc = next((l for l in locations if l.get("id") == "AIZAWL-01"), locations[0] if locations else None)
@@ -64,6 +87,9 @@ def get_overview():
         "system_name": NELENS_STATE.get("system_name", "NE-LENS"),
         "full_title": NELENS_STATE.get("full_title", ""),
         "last_updated": datetime.now().strftime("%d %b %Y | %H:%M:%S IST"),
+        "data_mode": data_mode,
+        "is_demo_simulated": (data_mode == "SIMULATED_DEMO"),
+        "horizons_supported": [1, 2, 3, 4, 5, 6, 7],
         "sensors_online": "52 / 52 Active",
         "station_summary": {
             "total_locations": len(locations),
@@ -82,12 +108,24 @@ def list_locations():
     return NELENS_STATE.get("locations", [])
 
 @router.get("/locations/{loc_id}")
-def get_location_detail(loc_id: str):
+def get_location_detail(loc_id: str, data_mode: str = "SIMULATED_DEMO"):
     locations = NELENS_STATE.get("locations", [])
     loc = next((l for l in locations if l.get("id") == loc_id), None)
     if not loc:
         raise HTTPException(status_code=404, detail="Location not found")
-    return loc
+    forecast_7h = landslide_forecast_engine.compute_multi_horizon_forecast(loc, data_source_mode=data_mode)
+    return {
+        **loc,
+        "forecast_7h": forecast_7h
+    }
+
+@router.get("/forecast/{loc_id}")
+def get_location_forecast(loc_id: str, data_mode: str = "SIMULATED_DEMO"):
+    locations = NELENS_STATE.get("locations", [])
+    loc = next((l for l in locations if l.get("id") == loc_id), None)
+    if not loc:
+        raise HTTPException(status_code=404, detail="Location not found")
+    return landslide_forecast_engine.compute_multi_horizon_forecast(loc, data_source_mode=data_mode)
 
 @router.post("/dispatch-alert")
 def dispatch_alert(req: AlertDispatchPayload):

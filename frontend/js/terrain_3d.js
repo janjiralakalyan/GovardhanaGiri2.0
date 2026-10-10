@@ -5121,10 +5121,10 @@ class Terrain3DVisualizer {
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 0.38 : 2.2) : 2.2;
       tHour = 0.0;
       leadTime = isFlood 
-        ? 'T+0.0h • Safe 4.0h Evacuation Buffer Remaining (98.2% AI Accuracy)'
-        : 'T+0.0h • Stable 4.0h Safe Window (FoS 1.62 • Subsurface Intact)';
+        ? 'T+0.0h • Safe 6.4h Evacuation Buffer Remaining (98.2% AI Confidence)'
+        : 'T+0.0h • Stable 6.4h Safe Window (FoS 1.62 • Subsurface Intact)';
       alertMsg = isFlood 
-        ? '🟢 Baseflow stable. 4-Hour AI Risk Forecasting initialized (98.2% Accuracy).'
+        ? '🟢 Baseflow stable. 6–7 Hour AI Risk Forecasting initialized (98.2% AI Confidence).'
         : '🟢 T+0h STABLE SLOPE: Factor of Safety FoS 1.62. Slope regolith stable, all hillside settlements secure.';
     } else if (stage === 1) {
       // Hour 1 (+1h: Infiltration & Hydrodynamic Runoff Rise)
