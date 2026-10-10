@@ -4576,8 +4576,8 @@ class Terrain3DVisualizer {
       sat = 38.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 0.38 : 2.2) : 2.2;
       tHour = 0.0;
-      leadTime = 'T+0.0h • Safe 4.0h Evacuation Buffer Remaining (98.2% AI Accuracy)';
-      alertMsg = '🟢 Baseflow stable. 4-Hour AI Risk Forecasting initialized (98.2% Accuracy).';
+      leadTime = 'T+0.0h • Safe 6.4h Evacuation Buffer Remaining (98.2% AI Confidence)';
+      alertMsg = '🟢 Baseflow stable. 6–7 Hour AI Risk Forecasting initialized (98.2% AI Confidence).';
     } else if (stage === 1) {
       // Hour 1 (+1h: Infiltration & Hydrodynamic Runoff Rise)
       rain = 58.0;

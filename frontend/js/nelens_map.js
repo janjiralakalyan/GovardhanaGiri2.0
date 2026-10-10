@@ -55,6 +55,10 @@ class NeLensMapEngine {
     setTimeout(() => {
       if (this.map) this.map.invalidateSize();
     }, 200);
+
+    window.addEventListener('resize', () => {
+      if (this.map) this.map.invalidateSize();
+    });
   }
 
   renderAllLocations(locations, activeLocId) {
@@ -87,23 +91,23 @@ class NeLensMapEngine {
       const marker = L.marker([loc.lat, loc.lon], { icon }).addTo(this.layers.districtPins);
 
       const popupHtml = `
-        <div style="font-family:'Inter',sans-serif; min-width:230px; color:#0f172a; padding:4px;">
-          <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">${loc.state} • DETECTED LANDSLIDE AREA</div>
-          <div style="font-size:14px; font-weight:800; color:#0f172a; margin-top:1px;">${loc.corridor_name}</div>
-          <div style="font-size:11px; color:#475569; margin-bottom:6px;">${loc.district}</div>
+        <div style="font-family:'Inter',sans-serif; min-width:230px; color:#f1f5f9; padding:4px;">
+          <div style="font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">${loc.state} • DETECTED LANDSLIDE AREA</div>
+          <div style="font-size:14px; font-weight:800; color:#f1f5f9; margin-top:1px;">${loc.corridor_name}</div>
+          <div style="font-size:11px; color:#a7b4c8; margin-bottom:6px;">${loc.district}</div>
           
           <div style="display:flex; justify-content:space-between; align-items:center; margin:6px 0; background:${riskCol}15; border:1px solid ${riskCol}40; padding:5px 8px; border-radius:6px;">
-            <span style="font-size:11.5px; font-weight:700; color:#0f172a;">Risk Score: <strong>${loc.risk_score}/100</strong></span>
+            <span style="font-size:11.5px; font-weight:700; color:#f1f5f9;">Risk Score: <strong style="color:#08A9F4;">${loc.risk_score}/100</strong></span>
             <span style="font-size:11px; font-weight:800; padding:2px 7px; border-radius:4px; background:${riskCol}; color:#fff;">${loc.risk_level}</span>
           </div>
 
-          <div style="font-size:11px; color:#334155; line-height:1.55;">
+          <div style="font-size:11px; color:#cbd5e1; line-height:1.55;">
             <div>🌧️ 24h Rain: <b>${loc.risk_drivers.rainfall_24h.value} mm</b> | Slope: <b>${loc.risk_drivers.slope.value}°</b></div>
             <div>💧 Soil Saturation: <b>${loc.risk_drivers.soil_moisture.value}%</b> | Radius: <b>${loc.affected_radius_km} km</b></div>
-            <div>👥 Population at Risk: <b>${loc.exposure.population_affected.toLocaleString()}</b></div>
+            <div>👥 Population at Risk: <b style="color:#08A9F4;">${loc.exposure.population_affected.toLocaleString()}</b></div>
           </div>
 
-          <button onclick="window.app.trigger3DFromMap('${loc.id}')" style="width:100%; margin-top:8px; background:linear-gradient(135deg, #d97706, #b45309); border:1px solid #f59e0b; color:#ffffff; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 10px rgba(217,119,6,0.35);">
+          <button onclick="window.app.trigger3DFromMap('${loc.id}')" style="width:100%; margin-top:8px; background:var(--bg-surface, #0E2E5C); border:1px solid #08783C; color:#34D399; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
             <span>⛰️</span> <span>Visualize 3D Landslide DEM</span>
           </button>
         </div>
@@ -177,12 +181,12 @@ class NeLensMapEngine {
         });
         const hMarker = L.marker([ev.lat, ev.lon], { icon: hIcon }).addTo(this.layers.previousLandslides);
         hMarker.bindPopup(`
-          <div style="font-family:'Inter',sans-serif; color:#0f172a; font-size:12px;">
-            <div style="font-weight:800; color:#b91c1c;">● Previous Landslide Event (${ev.time_ago})</div>
-            <div style="font-weight:700; margin:2px 0;">${ev.type}</div>
-            <div style="font-size:11px; color:#64748b;">${ev.affected}</div>
-            <div style="font-size:11px; margin-top:4px;">${ev.description}</div>
-            <div style="font-size:10px; color:#0284c7; margin-top:2px;">Source: ${ev.source}</div>
+          <div style="font-family:'Inter',sans-serif; color:#f1f5f9; font-size:12px;">
+            <div style="font-weight:800; color:#ef4444;">● Previous Landslide Event (${ev.time_ago})</div>
+            <div style="font-weight:700; margin:2px 0; color:#f1f5f9;">${ev.type}</div>
+            <div style="font-size:11px; color:#a7b4c8;">${ev.affected}</div>
+            <div style="font-size:11px; margin-top:4px; color:#cbd5e1;">${ev.description}</div>
+            <div style="font-size:10px; color:#22d3ee; margin-top:2px;">Source: ${ev.source}</div>
           </div>
         `);
       });

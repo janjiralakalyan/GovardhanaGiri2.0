@@ -60,6 +60,10 @@ class FloodMapEngine {
       if (this.map) this.map.invalidateSize();
     }, 250);
 
+    window.addEventListener('resize', () => {
+      if (this.map) this.map.invalidateSize();
+    });
+
     // Feature Layer Groups
     this.ghatsLayerGroup = L.layerGroup().addTo(this.map);
     this.riversLayerGroup = L.layerGroup().addTo(this.map);
@@ -254,9 +258,10 @@ class FloodMapEngine {
           </div>
           <div style="font-size:11.5px; color:#e2e8f0;">🌊 River/Torrent: <strong>${stn.river_name}</strong></div>
           <div style="font-size:11.5px; margin-top:3px; color:#38bdf8;">Stage: <strong>${stn.telemetry.Water_Level} m</strong> / Danger: <strong>${stn.danger_water_level} m</strong></div>
+          ${stn.prediction && stn.prediction.lead_time_hours ? `<div style="font-size:11.5px; margin-top:3px; color:#fbbf24;">⚡ Expected Warning Time: <strong>${stn.prediction.lead_time_hours} hrs</strong></div>` : ''}
           <div style="font-size:10px; color:#64748b; margin-top:5px; margin-bottom:8px;">Coordinates: ${stn.lat.toFixed(4)}°N, ${stn.lon.toFixed(4)}°E | Elev: ${stn.elevation}m</div>
           
-          <button onclick="window.app.trigger3DFromMap('${stn.id}')" style="width:100%; background:linear-gradient(135deg, #0284c7, #0369a1); border:1px solid #38bdf8; color:#ffffff; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 10px rgba(2,132,199,0.4);">
+          <button onclick="window.app.trigger3DFromMap('${stn.id}')" style="width:100%; background:var(--bg-surface, #0E2E5C); border:1px solid #08A9F4; color:#08A9F4; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
             <span>🌊</span> <span>Visualize 3D Inundation DEM</span>
           </button>
         </div>

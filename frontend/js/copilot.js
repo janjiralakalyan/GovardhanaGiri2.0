@@ -515,7 +515,7 @@ const CopilotApp = {
       const danger = stnData.danger_water_level || 5.0;
       const water = tel.Water_Level || 0;
       const risk = pred.risk_level || "Moderate";
-      const lead = pred.lead_time_hours || 3.5;
+      const lead = pred.lead_time_hours || 6.4;
       const shelters = stnData.shelters || [];
 
       cardHtml = `
@@ -609,7 +609,7 @@ const CopilotApp = {
         <div class="meta-grid">
           <div class="meta-item"><span class="lbl">Monitored Station & District</span><span class="val">${iap.station_name}, ${iap.mandal} Mandal (${iap.district} District)</span></div>
           <div class="meta-item"><span class="lbl">Report Generation Timestamp</span><span class="val">${iap.generated_at}</span></div>
-          <div class="meta-item"><span class="lbl">AI Evacuation Lead Time</span><span class="val">⚡ ${iap.lead_time_hours} Hours (3–4h Early Warning Window)</span></div>
+          <div class="meta-item"><span class="lbl">AI Evacuation Lead Time</span><span class="val">⚡ ${iap.lead_time_hours} Hours (${iap.lead_time_hours < 6.0 ? '5h Rapid Warning Window' : '6–7h Early Warning Window'})</span></div>
           <div class="meta-item"><span class="lbl">Target Riparian Population at Risk</span><span class="val">${(resMatrix.target_vulnerable_population || iap.population).toLocaleString()} Persons</span></div>
         </div>
 

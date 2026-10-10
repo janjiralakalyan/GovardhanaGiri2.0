@@ -432,6 +432,7 @@
 
 .sim-timeline-slider {
   -webkit-appearance: none;
+  appearance: none;
   width: 180px;
   height: 6px;
   border-radius: 3px;
