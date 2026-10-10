@@ -2162,8 +2162,8 @@ class Terrain3DVisualizer {
     // Status Pill Text
     ctx.font = 'bold 22px "Inter", sans-serif';
     ctx.fillStyle = badgeText;
-    const statusLabel = isCrit 
-      ? `🔴 FLOOD INUNDATED / EVACUATE` 
+    const statusLabel = isCrit
+      ? `🔴 FLOOD INUNDATED / EVACUATE`
       : (isThreat ? `🟡 SURGE THREAT ALERT` : (data.statusType === 'protected' ? `🛡️ 100% PROTECTED SANCTUARY` : `🟢 DRY & STABLE (Elevation Safe)`));
     ctx.fillText(statusLabel, 56, 181);
 
@@ -2176,9 +2176,9 @@ class Terrain3DVisualizer {
     // Materials Palette
     const plinthMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
     const wallPalette = [0xf8fafc, 0xfde68a, 0xe2e8f0, 0xfed7aa, 0xdcfce7];
-    const wallMat = new THREE.MeshStandardMaterial({ 
-      color: wallPalette[seed % wallPalette.length], 
-      roughness: 0.75 
+    const wallMat = new THREE.MeshStandardMaterial({
+      color: wallPalette[seed % wallPalette.length],
+      roughness: 0.75
     });
     const doorMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.85 });
     const woodPillarMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 });
@@ -2391,10 +2391,10 @@ class Terrain3DVisualizer {
     this.settlementNodes = [];
 
     clusters.forEach((cluster, cIdx) => {
-      const node = { 
-        name: cluster.name, 
-        x: cluster.x, 
-        z: cluster.z, 
+      const node = {
+        name: cluster.name,
+        x: cluster.x,
+        z: cluster.z,
         houses: [],
         status: 'safe',
         sprite: null
@@ -3266,7 +3266,7 @@ class Terrain3DVisualizer {
 
     const treePositions = [
       // Stable high crest forest
-      { x: -36, z: -28, type: 'pine' }, { x: -30, z: -24, type: 'pine' }, { x: -24, z: -28, type: 'hardwood' }, 
+      { x: -36, z: -28, type: 'pine' }, { x: -30, z: -24, type: 'pine' }, { x: -24, z: -28, type: 'hardwood' },
       { x: 26, z: -28, type: 'pine' }, { x: 34, z: -22, type: 'hardwood' }, { x: 22, z: -24, type: 'pine' },
       // Direct slide zone trees (unstable "drunken forest" that tilts on failure)
       { x: -18, z: -10, type: 'pine' }, { x: -8, z: -8, type: 'pine' }, { x: 4, z: -10, type: 'hardwood' }, { x: 14, z: -8, type: 'pine' },
@@ -3853,7 +3853,7 @@ class Terrain3DVisualizer {
       rainPositions[i * 3] = (Math.random() - 0.5) * 85;
       rainPositions[i * 3 + 1] = Math.random() * 50 + 5;
       rainPositions[i * 3 + 2] = (Math.random() - 0.5) * 85;
-      
+
       rainVelocities.push({
         vy: (2.2 + Math.random() * 2.8) * intensityFactor,
         vx: 0.35 * intensityFactor,
@@ -3889,8 +3889,8 @@ class Terrain3DVisualizer {
 
     const isPresentBaseline = (this.options.riskEvolutionPhase === 1);
     const waveSurgeFactor = isPresentBaseline ? 0 : Math.exp(-Math.pow(t - 1.5, 2) / 8.0);
-    const dynamicStage = isPresentBaseline 
-      ? Math.min(1.8, (this.options.waterLevel || 3.8) * 0.4) 
+    const dynamicStage = isPresentBaseline
+      ? Math.min(1.8, (this.options.waterLevel || 3.8) * 0.4)
       : Math.max(0.8, this.options.waterLevel + (waveSurgeFactor * 2.8) - 1.0);
 
     if (profile.mode === 'flood') {
@@ -4030,7 +4030,7 @@ class Terrain3DVisualizer {
       // 🚨 Dynamic Alarm Decision Triggering: STRICTLY ONLY WHEN CRITICAL POINT IS REACHED
       const isCriticalFlood = (dynamicStage >= (profile.dangerWaterLevel || 5.2) || floodedCount > 0 || targetWaterY > 4.6 || (rain >= 90 && sat >= 90));
       const isWarningFlood = !isCriticalFlood && (dynamicStage >= (profile.dangerWaterLevel || 5.2) * 0.75 || rain >= 50);
-      
+
       this.isAlarmTriggered = isCriticalFlood;
       this.alarmLevel = isCriticalFlood ? 'CRITICAL' : (isWarningFlood ? 'WARNING' : 'NORMAL');
 
@@ -4492,7 +4492,7 @@ class Terrain3DVisualizer {
       const stormDarkness = Math.min(0.85, (rain / 130) * 0.6);
       this.ambientLight.intensity = Math.max(0.18, 0.45 - stormDarkness * 0.3);
       this.sunLight.intensity = Math.max(0.35, 1.35 - stormDarkness * 0.95);
-      
+
       if (rain > 65 && this.scene && this.scene.fog) {
         this.scene.fog.color.setHex(0x060c18);
         this.scene.background.setHex(0x060c18);
@@ -4567,7 +4567,7 @@ class Terrain3DVisualizer {
           const v = pos.getY(i);
           // High velocity rapids down the spillway chute
           const rapids = Math.sin(u * 1.2 + elapsedTime * 18.0 * flowRate) * 0.28
-                       + Math.cos(v * 0.9 - elapsedTime * 22.0 * flowRate) * 0.32;
+            + Math.cos(v * 0.9 - elapsedTime * 22.0 * flowRate) * 0.32;
           pos.setZ(i, rapids);
         }
         geom.attributes.position.needsUpdate = true;
@@ -4759,8 +4759,8 @@ class Terrain3DVisualizer {
       const yieldThreshold = this.binghamYieldStress || 35.0;
       const isYieldExceeded = drivingShearStress > yieldThreshold || fos < 1.25;
 
-      const dynamicShearRate = isYieldExceeded 
-        ? Math.max(0.1, (drivingShearStress - yieldThreshold) / (this.binghamViscosity || 14.0)) 
+      const dynamicShearRate = isYieldExceeded
+        ? Math.max(0.1, (drivingShearStress - yieldThreshold) / (this.binghamViscosity || 14.0))
         : 0.04;
 
       const streamSpeedMult = (0.2 + dynamicShearRate * 0.45 + (sat / 100) * 0.4);
@@ -5120,10 +5120,10 @@ class Terrain3DVisualizer {
       sat = 38.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 0.38 : 2.2) : 2.2;
       tHour = 0.0;
-      leadTime = isFlood 
+      leadTime = isFlood
         ? 'T+0.0h • Safe 6.4h Evacuation Buffer Remaining (98.2% AI Confidence)'
         : 'T+0.0h • Stable 6.4h Safe Window (FoS 1.62 • Subsurface Intact)';
-      alertMsg = isFlood 
+      alertMsg = isFlood
         ? '🟢 Baseflow stable. 6–7 Hour AI Risk Forecasting initialized (98.2% AI Confidence).'
         : '🟢 T+0h STABLE SLOPE: Factor of Safety FoS 1.62. Slope regolith stable, all hillside settlements secure.';
     } else if (stage === 1) {
@@ -5132,10 +5132,10 @@ class Terrain3DVisualizer {
       sat = 68.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 0.65 : 3.40) : 3.40;
       tHour = 1.0;
-      leadTime = isFlood 
+      leadTime = isFlood
         ? 'T+1.0h • 3.0h Safe Window Remaining (Inflow Surge Advancing)'
         : 'T+1.0h • 3.0h Warning Window (Subsurface Infiltration & Saturation)';
-      alertMsg = isFlood 
+      alertMsg = isFlood
         ? '🟡 T+1h Inflow Surge: Heavy precipitation infiltrating upper catchment; stream stage rising rapidly.'
         : '🟡 T+1h MONSOON INFILTRATION: Heavy 58mm/h rainfall penetrating soil. Hairline crown tension fissures detected; FoS drops to 1.34.';
     } else if (stage === 2) {
@@ -5144,10 +5144,10 @@ class Terrain3DVisualizer {
       sat = 86.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 0.88 : 4.60) : 4.60;
       tHour = 2.0;
-      leadTime = isFlood 
+      leadTime = isFlood
         ? 'T+2.0h • 2.0h Evacuation Window (Orange Warning Threshold)'
         : 'T+2.0h • 2.0h Evacuation Window (Orange Slip Warning • Cracks 0.8m)';
-      alertMsg = isFlood 
+      alertMsg = isFlood
         ? '🟠 T+2h Surge Watch: Catchment saturated (86%). Pre-evacuation issued for low-lying riparian sectors.'
         : '🟠 T+2h TENSION CRACK OPENING: Slip plane pore pressure reaches 48 kPa. Crown cracks expand to 0.8m. Stilt foundations tilting (4.8°). FoS 1.08.';
     } else if (stage === 3) {
@@ -5156,10 +5156,10 @@ class Terrain3DVisualizer {
       sat = 95.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 1.12 : 5.80) : 5.80;
       tHour = 3.0;
-      leadTime = isFlood 
+      leadTime = isFlood
         ? 'T+3.0h • 🚨 CRITICAL EVACUATION ALARM (<1.0h Buffer to Peak)'
         : 'T+3.0h • 🚨 CRITICAL EVACUATION ALARM (<1.0h to Complete Rupture)';
-      alertMsg = isFlood 
+      alertMsg = isFlood
         ? '🚨 T+3h CRITICAL OVERTOPPING: Flood stage breaches danger mark! Immediate siren blast & emergency evacuation.'
         : '🚨 T+3h BISHOP ROTATIONAL SLIP RUPTURE: Shear failure along slip plane! Upper Spur severed (22.5° tilt). Highway cut by rockfall. Evacuate immediately!';
     } else if (stage === 4) {
@@ -5168,10 +5168,10 @@ class Terrain3DVisualizer {
       sat = 99.0;
       stageLevel = isFlood ? (profile.dangerWaterLevel ? profile.dangerWaterLevel * 1.42 : 7.20) : 7.20;
       tHour = 4.0;
-      leadTime = isFlood 
+      leadTime = isFlood
         ? 'T+4.0h • 🔴 PEAK INUNDATION & DELUGE HORIZON'
         : 'T+4.0h • 🔴 CATASTROPHIC DEBRIS AVALANCHE & RUNOUT HORIZON';
-      alertMsg = isFlood 
+      alertMsg = isFlood
         ? '🔴 T+4h PEAK DELUGE: Maximum inundation and landslide runout reached. 98.2% AI prediction validated.'
         : '🔴 T+4h DEBRIS RUNOUT PEAK: 3.4m viscoplastic mudflow inundates Tuirial Valley chalets. Upper settlements sheared. High-ground sanctuary 100% secure.';
     }

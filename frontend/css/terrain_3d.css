@@ -55,7 +55,7 @@
   position: absolute;
   top: 10px;
   left: 12px;
-  right: 12px;
+  right: 265px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -436,14 +436,29 @@
 }
 
 /* -------------------------------------------------------------
-   3. BOTTOM CENTER TIMELINE BAR (Scrubber & Speeds)
+   3. UNIFIED BOTTOM OPERATIONS CONTAINER (Simulation & Scrubber)
    ------------------------------------------------------------- */
-.terrain-3d-timeline-bar {
+.terrain-3d-bottom-container {
   position: absolute;
-  bottom: 12px;
-  left: 350px;
-  right: 260px;
-  height: 48px;
+  bottom: 10px;
+  left: 12px;
+  right: 265px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.terrain-3d-bottom-container .t3d-hud-row-sim,
+.terrain-3d-bottom-container .terrain-3d-timeline-bar {
+  pointer-events: auto;
+}
+
+.terrain-3d-timeline-bar {
+  position: relative;
+  width: 100%;
+  height: 44px;
   background: rgba(10, 15, 30, 0.94);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(56, 189, 248, 0.35);
@@ -452,7 +467,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  z-index: 15;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
   color: #f8fafc;
   pointer-events: auto;
@@ -560,17 +574,17 @@
    ------------------------------------------------------------- */
 .terrain-3d-sidebar {
   position: absolute;
-  top: 96px;
+  top: 10px;
   right: 12px;
-  bottom: 12px;
-  width: 235px;
-  background: rgba(10, 15, 30, 0.95);
+  bottom: 60px;
+  width: 245px;
+  background: rgba(10, 15, 30, 0.96);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  border: 1px solid rgba(56, 189, 248, 0.4);
   border-radius: 10px;
   padding: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-  z-index: 15;
+  z-index: 25;
   color: #f8fafc;
   overflow-y: auto;
   display: flex;
@@ -591,6 +605,19 @@
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 4px;
+}
+
+.t3d-rainfall-highlight {
+  background: rgba(2, 132, 199, 0.18);
+  border: 1.5px solid #38bdf8;
+  border-radius: 6px;
+  padding: 6px 8px;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+.t3d-rainfall-highlight .t3d-slider-header span:first-child {
+  font-weight: 800;
+  color: #38bdf8;
 }
 
 .t3d-slider-row {
@@ -899,35 +926,37 @@
    EMERGENCY ALARM FLOATING HUD BANNER & SIREN ANIMATIONS
    ------------------------------------------------------------- */
 .t3d-alarm-banner {
-  position: absolute;
-  top: 76px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  align-self: center;
+  margin-top: 2px;
   z-index: 35;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 18px;
-  border-radius: 10px;
+  gap: 8px;
+  padding: 3px 10px;
+  border-radius: 6px;
   background: rgba(15, 23, 42, 0.94);
-  backdrop-filter: blur(16px);
-  border: 1.5px solid #ef4444;
-  box-shadow: 0 0 25px rgba(239, 68, 68, 0.45), inset 0 0 15px rgba(239, 68, 68, 0.15);
+  backdrop-filter: blur(14px);
+  border: 1px solid #ef4444;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4), inset 0 0 10px rgba(239, 68, 68, 0.15);
   animation: alarmBannerSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1), alarmGlowPulse 1.2s infinite alternate;
   pointer-events: auto;
-  max-width: 90%;
+  max-width: 95%;
 }
 
 .t3d-alarm-banner.alarm-critical {
   border-color: #ef4444;
   background: linear-gradient(135deg, rgba(30, 10, 15, 0.96), rgba(15, 23, 42, 0.95));
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.6), inset 0 0 20px rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.5);
 }
 
 .t3d-alarm-banner.alarm-warning {
   border-color: #f59e0b;
   background: linear-gradient(135deg, rgba(30, 20, 10, 0.96), rgba(15, 23, 42, 0.95));
-  box-shadow: 0 0 25px rgba(245, 158, 11, 0.45), inset 0 0 15px rgba(245, 158, 11, 0.15);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
 }
 
 .t3d-alarm-icon-wrap {
@@ -937,56 +966,59 @@
 }
 
 .t3d-alarm-beacon-icon {
-  font-size: 22px;
+  font-size: 14px;
   animation: beaconSpinFlash 0.8s infinite alternate;
 }
 
 .t3d-alarm-text-block {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .t3d-alarm-title {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 800;
   color: #fecaca;
-  letter-spacing: 0.4px;
-  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  letter-spacing: 0.3px;
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+  white-space: nowrap;
 }
 
 .alarm-warning .t3d-alarm-title {
   color: #fde68a;
-  text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  text-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
 }
 
 .t3d-alarm-details {
-  font-size: 10px;
+  font-size: 9px;
   color: #cbd5e1;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .t3d-alarm-status-pill {
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   white-space: nowrap;
 }
 
 .t3d-alarm-status-pill.crit {
   background: #dc2626;
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
   animation: pillBlink 0.6s infinite alternate;
 }
 
 .t3d-alarm-status-pill.warn {
   background: #d97706;
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.8);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
 }
 
 @keyframes alarmBannerSlide {

@@ -70,35 +70,10 @@ class Terrain3DComponent {
           </div>
         </div>
 
-        <!-- Dynamic Emergency Alarm Floating HUD Banner -->
-        <div class="t3d-alarm-banner" id="${this.mountId}-alarm-banner" style="display:none;">
-          <div class="t3d-alarm-icon-wrap">
-            <span class="t3d-alarm-beacon-icon">🚨</span>
-          </div>
-          <div class="t3d-alarm-text-block">
-            <div class="t3d-alarm-title" id="${this.mountId}-alarm-title">DAM INFLOW SURCHARGE ALARM TRIGGERED</div>
-            <div class="t3d-alarm-details" id="${this.mountId}-alarm-details">Inflow 3.2 Lakh Cusecs • Spillway Radial Gates Open • Downstream Sirens Broadcasting</div>
-          </div>
-          <div class="t3d-alarm-status-pill crit" id="${this.mountId}-alarm-pill">CRITICAL ALARM</div>
-        </div>
-
         <!-- Top Unified Operations HUD Container -->
         <div class="t3d-top-hud">
-          <!-- Row 1: Title, Dropdown, and Camera Tools -->
+          <!-- Row 1: Area Selector Dropdown and Camera Tools -->
           <div class="t3d-hud-row-main">
-            <div class="t3d-title-block">
-              <span style="font-size:15px;">${isFlood ? '🌊' : '⛰️'}</span>
-              <div>
-                <h4 id="${this.mountId}-title">${this.config.title}</h4>
-                <div style="font-size:9.5px; color:#94a3b8;" id="${this.mountId}-subtitle">
-                  ${isFlood ? 'Telangana Flood Decision Support System • Primary River Basins & Dams' : 'NE-LENS Landslide Early Warning System • Northeast Mountain Corridors'}
-                </div>
-              </div>
-              <span class="mode-pill" id="${this.mountId}-pill" style="background:${isFlood ? '#0284c7' : '#d97706'};">
-                ${isFlood ? 'FLOOD DSS' : 'LANDSLIDE DSS'}
-              </span>
-            </div>
-
             <!-- Area Selector Dropdown (Strictly filtered by mode) -->
             <div class="t3d-area-select-wrap">
               <label for="${this.mountId}-area-dropdown">📍 ${isFlood ? 'Flood Basin:' : 'Landslide Corridor:'}</label>
@@ -128,7 +103,7 @@ class Terrain3DComponent {
               </select>
             </div>
 
-              <!-- Camera Controls & Layer Toggles -->
+            <!-- Camera Controls & Layer Toggles -->
             <div class="terrain-3d-controls-strip">
               <button class="t3d-btn t3d-btn-fullscreen-toggle" id="${this.mountId}-btn-complete-screen" title="Toggle 100% Complete Screen 3D Decision Support View">⛶ Complete Screen</button>
               <button class="t3d-btn" id="${this.mountId}-btn-dem-modal" title="Import Custom GeoTIFF / DEM Heightmap or LiDAR">📁 Ingest DEM</button>
@@ -148,29 +123,8 @@ class Terrain3DComponent {
             </div>
           </div>
 
-          <!-- Row 2: Mode-Specific Quick Areas + 4-Phase Hazard Stepper -->
+          <!-- Row 2: 4-Phase Hazard Stepper -->
           <div class="t3d-hud-row-sub">
-            <!-- Mode-Specific Quick Area Pills -->
-            <div class="t3d-sub-group">
-              <span class="t3d-sub-label">⚡ ${isFlood ? '6 FLOOD HOTSPOTS:' : '5 DETECTED LANDSLIDE AREAS:'}</span>
-              <div class="t3d-fast-btns-wrap">
-                ${isFlood ? `
-                  <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-01' ? 'active' : ''}" data-stn="TEL-STN-01">🌊 Bhadrachalam</button>
-                  <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-03' ? 'active' : ''}" data-stn="TEL-STN-03">🏞️ Medaram</button>
-                  <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-06' ? 'active' : ''}" data-stn="TEL-STN-06">💦 Kuntala Falls</button>
-                  <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-07' ? 'active' : ''}" data-stn="TEL-STN-07">🏗️ Kadam Dam</button>
-                  <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-08' ? 'active' : ''}" data-stn="TEL-STN-08">🏙️ Prakash Nagar</button>
-                  <button class="t3d-fast-btn ${this.config.stationId === 'TEL-STN-10' ? 'active' : ''}" data-stn="TEL-STN-10">🌉 Musi River</button>
-                ` : `
-                  <button class="t3d-fast-btn ${this.config.stationId === 'AIZAWL-01' ? 'active' : ''}" data-stn="AIZAWL-01">⛰️ Aizawl</button>
-                  <button class="t3d-fast-btn ${this.config.stationId === 'CHAMPHAI-02' ? 'active' : ''}" data-stn="CHAMPHAI-02">⛰️ Champhai</button>
-                  <button class="t3d-fast-btn ${this.config.stationId === 'EKHASI-03' ? 'active' : ''}" data-stn="EKHASI-03">⛰️ East Khasi Hills</button>
-                  <button class="t3d-fast-btn ${this.config.stationId === 'DIMAHASAO-04' ? 'active' : ''}" data-stn="DIMAHASAO-04">⛰️ Dima Hasao</button>
-                  <button class="t3d-fast-btn ${this.config.stationId === 'KOHIMA-05' ? 'active' : ''}" data-stn="KOHIMA-05">⛰️ Kohima</button>
-                `}
-              </div>
-            </div>
-
             <!-- 4-Phase Stepper (Dynamic for Flood vs Landslide) -->
             <div class="t3d-sub-group">
               <span class="t3d-sub-label">⚡ ${isFlood ? 'HOW FLOOD BECOMES RISKY:' : 'HOW SLOPE BECOMES RISKY:'}</span>
@@ -214,25 +168,16 @@ class Terrain3DComponent {
             </div>
           </div>
 
-          <!-- Row 3: 3D Danger Simulation & 4-Hour Risk Evolution Stages (Hour 0 to Hour 4) -->
-          <div class="t3d-hud-row-sim">
-            <button class="t3d-sim-master-btn" id="${this.mountId}-btn-run-sim" title="Run Automated 4-Hour Risk Progression Simulation with Early Warning Sirens">
-              <span class="sim-pulse-dot"></span>
-              <span class="sim-btn-text" id="${this.mountId}-sim-btn-text">⚡ RUN 4-HOUR DANGER SIMULATION</span>
-            </button>
-
-            <div class="t3d-sim-stages-group">
-              <span class="t3d-sim-stages-lbl">⏱️ 4-HOUR RISK PROGRESSION:</span>
-              <button class="t3d-stage-btn active" data-stage="0" title="Hour 0 (Now): Baseline Equilibrium">T+0h (Now)</button>
-              <button class="t3d-stage-btn" data-stage="1" title="Hour 1 (+1h): Precipitation Inflow & Runoff Rise">⏱️ +1h (Inflow)</button>
-              <button class="t3d-stage-btn" data-stage="2" title="Hour 2 (+2h): Saturated Catchment Surge Watch">⏱️ +2h (Surge)</button>
-              <button class="t3d-stage-btn stage-alarm" data-stage="3" title="Hour 3 (+3h): 🚨 Critical Danger Breach & Shear Slip">🚨 +3h (Breach)</button>
-              <button class="t3d-stage-btn stage-crit" data-stage="4" title="Hour 4 (+4h): 🔴 Peak Inundation & Catastrophic Deluge">🔴 +4h (Peak)</button>
+          <!-- Dynamic Emergency Alarm HUD Banner (Stacks naturally inside top HUD flex column) -->
+          <div class="t3d-alarm-banner" id="${this.mountId}-alarm-banner" style="display:none;">
+            <div class="t3d-alarm-icon-wrap">
+              <span class="t3d-alarm-beacon-icon">🚨</span>
             </div>
-
-            <button class="t3d-btn" id="${this.mountId}-btn-toggle-factors" title="Toggle Factors Alteration Matrix Table">
-              📊 4-Hour Factors Matrix
-            </button>
+            <div class="t3d-alarm-text-block">
+              <div class="t3d-alarm-title" id="${this.mountId}-alarm-title">DAM INFLOW SURCHARGE ALARM TRIGGERED</div>
+              <div class="t3d-alarm-details" id="${this.mountId}-alarm-details">Inflow 3.2 Lakh Cusecs • Spillway Radial Gates Open • Downstream Sirens Broadcasting</div>
+            </div>
+            <div class="t3d-alarm-status-pill crit" id="${this.mountId}-alarm-pill">CRITICAL ALARM</div>
           </div>
         </div>
 
@@ -337,67 +282,51 @@ class Terrain3DComponent {
           </div>
         </div>
 
-        <!-- Left Floating Card: Risk Causality & Infrastructure Status -->
-        <div class="t3d-left-card" id="${this.mountId}-causality">
-          <div class="t3d-card-header">
-            <span>🔬 WHY THIS AREA BECOMES RISKY</span>
-            <span class="t3d-live-tag">LIVE DYNAMICS</span>
+        <!-- Bottom Operations Center (Simulations Bar + Timeline Scrubber) -->
+        <div class="terrain-3d-bottom-container">
+          <!-- 3D Danger Simulation & 4-Hour Risk Evolution Stages (Hour 0 to Hour 4) -->
+          <div class="t3d-hud-row-sim">
+            <button class="t3d-sim-master-btn" id="${this.mountId}-btn-run-sim" title="Run Automated 4-Hour Risk Progression Simulation with Early Warning Sirens">
+              <span class="sim-pulse-dot"></span>
+              <span class="sim-btn-text" id="${this.mountId}-sim-btn-text">⚡ RUN 4-HOUR DANGER SIMULATION</span>
+            </button>
+
+            <div class="t3d-sim-stages-group">
+              <span class="t3d-sim-stages-lbl">⏱️ 4-HOUR RISK PROGRESSION:</span>
+              <button class="t3d-stage-btn active" data-stage="0" title="Hour 0 (Now): Baseline Equilibrium">T+0h (Now)</button>
+              <button class="t3d-stage-btn" data-stage="1" title="Hour 1 (+1h): Precipitation Inflow & Runoff Rise">⏱️ +1h (Inflow)</button>
+              <button class="t3d-stage-btn" data-stage="2" title="Hour 2 (+2h): Saturated Catchment Surge Watch">⏱️ +2h (Surge)</button>
+              <button class="t3d-stage-btn stage-alarm" data-stage="3" title="Hour 3 (+3h): 🚨 Critical Danger Breach & Shear Slip">🚨 +3h (Breach)</button>
+              <button class="t3d-stage-btn stage-crit" data-stage="4" title="Hour 4 (+4h): 🔴 Peak Inundation & Catastrophic Deluge">🔴 +4h (Peak)</button>
+            </div>
+
+            <button class="t3d-btn" id="${this.mountId}-btn-toggle-factors" title="Toggle Factors Alteration Matrix Table">
+              📊 4-Hour Factors Matrix
+            </button>
           </div>
 
-          <!-- Infrastructure Badges Row -->
-          <div class="t3d-infra-badges-row">
-            <div class="t3d-infra-badge safe" id="${this.mountId}-badge-bridge">
-              <span>🌉 Bridge:</span> <strong>CLEAR</strong>
+          <!-- Bottom Center Timeline Bar -->
+          <div class="terrain-3d-timeline-bar">
+            <div class="t3d-timeline-controls">
+              <button class="t3d-play-btn" id="${this.mountId}-btn-play" title="Play / Pause 12-Hour Flood Wave Simulation">▶ Play</button>
+              <span class="t3d-timeline-label" id="${this.mountId}-lbl-time">T = 0.0h (Now)</span>
             </div>
-            <div class="t3d-infra-badge safe" id="${this.mountId}-badge-road">
-              <span>🛣️ Road:</span> <strong>OPEN</strong>
+            <div class="t3d-timeline-track-wrap">
+              <input type="range" class="t3d-timeline-range" id="${this.mountId}-sld-timeline" min="-6.0" max="6.0" step="0.1" value="0.0">
+              <div class="t3d-timeline-ticks">
+                <span>T-6h</span>
+                <span>T-3h</span>
+                <span style="color:#38bdf8; font-weight:700;">T-0 (Now)</span>
+                <span style="color:#f59e0b; font-weight:700;">T+1.5h (Peak)</span>
+                <span>T+3h</span>
+                <span>T+6h</span>
+              </div>
             </div>
-            <div class="t3d-infra-badge safe" id="${this.mountId}-badge-houses">
-              <span>🏘️ Settlements:</span> <strong>0/16 Safe</strong>
+            <div class="t3d-speed-btns">
+              <button class="t3d-spd-btn active" data-speed="1">1x</button>
+              <button class="t3d-spd-btn" data-speed="2">2x</button>
+              <button class="t3d-spd-btn" data-speed="5">5x</button>
             </div>
-            <div class="t3d-infra-badge safe" id="${this.mountId}-badge-shelter" style="border-color:#10b981; background:rgba(16,185,129,0.15);">
-              <span>🛡️ Safe Sanctuary:</span> <strong style="color:#34d399;">100% PROTECTED</strong>
-            </div>
-          </div>
-
-          <!-- Dynamic Causality List -->
-          <div class="t3d-causality-list" id="${this.mountId}-causality-list">
-            <!-- Populated dynamically via renderCausalityNarrative -->
-          </div>
-        </div>
-
-        <!-- Left Floating Settlements / Villages Impact Dock -->
-        <div class="t3d-villages-card" id="${this.mountId}-villages-card" style="display:flex;">
-          <div class="t3d-villages-header">
-            <h5><span>🏘️ ${isFlood ? 'RIPARIAN VILLAGES IMPACT' : 'SETTLEMENT CLUSTERS IMPACT'}</span> <span style="font-size:9.5px; color:#38bdf8;">${isFlood ? 'LIVE FLOOD STAGE' : 'DEBRIS & STRUCTURAL TILT'}</span></h5>
-            <button class="t3d-factors-close" id="${this.mountId}-villages-close" title="Toggle Dock">─</button>
-          </div>
-          <div class="t3d-villages-list" id="${this.mountId}-villages-list">
-            <!-- Populated dynamically via terrain3d-update -->
-          </div>
-        </div>
-
-        <!-- Bottom Center Timeline Bar -->
-        <div class="terrain-3d-timeline-bar">
-          <div class="t3d-timeline-controls">
-            <button class="t3d-play-btn" id="${this.mountId}-btn-play" title="Play / Pause 12-Hour Flood Wave Simulation">▶ Play</button>
-            <span class="t3d-timeline-label" id="${this.mountId}-lbl-time">T = 0.0h (Now)</span>
-          </div>
-          <div class="t3d-timeline-track-wrap">
-            <input type="range" class="t3d-timeline-range" id="${this.mountId}-sld-timeline" min="-6.0" max="6.0" step="0.1" value="0.0">
-            <div class="t3d-timeline-ticks">
-              <span>T-6h</span>
-              <span>T-3h</span>
-              <span style="color:#38bdf8; font-weight:700;">T-0 (Now)</span>
-              <span style="color:#f59e0b; font-weight:700;">T+1.5h (Peak)</span>
-              <span>T+3h</span>
-              <span>T+6h</span>
-            </div>
-          </div>
-          <div class="t3d-speed-btns">
-            <button class="t3d-spd-btn active" data-speed="1">1x</button>
-            <button class="t3d-spd-btn" data-speed="2">2x</button>
-            <button class="t3d-spd-btn" data-speed="5">5x</button>
           </div>
         </div>
 
@@ -405,9 +334,9 @@ class Terrain3DComponent {
         <div class="terrain-3d-sidebar">
           <h5><span>⚙️ ${isFlood ? 'Hydraulic Stress Simulator' : 'Geotechnical Stress Simulator'}</span> <span style="font-size:9.5px; color:#94a3b8;">Real-Time</span></h5>
           
-          <div class="t3d-slider-row">
+          <div class="t3d-slider-row t3d-rainfall-highlight">
             <div class="t3d-slider-header">
-              <span>${isFlood ? 'Rainfall Intensity' : 'Rainfall Surcharge'}</span>
+              <span>🌧️ ${isFlood ? 'Heavy Rainfall Intensity' : 'Rainfall Surcharge'}</span>
               <span class="val-num" id="${this.mountId}-lbl-rain">${this.config.rainfall} mm/h</span>
             </div>
             <input type="range" class="t3d-range-input" id="${this.mountId}-sld-rain" min="0" max="180" value="${this.config.rainfall}">
